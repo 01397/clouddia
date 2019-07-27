@@ -20,7 +20,7 @@ export default class OudiaParser {
 
 }
 
-
+// 再帰を用いてObjectを組み上げていく
 function oud_oujson(lines, count = 0) {
     const local = {};
     for (let i = count; i < lines.length; i++) {
@@ -48,6 +48,7 @@ function oud_oujson(lines, count = 0) {
     return local;
 }
 
+// RessyaのEkiJikokuを扱いやすく。
 function parseRessyaString(ressya, stationLength) {
     const array = ressya.EkiJikoku.split(',').map(str => {
         if (str === "") return null;

@@ -33,7 +33,7 @@ export default class WelcomeView extends View{
     <p>
         Cloudなんて名前はついてるけど、特にクラウドサービスはしてない笑<br />
         まぁいい名前があれば変えるかもしれないし、変えないかもしれない...?<br />
-        お遊びで作ったロゴが手元にあったから使ってるだけって感じです。<br />
+        お遊びで作ったCloudDiaなんてロゴを作ってしまったとこから開発スタート。<br />
         そこそこ気に入ってるからここにも貼っちゃお！<br />
         SVGのコードを手打ちして作ったんだよ、頭おかしいね笑<br />
         <img src="img/logo.svg" alt="CloudDiaのロゴ画像" width="96" height="96"><br />
@@ -49,6 +49,7 @@ export default class WelcomeView extends View{
         * Google Chromeを強く推奨するぜ！Safariだとちょっと動作がカクつくかも。Edgeは知らん<br />
         * まだまだ未完成だから、気まぐれに更新するしバグだらけだと思うよ〜何が起きても全て自己責任で！<br />
         * ついったー: <a href="https://twitter.com/01_397">大井さかな(@01_397)</a>
+        * そーすこーど: <a href="https://github.com/01397/clouddia">GitHub</a>
     </p>`;
     document.getElementById('fileSelector').addEventListener('change', evt => {
       this.app.loadOudFileLocal(evt.target.files[0]);

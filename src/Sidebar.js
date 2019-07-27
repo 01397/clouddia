@@ -13,8 +13,8 @@ export default class Sidebar {
       elements.push(
           h('div', { class: 'sidebar-section' }, [
               h('div', { class: 'sidebar-section-title' }, '路線'),
-              h('div', { class: 'sidebar-section-content' }, '駅', () => this.app.comingSoon()),
-              h('div', { class: 'sidebar-section-content' }, '種別', () => this.app.comingSoon()),
+              h('div', { class: 'sidebar-section-content' }, '駅', () => this.app.showComingSoonView()),
+              h('div', { class: 'sidebar-section-content' }, '種別', () => this.app.showComingSoonView()),
           ])
       );
       const data = this.app.data;
@@ -24,7 +24,7 @@ export default class Sidebar {
                   h('div', { class: 'sidebar-section-title' }, val.DiaName),
                   h('div', { class: 'sidebar-section-content' }, '下り列車時刻表', () => this.app.showTrainTimetable(idx, 'Kudari')),
                   h('div', { class: 'sidebar-section-content' }, '上り列車時刻表', () => this.app.showTrainTimetable(idx, 'Nobori')),
-                  h('div', { class: 'sidebar-section-content' }, '駅時刻表', () => this.app.comingSoon()),
+                  h('div', { class: 'sidebar-section-content' }, '駅時刻表', () => this.app.showComingSoonView()),
                   h('div', { class: 'sidebar-section-content' }, 'ダイヤグラム', () => this.app.showDiagramView(idx))
               ])
           );
