@@ -2,9 +2,13 @@
 
 // DiagramParser.js (module)
 // oudiaのテキストファイルをJSONオブジェクトにしまっせ。
-
-export const DiagramParser = {
-    parseOudia: (oudString) => {
+export default class OudiaParser {
+    // ただObjectに変換するだけ
+    static parse(oudString) {
+        return oud_oujson(oudString.split(/\r\n|\r|\n/), 0);
+    }
+    // さらに列車時刻の文字列も変換する
+    static parse2(oudString) {
         const json = oud_oujson(oudString.split(/\r\n|\r|\n/), 0);
         const stationLength = json.Rosen[0].Eki.length;
         json.Rosen[0].Dia.forEach(dia => {
@@ -12,11 +16,10 @@ export const DiagramParser = {
             dia.Nobori[0].Ressya.forEach(ressya => ressya.timetable = parseRessyaString(ressya, stationLength));
         });
         return json;
-    },
-    oudiaToOuJSON: (oudString) => {
-        return oud_oujson(oudString.split(/\r\n|\r|\n/), 0);
     }
-};
+
+}
+
 
 function oud_oujson(lines, count = 0) {
     const local = {};
@@ -38,8 +41,8 @@ function oud_oujson(lines, count = 0) {
                 local[key] = [val];
             }
             i = j;
-        } else {
-            console.warn(i + '行目: ' + lines[i] + 'って何だろう？');
+        } else if (lines[i] !== '') {
+            console.warn(i + '行目: ' + lines[i] + '不明な文字列');
         }
     }
     return local;

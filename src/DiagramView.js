@@ -1,10 +1,13 @@
 "use strict";
 
+import { h, ouColorToHex } from "./Util.js";
+import View from "./View.js";
+
 // DiagramView.js (module)
 // ダイヤグラムを表示する。斜め線いっぱいのやつ。
-export default class DiagramView {
+export default class DiagramView extends View{
   constructor(app, idx) {
-    this.app = app;
+    super(app);
     this.idx = idx;
     this.stations = this.app.data.Rosen[0].Eki;
     this.inboundTrains = this.app.data.Rosen[0].Dia[idx]['Nobori'][0].Ressya;
@@ -111,39 +114,5 @@ export default class DiagramView {
   }
   finish() { }
 }
-function HHMMtoMinutes(HHMMstring) {
-  if (HHMMstring == "") return null;
-  return HHMMstring.slice(0, -2) * 60 + HHMMstring.slice(-2) * 1;
-}
 
-const ouColorToHex = (ouColor) => {
-  const b = ouColor.slice(2, 4);
-  const g = ouColor.slice(4, 6);
-  const r = ouColor.slice(6, 8);
-  return '#' + r + g + b;
-};
 
-// DOM生成。
-const h = (tag, attr = null, body = null, onclick = null, ns = null) => {
-  const element = ns === null ? document.createElement(tag) : document.createElementNS(ns, tag);
-  if (attr != null) {
-    for (let key in attr) {
-      element.setAttribute(key, attr[key]);
-    }
-  }
-  if (onclick != null) {
-    element.addEventListener('click', onclick, false);
-  }
-  if (typeof body === 'string') {
-    element.textContent = body;
-  } else if (body instanceof Element) {
-    element.appendChild(body);
-  } else if (body instanceof Array) {
-    body.forEach(elm => {
-      element.appendChild(elm);
-    });
-  } else if (body !== null) {
-    console.warn('何だお前！: ' + body);
-  }
-  return element;
-};

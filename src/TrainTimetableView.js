@@ -1,5 +1,8 @@
 "use strict";
 
+import { ouColorToHex, MinutesToHHMM } from "./Util.js";
+import View from "./View.js";
+
 // TrainTimetableView.js (module)
 // 列車時刻表を表示する。
 
@@ -9,7 +12,7 @@ const TableMark = {
   nonroute: "||"
 };
 
-export default class TrainTimetableView {
+export default class TrainTimetableView extends View{
   /**
    * 初期化 - データ編 -
    * @param {App}    app
@@ -17,19 +20,27 @@ export default class TrainTimetableView {
    * @param {string} key 'Nobori' or 'Kudari'
    */
   constructor(app, idx, key) {
-    this.app = app;
+    super(app);
+    this.sheet = [['', '', '']];
 
-    // 表示文字列の2次元配列
-    const sheet = [['', '', '']];
-    const colStyle = [null];
-    const rowStyle = [0, 0, 0];
-    const firstRowStyle = [];
+    // 縦列の文字色
+    this.colStyle = [null];
+    this.rowStyle = [0, 0, 0];
     // ヘッダ行数
     this.headerRowCount = 3;
+
+    //駅の着発表示を調べる
+    const {trains, rowCount, format} = this.loadStationAppearance({idx, key});
+
+    // 列車を一つずつ見ていこー。
+    this.fillSheet({trains, rowCount, format})
+  }
+
+  // 時刻表を埋める前に、駅の着発表示を調べる。
+  loadStationAppearance({idx, key}) {
     // 時刻部分の行数→終着駅の後を埋めるのに使う
     let rowCount = 0;
-
-    // 駅の着発表示を調べよー。
+    // 駅の着発設定を調べよー。
     const stations = this.app.data.Rosen[0].Eki;
     const len = stations.length;
     const trains = this.app.data.Rosen[0].Dia[idx][key][0].Ressya;
@@ -46,33 +57,29 @@ export default class TrainTimetableView {
       }
       format.push(val);
 
+      this.sheet[0].push(station.Ekimei);
+      if (val % 3 === 0) {
+        this.sheet[0].push('---');
+        this.rowStyle.push('#cccccc');
+        rowCount++;
+      }
+      rowCount++;
       if (key === "Kudari") {
-        sheet[0].push(station.Ekimei);
-        rowCount++;
-        if (val % 3 === 0) {
-          sheet[0].push('---');
-          rowStyle.push('#cccccc');
-          rowCount++;
-        }
-        rowStyle.push(station.Kyoukaisen == "1" ? '#222222' : 'transparent');
-      } else {
-        sheet[0].push(station.Ekimei);
-        if (val % 3 === 0) {
-          sheet[0].push('---');
-          rowStyle.push('#cccccc');
-          rowCount++;
-        }
-        rowCount++;
-        if (i < len - 1) rowStyle.push(stations[len - i - 2].Kyoukaisen == "1" ? '#222222' : 'transparent');
+        this.rowStyle.push(station.Kyoukaisen == "1" ? '#222222' : 'transparent');
+      } else if (i < len - 1) {
+        this.rowStyle.push(stations[len - i - 2].Kyoukaisen == "1" ? '#222222' : 'transparent');
       }
     }
+    return {trains, rowCount, format};
+  }
 
-    // 列車を一つずつ見ていこー。
+  // 時刻表に表示する列車時刻の文字列配列を埋める
+  fillSheet({trains, rowCount, format}) {
     trains.forEach(v => {
       // 1列分の表示テキストの配列
       const train = [];
       const trainType = this.app.data.Rosen[0].Ressyasyubetsu[v.Syubetsu];
-      colStyle.push(ouColorToHex(trainType.JikokuhyouMojiColor));
+      this.colStyle.push(ouColorToHex(trainType.JikokuhyouMojiColor));
       train.push(v.Ressyabangou);
       train.push(trainType.Ryakusyou);
       train.push(v.Ressyamei);
@@ -85,11 +92,11 @@ export default class TrainTimetableView {
         switch (data.stopType) {
           case 1:
             if ((format[i] & 1) === 1) {
-              if(i > 0 && v.timetable[i-1] == null) train.push(TableMark.blank);
+              if (i > 0 && v.timetable[i - 1] == null) train.push(TableMark.blank);
               else train.push(MinutesToHHMM(data.arrival) || MinutesToHHMM(data.departure));
             }
             if ((format[i] & 2) === 2) {
-              if(i < v.timetable.length && v.timetable[i+1] == null)  train.push(TableMark.blank);
+              if (i < v.timetable.length && v.timetable[i + 1] == null) train.push(TableMark.blank);
               else train.push(MinutesToHHMM(data.departure) || MinutesToHHMM(data.arrival));
             }
             break;
@@ -102,87 +109,57 @@ export default class TrainTimetableView {
             if (format[i] % 4 === 3) train.push(TableMark.nonroute);
         }
       });
-      /*
-      v.EkiJikoku.split(',').forEach((str, i) => {
-        if (str === "") {
-          train.push(TableMark.blank);
-          if (format[i] % 4 === 3) train.push(TableMark.blank);
-          return;
-        }
-        const [type, times] = str.split(';');
-        switch (type) {
-          case '1':
-            // eslint-disable-next-line no-case-declarations
-            let arr, dep;
-            if (times.includes('/')) {
-              [arr, dep] = times.split('/');
-            } else {
-              arr = dep = times;
-            }
-            // eslint-disable-next-line no-case-declarations
-            if ((format[i] & 1) === 1) train.push(arr);
-            if ((format[i] & 2) === 2) train.push(dep);
-            break;
-          case '2':
-            train.push("ﾚ");
-            if (format[i] % 4 === 3) train.push(TableMark.pass);
-            break;
-          case '3':
-            train.push("||");
-            if (format[i] % 4 === 3) train.push(TableMark.nonroute);
-        }
-      });*/
       //終着駅後の空欄埋め
       for (let i = train.length - this.headerRowCount; i < rowCount; i++)train.push(TableMark.blank);
-      sheet.push(train);
+      this.sheet.push(train);
     });
-
-    // 表データできました、あとの表示処理は頼んだぞ！
-    this.sheet = sheet;
-    this.colStyle = colStyle;
-    this.rowStyle = rowStyle;
   }
+
 
   // 初期化 - 描画編 -
   render() {
-    this.wrapper = document.getElementById('mainWindow');
-    // wrapper > (tBody, tFixedRows, tFixedCols)
+    // windowのなかに (tBody, tFixedRows, tFixedCols)がある構造
+    this.window = document.getElementById('mainWindow')
+
+    // 時刻部分
     let tBody = document.createElement('div');
     tBody.id = "largeTable-body";
     this.tBody = tBody;
-    this.wrapper.appendChild(tBody);
+    this.window.appendChild(tBody);
 
+    // 上部(種別等)
     let tFixedRows = document.createElement('div');
     tFixedRows.id = "largeTable-fixedRows";
     this.tFixedRows = tFixedRows;
-    this.wrapper.appendChild(tFixedRows);
+    this.window.appendChild(tFixedRows);
 
+    // 左部(駅名)
     let tFixedCols = document.createElement('div');
     tFixedCols.id = "largeTable-fixedCols";
     this.tFixedCols = tFixedCols;
-    this.wrapper.appendChild(tFixedCols);
+    this.window.appendChild(tFixedCols);
 
+    // セルの数
     this.sheetWidth = this.sheet.length;
     this.sheetHeight = this.sheet[0].length;
 
+    // セルのサイズ
     this.cellWidth = 40;
     this.cellHeight = 16;
     this.stationCellWidth = 80;
 
-    // 表示テキストの2次元配列
-    this.sheet = this.sheet;
-    // 縦列の色の1次元配列
-    this.colStyle = this.colStyle;
-    // 1なら境界線
-    this.rowStyle = this.rowStyle;
-    // divちゃん達の管理
+    // 表示の高速化のために画面外に要素を置きたくないので、絶対座標で配置するdiv要素を画面の出入りに合わせて使い回す。
+    // 時刻部分、上部、左部に属するdivちゃん達の管理
     this.tBodyDivs = new Map();
     this.tFixedRowDivs = new Map();
     this.tFixedColDivs = new Map();
-    // 最終描画領域。座標ではなくセル番号
-    this.lastBox = { x: -100, y: -100, w: 0, h: 0 };
+    // 最終描画領域。座標ではなくセル番号。初回のupdate()で描画されるように現在地を画面外に飛ばしておく
+    this.lastBox = { x: -999, y: -999, w: 0, h: 0 };
 
-    this.wrapper.addEventListener('scroll', () => this.update()); //スクロールで再描画
+    //スクロールで再描画
+    this.window.addEventListener('scroll', () => this.update());
+
+    // CSSを書きます。あんまり綺麗なやり方じゃないけど、めんどくさかった...
     const str = document.createTextNode(
       `.largeTable-cell{
         position: absolute;
@@ -233,32 +210,38 @@ export default class TrainTimetableView {
         background-image: url(img/logo_icon_white.svg);
       }
       `);
+    // 画面遷移時にstyleを消すために要素の参照を保存しとく
     let style = this.styleElement = document.createElement('style');
     style.appendChild(str);
     document.head.appendChild(style);
+
+    // さて初回描画へとまいりましょうか！！
     this.update();
   }
 
-  // 画面更新。スクロールがトリガー。
+
+  // 画面更新。初回描画またはスクロールにより呼ばれる。
   // 新たに画面に入ってきた要素と、画面から出ていく要素を検出して、差分を修正。
   update() {
+
     /*** Step1.表示領域の確認 ***/
 
-    const VIEW_WIDTH = this.wrapper.offsetWidth;
-    const VIEW_HEIGHT = this.wrapper.offsetHeight;
-    const VIEW_X = this.wrapper.scrollLeft;
-    const VIEW_Y = this.wrapper.scrollTop;
+    const VIEW_WIDTH = this.window.offsetWidth;
+    const VIEW_HEIGHT = this.window.offsetHeight;
+    const VIEW_X = this.window.scrollLeft;
+    const VIEW_Y = this.window.scrollTop;
 
-    // 現在の表示領域における、 時 刻 部 分 の 左上のセル番地と右下のセル番地。
+    // 現在の表示領域における、"時刻部分"の左上のセル番地と右下のセル番地。
     let [i0, j0] = this.getCellByCoordinate(VIEW_X + this.stationCellWidth, VIEW_Y + this.cellHeight * this.headerRowCount);
     let [iM, jM] = this.getCellByCoordinate(VIEW_X + this.stationCellWidth + VIEW_WIDTH, VIEW_Y + VIEW_HEIGHT);
-    i0 = Math.max(i0 - 10, 0);// 種別等の情報を左側ギリギリまで文字を消さない
+    // overscan。余裕を持たせる
+    i0 = Math.max(i0 - 10, 0);
     j0 = Math.max(j0 - 10, 0);
-    iM = Math.min(iM + 10, this.sheetWidth - 1);// 画面外には行かせないっ
-    jM = Math.min(jM + 10, this.sheetHeight - 1);// 画面外には行かせないっ
+    iM = Math.min(iM + 10, this.sheetWidth - 1);
+    jM = Math.min(jM + 10, this.sheetHeight - 1);
 
-    // 表示領域変わってないなら帰るわ
-    if (i0 - 5 < this.lastBox.x && j0 -5 < this.lastBox.y && iM + 5 > this.lastBox.x + this.lastBox.w && jM + 5 >  this.lastBox.y + this.lastBox.h) return;
+    // 表示領域変わってないなら撤退
+    if (i0 - 5 < this.lastBox.x && j0 - 5 < this.lastBox.y && iM + 5 > this.lastBox.x + this.lastBox.w && jM + 5 > this.lastBox.y + this.lastBox.h) return;
 
 
     /*** Step2.再利用できるDIVを集める ***/
@@ -292,6 +275,7 @@ export default class TrainTimetableView {
     }
     const fragmentFixedCol = document.createDocumentFragment();
     const iteratorFixedCol = reusableFixedColDivs.entries();
+
 
 
     /*** Step3.差分を修正する ***/
@@ -420,13 +404,3 @@ export default class TrainTimetableView {
   }
 }
 
-const ouColorToHex = (ouColor) => {
-  const b = ouColor.slice(2, 4);
-  const g = ouColor.slice(4, 6);
-  const r = ouColor.slice(6, 8);
-  return '#' + r + g + b;
-};
-const MinutesToHHMM = (min) => {
-  if (!min) return null;
-  return Math.floor(min / 60) + '' + String(min % 60).padStart(2, '0');
-}
