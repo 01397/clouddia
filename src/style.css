@@ -1,0 +1,193 @@
+:root {
+    --app-bg-color: #f0f0f0;
+    --sidebar-bg-color: #1f1a24;
+}
+
+html, body {
+    font-size: 14px;
+    font-family: 'Noto Sans JP', sans-serif;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+#app {
+    width: 100%;
+    height: 100%;
+    background-color: var(--app-bg-color);
+    display: flex;
+}
+
+#sidebar {
+    width: 192px;
+    height: 100%;
+    overflow-y: scroll;
+    background-color: var(--sidebar-bg-color);
+    font-weight: bold;
+    color: #aaa;
+    box-shadow: -6px 0 5px 5px rgba(0, 0, 0, 0.7);
+}
+
+.sidebar-section {
+    border-bottom: 1px solid #808080;
+    padding: 4px 0;
+}
+
+.sidebar-section-title {
+    font-size: 12px;
+    color: #888;
+    padding: 0 4px;
+}
+
+.sidebar-section-content {
+    font-size: 16px;
+    color: #eee;
+    padding: 4px 8px;
+    cursor: pointer;
+}
+
+.sidebar-section-content:hover {
+    background-color: #ffffff11;
+}
+
+#sidebar-railwayName {
+    color: #eee;
+}
+
+#sidebar-logo {
+    display: flex;
+}
+
+#sidebar-logo-img {
+    height: 32px;
+    margin: auto;
+}
+
+#mainWindow {
+    flex: 1;
+    position: relative;
+    overflow: scroll;
+    -webkit-overflow-scrolling: touch;
+}
+
+#mainWindow.startPage>h1 {
+    color: #222222;
+    font-size: 20px;
+    margin: 16px 0;
+}
+
+#mainWindow.startPage>h2 {
+    color: #666666;
+    font-size: 16px;
+    margin: 24px 0 0;
+}
+
+#mainWindow.startPage>p {
+    margin: 0;
+    color: #222222;
+}
+
+#mainWindow.startPage>p>a {
+    color: #a852ff;
+    text-decoration: none;
+    background: linear-gradient(to bottom, transparent 40%, #a852ffaa 60%);
+    transition: .3s linear;
+    background-position: 0 0%;
+    background-size: 100% 200%;
+}
+
+#mainWindow.startPage>p>a:hover {
+    color: #ffffff;
+    background-position: 0 100%;
+}
+
+#mainWindow.startPage {
+    padding: 8px
+}
+
+h3 {
+    margin: 0;
+}
+
+#start-openButton {
+    display: inline-block;
+    width: 244px;
+    background-color: #a852ff;
+    color: white;
+    border-radius: 4px;
+    padding: 8px;
+    text-align: center;
+    font-weight: bold;
+    background-image: linear-gradient(to bottom, #00000000, #00000044);
+    cursor: pointer;
+}
+
+#start-urlSection {
+    display: flex;
+    justify-content: center;
+}
+
+#fileSelector {
+    display: none;
+}
+
+#start-main {
+    max-width: 400px;
+    border: 2px solid #a852ff;
+    padding: 8px;
+    text-align: center;
+    border-radius: 8px;
+    position: relative;
+}
+
+#start-main.drag:after{
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background: #a852ff;
+    content: 'ここにファイルをドロップ！';
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 24px;
+    font-weight: bold;
+    color: #fff;
+}
+
+input#fileURL {
+    padding: 4px;
+    height: 24px;
+    border: 2px solid #a852ff;
+    border-radius: 4px 0 0 4px;
+    width: 200px;
+    border-right: none;
+}
+
+button#fileRequester {
+    border-radius: 0 4px 4px 0;
+    background-color: #a852ff;
+    border: none;
+    color: white;
+    font-weight: bold;
+    font-size: 16px;
+    width: 50px;
+    background-image: linear-gradient(to bottom, #00000000, #00000044);
+}
+
+#main-or {
+    margin: 16px 0;
+}
+.start-caption{
+    font-size: 10px;
+    color: #aaa;
+}
+
+code {
+    background: #00000022;
+    padding: 2px 4px;
+    font-weight: bold;
+}

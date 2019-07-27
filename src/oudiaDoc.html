@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="js">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<title>独自解釈：oudia</title>
+	<style>
+		body{
+			background: #eee;
+		}
+		*{
+			line-height: 1;
+		}
+		input:checked+.s{
+			display: block
+		}
+		.s{
+			display: none;
+			background: rgba(0,128,255,0.1);
+			padding: 4px;
+			margin: 0 4px 8px;
+		}
+
+		.head{
+			font-size: 16px;
+			color: #000;
+		}
+		.body {
+			font-size: 12px;
+			color: #666;
+			padding-left: 8px;
+		}
+		code{
+			font-family: menlo, monospace;
+		}
+		code>span{
+			color: #d44;
+		}
+		code>span::before{
+			content: '<';
+			opacity: 0.5;
+		}
+		code>span::after {
+			content: '>';
+			opacity: 0.5;
+		}
+	</style>
+</head>
+<body>
+	oudiaのファイルがどーなってるか調べた、結構適当。
+	<input type="checkbox" checked style="display: none;">
+	<div id="Ima3ji33hunDayo" class="s">
+DispProp 表示に関する情報
+	CommentFont "PointTextHeight=[number];Facename=[string]"
+	DiaEkimeiFont "PointTextHeight=[number];Facename=[string]"
+	DiaHaikeiColor "[AA][BB][GG][RR]"
+	DiaJikokuFont "PointTextHeight=[number];Facename=[string]"
+	DiaJikuColor "[AA][BB][GG][RR]"
+	DiaMojiColor "[AA][BB][GG][RR]"
+	DiaRessyaColor "[AA][BB][GG][RR]"
+	DiaRessyaFont "PointTextHeight=[number];Facename=[string]"
+	EkimeiLength "[number]"
+	JikokuhyouFont "PointTextHeight=[number];Facename=[string]"
+	JikokuhyouRessyaWidth "[number]"
+	JikokuhyouVFont "PointTextHeight=[number];Facename=[string]"
+FileType 例:"OuDia.1.02"
+FileTypeAppComment 例:"OuDia Ver. 1.02.05"
+Rosen
+	Comment
+	Dia
+		DiaName
+		Kudari
+		Nobori
+	DiagramDgrYZahyouKyoriDefault
+	KitenJikoku
+	Ressyasyubetsu
+	Rosenmei
+	</div>
+	<script>
+			const t = document.getElementById('Ima3ji33hunDayo').textContent;
+			let indent = 0;
+			document.getElementById('Ima3ji33hunDayo').innerHTML = t.replace(/\"(.+?)\"/gim, "<code>$1</code>").replace(/\[(.+?)\]/gim, "<span>$1</span>").split('\n').map(v => {
+				let currentIndent = v.match(/^\t*/)[0].length;
+				let result = currentIndent > indent ? '<input type="checkbox" class="preS" checked><div class="s">' : '';
+				result += currentIndent < indent ? '</div>' : '';
+				result += '<div class="c"><div class="head">'+v.slice(currentIndent).split(' ').join('</div><div class="body">')+'</div></div>';
+				indent = currentIndent;
+				return result;
+			}).join('')
+		</script>
+</body>
+</html>
