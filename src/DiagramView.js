@@ -43,13 +43,11 @@ export default class DiagramView extends View {
       <div id="diagram-tools-zoomin" class="diagram-tools-button"></div>
       <div id="diagram-tools-zoomout" class="diagram-tools-button"></div>
     </div>
-    <div id="diagram-tools-container2" class="diagram-tools-container">
-      <div id="diagram-tools-narrow" class="diagram-tools-button"></div>
-      <div id="diagram-tools-widen" class="diagram-tools-button"></div>
-    </div>
     <div id="diagram-tools-container3" class="diagram-tools-container">
       <div id="diagram-tools-outbound" class="diagram-tools-button"></div>
       <div id="diagram-tools-inbound" class="diagram-tools-button"></div>
+      <div id="diagram-tools-narrow" class="diagram-tools-button"></div>
+      <div id="diagram-tools-widen" class="diagram-tools-button"></div>
     </div>
     </div>`;
     this.window.appendChild(toolContainer);
@@ -57,8 +55,8 @@ export default class DiagramView extends View {
     this.svgElement = h('svg', { id: 'diagram-svg' }, null, null, "http://www.w3.org/2000/svg");
     this.window.appendChild(this.svgElement);
 
-    document.getElementById('diagram-tools-outbound').addEventListener('click', () => {this.visibleOutbound = !this.visibleOutbound;this.draw()}, false);
-    document.getElementById('diagram-tools-inbound').addEventListener('click', () => {this.visibleInbound = !this.visibleInbound;this.draw()}, false);
+    document.getElementById('diagram-tools-outbound').addEventListener('click', () => { this.visibleOutbound = !this.visibleOutbound; this.draw();}, false);
+    document.getElementById('diagram-tools-inbound').addEventListener('click', () => { this.visibleInbound = !this.visibleInbound; this.draw();}, false);
     document.getElementById('diagram-tools-widen').addEventListener('click', () => this.scale(this.xScale * 1.2), false);
     document.getElementById('diagram-tools-narrow').addEventListener('click', () => this.scale(this.xScale / 1.2), false);
     document.getElementById('diagram-tools-zoomin').addEventListener('click', () => this.scale(this.xScale * 1.2, this.yScale * 1.2), false);
@@ -84,30 +82,29 @@ export default class DiagramView extends View {
     this.xScale = newXScale;
     this.yScale = newYScale;
     // CSSでアニメーションをする
-    this.svgElement.style.transition = this.stationContainer.style.transition = this.timeContainer.style.transition = 'transform 0.2s ease 0s';
+    this.svgElement.style.transition = this.stationContainer.style.transition = this.timeContainer.style.transition = 'transform 0.19s ease 0s';
     this.svgElement.style.transform = `translate(${scrollLeft - newX}px, ${scrollTop - newY}px) scale(${xRatio}, ${yRatio})`;
     this.timeContainer.style.transform = `translate(${scrollLeft - newX}px, 0) scale(${xRatio}, 1)`;
     this.stationContainer.style.transform = `translate(0, ${scrollTop - newY}px) scale(1, ${yRatio})`;
 
-    setTimeout(() => {
-      // CSSを元に戻す
-      this.svgElement.style.transition = this.timeContainer.style.transition = this.stationContainer.style.transition = 'none';
-      this.svgElement.style.transform = this.timeContainer.style.transform = this.stationContainer.style.transform = `scale(1, 1) translate(0, 0)`;
-      // JSで描画
-      this.draw();
-      // 位置合わせ
-      this.window.scrollLeft = newX;
-      this.window.scrollTop = newY;
-    }, 200);
+    const drawFunc = this.draw(false);
+    setTimeout(() =>
+      requestAnimationFrame(() => {
+        // CSSを元に戻す
+        this.svgElement.style.transition = this.timeContainer.style.transition = this.stationContainer.style.transition = 'none';
+        this.svgElement.style.transform = this.timeContainer.style.transform = this.stationContainer.style.transform = `scale(1, 1) translate(0, 0)`;
+        // JSで描画
+        drawFunc();
+        // 位置合わせ
+        this.window.scrollLeft = newX;
+        this.window.scrollTop = newY;
+      })
+      , 200);
 
 
   }
   // 全体の描画
-  draw() {
-    this.timeContainer.innerHTML = '';
-    this.stationContainer.innerHTML = '';
-    this.svgElement.innerHTML = '';
-
+  draw(immediate = true) {
     // line要素を集める
     const lines = [];
     const timeLabels = [];
@@ -140,11 +137,13 @@ export default class DiagramView extends View {
     // 時刻、縦線描画
     // d1: ラベル間隔, d2: 中目盛, d3: 小目盛
     let d1, d2, d3;
-    if (this.xScale > 7.5) {
-      [d1, d2, d3] = [10, 5, 1];
+    if (this.xScale > 15) {
+      [d1, d2, d3] = [5, 5, 1];
     } else if (this.xScale > 5) {
-      [d1, d2, d3] = [20, 5, 1];
-    } else if (this.xScale > 3) {
+      [d1, d2, d3] = [10, 5, 1];
+    } else if (this.xScale > 4) {
+      [d1, d2, d3] = [20, 10, 2];
+    } else if (this.xScale > 2) {
       [d1, d2, d3] = [30, 10, 2];
     } else {
       [d1, d2, d3] = [60, 10, 5];
@@ -153,8 +152,8 @@ export default class DiagramView extends View {
       const x = i * this.xScale;
       const t = i + this.startTime;
       if (t % d1 === 0) {
-        const label = h('div', { class: 'diagram-label' }, MinutesToHHMM(t));
-        label.style.left = (x + 80) + 'px';
+        const label = h('div', { class: 'diagram-label' }, MinutesToHHMM(t, ':'));
+        label.style.left = (x + 80 - 20) + 'px';//20というのはlabelの幅の半分。中央寄せのための調整
         timeLabels.push(label);
       }
       lines.push(
@@ -163,8 +162,8 @@ export default class DiagramView extends View {
           x2: x,
           y1: 0,
           y2: y,
-          stroke: t % d2 === 0 ? '#b0b0b0' : '#d0d0d0',
-          strokeWidth: t % d2 === 0 ? 1 : 0.5
+          stroke: t % d1 === 0 ? '#b0b0b0' : '#d0d0d0',
+          'stroke-dasharray': t % d2 === 0 ? '0' : '3 1.5'
         }, null, null, "http://www.w3.org/2000/svg")
       );
     }
@@ -172,7 +171,7 @@ export default class DiagramView extends View {
     const paths = [];
     // 列車描画
     if (this.visibleOutbound) {
-      this.outboundTrains.forEach((train, i) => {
+      this.outboundTrains.forEach(train => {
         paths.push(
           h('path', {
             d: this.getTrainPath(train.timetable),
@@ -182,7 +181,7 @@ export default class DiagramView extends View {
       });
     }
     if (this.visibleInbound) {
-      this.inboundTrains.forEach((train, i) => {
+      this.inboundTrains.forEach(train => {
         paths.push(
           h('path', {
             d: this.getTrainPath(train.timetable, y),
@@ -192,17 +191,36 @@ export default class DiagramView extends View {
       });
     }
 
-    // svg要素に突っ込む
-    this.svgElement.setAttribute('width', 60 * 24 * this.xScale);
-    this.svgElement.setAttribute('height', y);
-    this.svgElement.setAttribute('viewBox', `0 0 ${60 * 24 * this.xScale} ${y}`);
-    this.svgElement.append(...[...lines, h('g', { strokeWidth: 2, fill: 'none' }, paths, null, "http://www.w3.org/2000/svg")]);
+    const svgContent = document.createDocumentFragment();
+    svgContent.append(...[...lines, h('g', { strokeWidth: 2, fill: 'none' }, paths, null, "http://www.w3.org/2000/svg")]);
+    const timeContent = document.createDocumentFragment();
+    timeContent.append(...timeLabels);
+    const stationContent = document.createDocumentFragment();
+    stationContent.append(...stationLabels);
 
-    // 固定部分のサイズ調整
-    this.timeContainer.append(...timeLabels);
-    this.timeContainer.style.width = (80 + 60 * 24 * this.xScale) + 'px';
-    this.stationContainer.append(...stationLabels);
-    this.stationContainer.style.height = (32 + y) + 'px';
+    const func = () => {
+      this.timeContainer.innerHTML = '';
+      this.stationContainer.innerHTML = '';
+      this.svgElement.innerHTML = '';
+      // svg要素に突っ込む
+      this.svgElement.setAttribute('width', 60 * 24 * this.xScale);
+      this.svgElement.setAttribute('height', y);
+      this.svgElement.setAttribute('viewBox', `0 0 ${60 * 24 * this.xScale} ${y}`);
+      this.svgElement.appendChild(svgContent);
+
+      // 固定部分のサイズ調整
+      this.timeContainer.style.width = (80 + 60 * 24 * this.xScale) + 'px';
+      this.timeContainer.appendChild(timeContent);
+      this.stationContainer.style.height = (32 + y) + 'px';
+      this.stationContainer.appendChild(stationContent);
+    };
+
+    // すぐに描画するなら描画処理を実行し、アニメーションする場合は描画処理の関数を返り値にする。
+    if (immediate) {
+      func();
+    } else {
+      return func;
+    }
   }
 
   //上り列車のパスを計算するときは、heightにSVGの高さの値を入れる。
@@ -211,33 +229,53 @@ export default class DiagramView extends View {
     let mark = 'M';
     let y = height === null ? 8 : height - 8;
     const flag = (height !== null ? -1 : 1);
-    // 最後に描画した地点のY座標
-    let lastY = y;
+    // 最後に描画した地点のX,Y座標
+    let lastX = -1;
     // 最後の停車駅からのY座標を進んだ距離(経由なしの区間を除く)
     let distance = 0;
-    // 通過中に経由なしに入った時には次の停車駅までx座標が決まらないので、y座標だけ控えておく。
+    // 通過中に経由なしに入った場合には次の停車駅までx座標が決まらないので、y座標とその時点でのdistanceを控えておく。
     let pendingPoints = [];
     // 1駅ずつ見ていくよ！
     timetable.forEach((val, i) => {
+      // 今回y座標を進む距離。
+      const delta = flag * (this.stationDistance[height === null ? i : (this.stationDistance.length - 1 - i)] == Number.MAX_SAFE_INTEGER ? this.yScale : this.stationDistance[height === null ? i : (this.stationDistance.length - 1 - i)] * this.yScale);
       if (val !== null) {
+        // 経由なしから飛び出した時。
+        if (lastX != -1 && timetable[i - 1] && timetable[i - 1].stopType === 3 && timetable[i].stopType !== 3) {
+          pendingPoints.push([y, distance]);
+        }
+        // 経由なしを通って停車駅まできたら、控えておいた点を結ぶ
+        if (pendingPoints.length !== 0 && (val.departure !== null || val.arrival !== null)) {
+          const x = (val.arrival !== null) ? (((val.arrival < this.startTime ? val.arrival + 24 * 60 : val.arrival) - this.startTime) * this.xScale) : (((val.departure < this.startTime ? val.departure + 24 * 60 : val.departure) - this.startTime) * this.xScale);
+          for (let k = 0; k < pendingPoints.length; k++) {
+            str += (k % 2 == 0 ? 'L' : 'M') + ((x - lastX) * pendingPoints[k][1] / distance + lastX) + ' ' + pendingPoints[k][0];
+          }
+          pendingPoints = [];
+        }
         // 到着時刻
         if (val.arrival !== null) {
-          str += `${mark}${((val.arrival < this.startTime ? val.arrival + 24 * 60 : val.arrival) - this.startTime) * this.xScale} ${y}`;
+          const x = ((val.arrival < this.startTime ? val.arrival + 24 * 60 : val.arrival) - this.startTime) * this.xScale;
+          str += `${mark}${x} ${y}`;
+          lastX = x;
         }
         // 出発時刻
         if (val.departure !== null && val.departure !== val.arrival) {
-          str += `${mark}${((val.departure < this.startTime ? val.departure + 24 * 60 : val.departure) - this.startTime) * this.xScale} ${y}`;
+          const x = ((val.departure < this.startTime ? val.departure + 24 * 60 : val.departure) - this.startTime) * this.xScale;
+          str += `${mark}${x} ${y}`;
+          lastX = x;
         }
-        if (val.departure !== null && val.arrival !== null){
+        // 線を描いたら、distanceリセット
+        if (val.departure !== null || val.arrival !== null) {
           mark = 'L';
-          lastY = y;
+          distance = 0;
         }
-        if (timetable[i + 1] && timetable[i + 1].stopType == 3) {
-          pendingPoints.push(y);
-          mark = 'M';
+        // 経由なしに飛び込む時、そのy座標を控える
+        if (lastX != -1 && timetable[i].stopType !== 3 && timetable[i + 1] && timetable[i + 1].stopType == 3) {
+          pendingPoints.push([y, distance]);
         }
+        if (timetable[i].stopType !== 3) distance += delta;
       }
-      y += flag * (this.stationDistance[height===null ? i : (this.stationDistance.length - 1- i)] == Number.MAX_SAFE_INTEGER ? this.yScale : this.stationDistance[height===null ? i : (this.stationDistance.length - 1- i)] * this.yScale);
+      y += delta;
     });
     return str;
   }

@@ -13,14 +13,14 @@ export const h = (tag, attr = null, body = null, onclick = null, ns = null) => {
   }
   if (typeof body === 'string') {
     element.textContent = body;
+  } else if (typeof body === 'number') {
+    element.textContent = String(body);
   } else if (body instanceof Element) {
     element.appendChild(body);
   } else if (body instanceof Array) {
-    body.forEach(elm => {
-      element.appendChild(elm);
-    });
+    element.append(...body);
   } else if (body !== null) {
-    console.warn('何だお前！: ' + body);
+    console.warn('この中身は想定してない！！\n' + body);
   }
   return element;
 };
@@ -53,9 +53,9 @@ export const HHMMtoMinutes = HHMMstring => {
 
 // 0:00からの経過分数を、時分を表す文字列に変換
 // 例) 893 → '1453'
-export const MinutesToHHMM = min => {
-  if (!min) return null;
-  return Math.floor(min / 60) + '' + String(min % 60).padStart(2, '0');
+export const MinutesToHHMM = (min=null, str="") => {
+  if (min === null) return null;
+  return Math.floor(min / 60) + str + String(min % 60).padStart(2, '0');
 };
 
 // Oudiaで用いられる色を、#rrggbbの形に変換

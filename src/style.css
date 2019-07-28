@@ -214,8 +214,8 @@ code {
     background-color: var(--app-bg-color);
     box-shadow: 0 -10px 2px 10px #00000088;
     z-index: 2;
-    transform: scale(1, 1) translate(0,0);
-    transform-origin: 0 80px;
+    transform: scale(1, 1) translate(0, 0);
+    transform-origin: 80px 0;
 }
 
 #diagram-station {
@@ -228,68 +228,249 @@ code {
     box-shadow: -10px 0 2px 10px #00000088;
     z-index: 3;
     float: left;
-    transform: scale(1, 1) translate(0,0);
+    transform: scale(1, 1) translate(0, 0);
     transform-origin: 0 0;
 }
-#diagram-svg{
+
+#diagram-svg {
     position: absolute;
     top: 16px;
     left: 80px;
-    transform: scale(1, 1) translate(0,0);
+    transform: scale(1, 1) translate(0, 0);
     transform-origin: 0 8px;
 }
-.diagram-label{
+
+.diagram-label {
     position: absolute;
     font-size: 12px;
     line-height: 1;
     color: #444;
 }
-#diagram-station>.diagram-label{
+
+#diagram-time>.diagram-label {
+    width: 40px;
+    text-align: center;
+}
+
+#diagram-station>.diagram-label {
     width: 80px;
-    left:0;
+    left: 0;
+    text-align: right;
     text-overflow: ellipsis;
     white-space: nowrap;
     overflow: hidden;
     border-bottom: 1px solid #ddd;
 }
 
-
-#diagram-tools{
+#diagram-tools {
     position: fixed;
     right: 8px;
     bottom: 8px;
     z-index: 4;
 }
-.diagram-tools-container{
+
+.diagram-tools-container {
     position: absolute;
     border-radius: 4px;
     background-color: white;
     box-shadow: 0 0 2px #000000aa;
     display: flex;
 }
-.diagram-tools-button{
+
+.diagram-tools-button {
     width: 32px;
     height: 32px;
     filter: brightness(1.2);
     background-size: contain;
 }
-#diagram-tools-container1{
+
+#diagram-tools-container1 {
     bottom: 40px;
     right: 0;
     width: 32px;
     flex-wrap: wrap;
 }
+
 #diagram-tools-container2 {
     bottom: 40px;
     right: 40px;
 }
+
 #diagram-tools-container3 {
     bottom: 0;
     right: 0;
 }
-#diagram-tools-zoomin{background-image: url(img/plus.svg);}
-#diagram-tools-zoomout{background-image: url(img/minus.svg);}
-#diagram-tools-widen{background-image: url(img/widen.svg);}
-#diagram-tools-narrow{background-image: url(img/narrow.svg);}
-#diagram-tools-inbound{background-image: url(img/inbound.svg);}
-#diagram-tools-outbound{background-image: url(img/outbound.svg);}
+
+#diagram-tools-zoomin {
+    background-image: url(img/plus.svg);
+}
+
+#diagram-tools-zoomout {
+    background-image: url(img/minus.svg);
+}
+
+#diagram-tools-widen {
+    background-image: url(img/widen.svg);
+}
+
+#diagram-tools-narrow {
+    background-image: url(img/narrow.svg);
+}
+
+#diagram-tools-inbound {
+    background-image: url(img/inbound.svg);
+}
+
+#diagram-tools-outbound {
+    background-image: url(img/outbound.svg);
+}
+
+.st-header {
+    margin: 8px 0;
+    color: #222;
+}
+
+.st-header-title {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.st-header-direction {
+    float: right;
+    line-height: 24px;
+    background: #e0e0e0;
+    border-radius: 4px;
+    padding: 0 4px;
+}
+
+.st-header-diagram {
+    color: #666;
+    font-size: 12px;
+}
+
+.st-sheet {
+    max-width: 700px;
+    flex: 1;
+    margin: 16px 8px;
+    box-shadow: 1px 1px 6px -1px #00000088;
+    padding: 6px;
+}
+
+.st-row {
+    display: flex;
+    min-height: 28px;
+}
+
+.st-hour {
+    width: 32px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    color: #444;
+    font-size: 16px;
+    border-right: 2px solid var(--app-bg-color);
+}
+
+.st-row:nth-child(2n-1) {
+    background: #e0e0e0;
+}
+
+.st-train {
+    width: 20px;
+    margin: 4px 2px;
+    text-align: center;
+}
+
+.st-minutes {
+    display: flex;
+    flex-wrap: wrap;
+    flex: 1;
+}
+
+.st-train-terminal {
+    font-size: 10px;
+    color: #444;
+    height: 12px;
+}
+
+.st-train-minute {
+    font-size: 15px;
+    width: 20px;
+    height: 20px;
+    line-height: 20px;
+}
+
+.st-footer {
+    font-size: 12px;
+    line-height: 1.2;
+    color: #333;
+    border-top: 1px solid #ccc;
+    padding-top: 8px;
+    margin: 4px 0;
+}
+
+#directionSelector {
+    display: none;
+}
+
+#stationSelector {
+    font-size: 14px;
+    padding: 4px 30px 4px 4px;
+    line-height: 1.5;
+    background: linear-gradient(45deg, transparent 50%, #a852ff 50%), linear-gradient(315deg, transparent 50%, #a852ff 50%), linear-gradient(to bottom, #00000000, #00000022), linear-gradient(to right, #e0e0e0 calc(100% - 26px), #d4a4ff calc(100% - 26px));
+    background-position: calc(100% - 13px) 50%, calc(100% - 8px) 50%, left top, left top;
+    background-size: 5px 5px, 5px 5px, cover, cover;
+    background-repeat: no-repeat;
+    border: 1px solid #aaa;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    -ms-progress-appearance: none;
+    appearance: none;
+    font-weight: bold;
+    margin-bottom: 8px;
+    position: relative;
+    background-image:
+}
+
+#st-tools {
+    margin: 16px 8px;
+}
+
+.st-tools-title {
+    color: #888;
+    font-weight: bold;
+    font-size: 12px;
+}
+
+.st-tools-direction {
+    border: 1px solid #aaa;
+    border-radius: 4px;
+    overflow: hidden;
+    display: flex;
+}
+
+.st-tools-direction-child {
+    padding: 4px 0;
+    text-align: center;
+    font-weight: bold;
+    flex: 1;
+    background-image: linear-gradient(to bottom, #00000000, #00000022);
+}
+
+#directionSelector:checked+.st-tools-direction>.st-tools-direction-child:last-child, .st-tools-direction>.st-tools-direction-child:first-child {
+    color: #888888;
+    color: #00000066;
+    background-color: #dbb3ff;;
+}
+
+#directionSelector:checked+.st-tools-direction>.st-tools-direction-child:first-child, .st-tools-direction>.st-tools-direction-child:last-child {
+    color: white;
+    background-color: #a852ff;
+}
+.st-tools-direction-checkbox:disabled{
+    display: none;
+}
+.st-tools-direction-item {
+    display: block;
+}

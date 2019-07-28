@@ -6,6 +6,7 @@ import Sidebar from "./Sidebar.js";
 import ComingSoonView from "./ComingSoonView.js";
 import OudiaParser from "./OudiaParser.js";
 import WelcomeView from "./WelcomeView.js";
+import StationTimetableView from "./StationTimetableView.js";
 
 // App.js (module)
 // なんか、ここでメインの処理をすることになったよ〜
@@ -51,7 +52,7 @@ export default class App {
      * @param {number} idx 何番目のDia
      * @param {string} key 'Nobori' or 'Kudari'
      */
-    showTrainTimetable(idx, key) {
+    showTrainTimetableView(idx, key) {
         this.mainView = new TrainTimetableView(this, idx, key);
     }
     /**
@@ -64,8 +65,11 @@ export default class App {
     showComingSoonView() {
         this.mainView = new ComingSoonView(this);
     }
-    showWelcomeView(){
+    showWelcomeView() {
         this.mainView = new WelcomeView(this);
+    }
+    showStationTimetableView(idx) {
+        this.mainView = new StationTimetableView(this, idx);
     }
 
     /**
@@ -74,7 +78,7 @@ export default class App {
  */
     loadOudFile(string) {
         this.data = OudiaParser.parse2(string);
-        this.showTrainTimetable(0, 'Kudari');
+        this.showTrainTimetableView(0, 'Kudari');
     }
     loadOudFileLocal(file) {
         const reader = new FileReader();
