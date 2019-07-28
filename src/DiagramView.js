@@ -44,8 +44,9 @@ export default class DiagramView extends View {
       <div id="diagram-tools-zoomout" class="diagram-tools-button"></div>
     </div>
     <div id="diagram-tools-container3" class="diagram-tools-container">
-      <div id="diagram-tools-outbound" class="diagram-tools-button"></div>
       <div id="diagram-tools-inbound" class="diagram-tools-button"></div>
+      <div id="diagram-tools-both" class="diagram-tools-button"></div>
+      <div id="diagram-tools-outbound" class="diagram-tools-button"></div>
       <div id="diagram-tools-narrow" class="diagram-tools-button"></div>
       <div id="diagram-tools-widen" class="diagram-tools-button"></div>
     </div>
@@ -55,8 +56,9 @@ export default class DiagramView extends View {
     this.svgElement = h('svg', { id: 'diagram-svg' }, null, null, "http://www.w3.org/2000/svg");
     this.window.appendChild(this.svgElement);
 
-    document.getElementById('diagram-tools-outbound').addEventListener('click', () => { this.visibleOutbound = !this.visibleOutbound; this.draw();}, false);
-    document.getElementById('diagram-tools-inbound').addEventListener('click', () => { this.visibleInbound = !this.visibleInbound; this.draw();}, false);
+    document.getElementById('diagram-tools-inbound').addEventListener('click', () => { this.visibleOutbound = false;this.visibleInbound = true; this.draw();}, false);
+    document.getElementById('diagram-tools-both').addEventListener('click', () => { this.visibleOutbound = true;this.visibleInbound = true; this.draw();}, false);
+    document.getElementById('diagram-tools-outbound').addEventListener('click', () => { this.visibleOutbound = true;this.visibleInbound = false; this.draw();}, false);
     document.getElementById('diagram-tools-widen').addEventListener('click', () => this.scale(this.xScale * 1.2), false);
     document.getElementById('diagram-tools-narrow').addEventListener('click', () => this.scale(this.xScale / 1.2), false);
     document.getElementById('diagram-tools-zoomin').addEventListener('click', () => this.scale(this.xScale * 1.2, this.yScale * 1.2), false);

@@ -46,24 +46,26 @@ export default class StationTimetableView extends View {
     this.directionSelector = h('input', { id: 'directionSelector', type: 'checkbox' });
     this.directionSelector.addEventListener('change', () => this.display(), false);
 
-    const tools = h('div', { id: 'st-tools' }, [
-      h('div', { class: "st-tools-title" }, '駅名'),
-      this.stationSelector,
-      h('div', { class: "st-tools-title" }, '方向'),
-      h('label', null, [
-        this.directionSelector,
-        h('div', { class: "st-tools-direction" }, [
-          h('div', { class: "st-tools-direction-child" }, '上り'),
-          h('div', { class: "st-tools-direction-child" }, '下り')
-        ])
-      ]),
-      h('div', { id: "st-tools-direction-detail" })
+    const tools = h('div', { id: 'st-tools-wrapper' }, [
+      h('div', { id: 'st-tools' }, [
+        h('div', {class: 'st-tools-container'}, [
+          h('div', { class: "st-tools-title" }, '駅名'),
+          this.stationSelector
+        ]),
+        h('div', {class: 'st-tools-container'}, [
+          h('div', { class: "st-tools-title" }, '方向'),
+          h('label', null, [
+            this.directionSelector,
+            h('div', { class: "st-tools-direction" }, [
+              h('div', { class: "st-tools-direction-child" }, '上り'),
+              h('div', { class: "st-tools-direction-child" }, '下り')
+            ])
+          ]),
+        ]),
+        h('div', {class: 'st-tools-container', id: "st-tools-direction-detail" })
+      ])
     ]);
-
-    this.window.style.display = 'flex';
-    this.window.style.flexWrap = 'wrap';
-    this.window.style.justifyContent = 'center';
-    this.window.append(this.timetableSheet, tools);
+    this.window.append(tools, this.timetableSheet);
 
     this.display();
   }
@@ -189,13 +191,6 @@ export default class StationTimetableView extends View {
     // 時刻表の表部分
     const wrapper = h('div', { class: 'st-wrapper' }, rows);
 
-    // ヘッダー
-    const header = h('div', { class: 'st-header' }, [
-      h('div', { class: 'st-header-direction' }, data.direction),
-      h('div', { class: 'st-header-title' }, data.stationName),
-      h('div', { class: 'st-header-diagram' }, data.diagramTitle)
-    ]);
-
     // フッター
     const types = () => {
       const result = [];
@@ -219,7 +214,7 @@ export default class StationTimetableView extends View {
     // 画面に追加
     const sheet = h('div', {
       class: 'st-sheet'
-    }, [header, wrapper, footer]);
+    }, [wrapper, footer]);
     this.timetableSheet.replaceWith(sheet);
     this.timetableSheet = sheet;
 
