@@ -2,6 +2,9 @@
     --app-bg-color: #f0f0f0;
     --sidebar-bg-color: #1f1a24;
 }
+*{
+    cursor: default;
+}
 
 html, body {
     font-size: 14px;
@@ -18,6 +21,60 @@ html, body {
     height: 100%;
     background-color: var(--app-bg-color);
     display: flex;
+    box-sizing: border-box;
+}
+
+#dialogBackground {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    top: 0;
+    display: none;
+    background-color: #00000000;
+    transition: background-color 0.35s ease;
+    z-index: 105;
+}
+#app.sidebar-on>#dialogBackground {
+    display: block;
+    background-color: #00000088;
+}
+
+#header{
+    position: fixed;
+    top: 0;
+    height: 40px;
+    width: 100%;
+    display: none;
+    background-color: var(--sidebar-bg-color);
+    box-shadow: 0 -10px 2px 10px #00000088;
+    z-index: 100;
+}
+#header-toggleSidebar{
+    width: 40px;
+    background-image: url(img/menu.svg);
+    background-size: contain;
+    background-repeat: no-repeat;
+}
+#header-titleContainer {
+    line-height: 1;
+    padding: 4px 0 4px 8px;
+}
+
+#header-subtitle {
+    font-size: 12px;
+    padding: 1px 0;
+    color: #aaaaaa;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+#header-title {
+    font-size: 16px;
+    color: #e0e0e0;
+    font-weight: bold;
+    padding: 1px 0;
 }
 
 #sidebar {
@@ -25,7 +82,6 @@ html, body {
     height: 100%;
     overflow-y: scroll;
     background-color: var(--sidebar-bg-color);
-    font-weight: bold;
     color: #aaa;
     box-shadow: -6px 0 5px 5px rgba(0, 0, 0, 0.7);
 }
@@ -37,27 +93,38 @@ html, body {
 
 .sidebar-section-title {
     font-size: 12px;
-    color: #888;
+    color: #e0e0e0;
     padding: 0 4px;
 }
 
 .sidebar-section-content {
     font-size: 16px;
-    color: #eee;
+    color: #888;
     padding: 4px 8px;
     cursor: pointer;
+    font-weight: bold;
 }
 
 .sidebar-section-content:hover {
     background-color: #ffffff11;
 }
+.sidebar-section-content.selected {
+    color: #fff;
+    background-color: #a852ff40;
+}
 
 #sidebar-railwayName {
-    color: #eee;
+    color: #aaaaaa;
+    font-size: 12px;
+    padding: 4px;
 }
 
 #sidebar-logo {
-    display: flex;
+    height: 32px;
+    background-image: url(img/logo_horizontal_dark.svg);
+    background-size: 80%;
+    background-position: center;
+    background-repeat: no-repeat;
 }
 
 #sidebar-logo-img {
@@ -499,4 +566,35 @@ code {
     flex-direction: column;
     justify-content: flex-end;
     flex-shrink: 2;
+}
+
+@media screen and (max-width: 600px) {
+    #app {
+        padding-top: 40px;
+    }
+    #header {
+        display: flex;
+    }
+    #app.sidebar-on>#dialogBackground{
+        display: block;
+    }
+    #sidebar{
+        position: absolute;
+        z-index: 110;
+        left: -200px;
+        transition: left 0.35s ease;
+        top: 0;
+    }
+    #app.sidebar-on>#sidebar {
+        left: 0;
+    }
+    #app.no-file>#header{
+        background-image: url(img/logo_horizontal_dark.svg);
+        background-position: center;
+        background-size: auto 80%;
+        background-repeat: no-repeat;
+    }
+    #app.no-file>#header>#header-toggleSidebar{
+        display: none;
+    }
 }

@@ -7,24 +7,40 @@ import ComingSoonView from "./ComingSoonView.js";
 import OudiaParser from "./OudiaParser.js";
 import WelcomeView from "./WelcomeView.js";
 import StationTimetableView from "./StationTimetableView.js";
+import { h } from "./Util.js";
+import Header from "./Header.js";
 
 // App.js (module)
 // なんか、ここでメインの処理をすることになったよ〜
 const ENCODING_TYPE = 'shift-jis';
 
 export default class App {
-    constructor() {
+    constructor(element) {
         // バージョン？
         this.version = 0.1;
         // JSON形式のouDia
         this._data = null;
-        // サイドバーちゃん(≡^oλo^≡)
+        // 画面初期化
+        this.wrapper = element;
+        this.wrapper.classList.add('no-file');
+        const dialogBackground = h('div', {id: 'dialogBackground'});
+        dialogBackground.addEventListener('click', () => this.sidebar.hide());
+        element.append(
+            h('div', {id: 'header'}),
+            h('div', {id: 'sidebar'}),
+            h('div', {id: 'mainWindow'}),
+            dialogBackground
+        );
+        // サイドバーちゃん\(=∂_∂=)/
         this.sidebar = new Sidebar(this);
+        // ヘッダーちゃん (~^v^~)//
+        this.header = new Header(this);
         this._mainView = null;
     }
     set data(json) {
         this._data = json;
         this.sidebar.render();
+        this.wrapper.classList.remove('no-file');
     }
     get data() {
         return this._data;
@@ -43,6 +59,9 @@ export default class App {
         // こんにちは、新mainViewの描画
         this._mainView = view;
         view.render();
+
+        // サイドバーを隠す(モバイル)
+        this.sidebar.hide();
     }
     get mainView() {
         return this._mainView;
@@ -54,6 +73,8 @@ export default class App {
      */
     showTrainTimetableView(idx, key) {
         this.mainView = new TrainTimetableView(this, idx, key);
+        this.header.subtitle = this.data.Rosen[0].Dia[idx].DiaName;
+        this.header.title = (key == 'Nobori' ? '上り' : '下り') + '列車時刻表';
     }
     /**
      * まじ、ダイヤ表示すんのしんどいわぁ
@@ -61,15 +82,23 @@ export default class App {
      */
     showDiagramView(idx) {
         this.mainView = new DiagramView(this, idx);
+        this.header.subtitle = this.data.Rosen[0].Dia[idx].DiaName;
+        this.header.title = 'ダイヤグラム';
     }
     showComingSoonView() {
         this.mainView = new ComingSoonView(this);
+        this.header.subtitle = 'このページはまだご利用になれません';
+        this.header.title = '準備中';
     }
     showWelcomeView() {
         this.mainView = new WelcomeView(this);
+        this.header.subtitle = '';
+        this.header.title = '';
     }
     showStationTimetableView(idx) {
         this.mainView = new StationTimetableView(this, idx);
+        this.header.subtitle = this.data.Rosen[0].Dia[idx].DiaName;
+        this.header.title = '駅時刻表';
     }
 
     /**

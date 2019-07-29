@@ -14,8 +14,8 @@
     </g>
      <g stroke-width="8" stroke="#a852ff" stroke-linecap="round" stroke-linejoin="round" transform="translate(64 -174)">
         <path d="M170 190 v30 h10 a15 15 0 0 0 0 -30 z" fill="none"/>
-        <circle cx="210" cy="190" r="1"/>
         <path d="M210 203 v17" fill="none"/>
         <path d="M245 210 a10 10 0 0 0 -20 0a10 10 0 0 0 20 0m0 -10v20" fill="none"/>
     </g>
+    <circle cx="210" cy="190" r="5" fill="#a852ff" transform="translate(64 -174)"/>
 </svg>

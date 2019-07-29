@@ -71,5 +71,8 @@ export default class WelcomeView extends View{
       this.app.loadOudFileLocal(evt.dataTransfer.files[0]);
     });
   }
+  finish() {
+    this.window.classList.remove('startPage');
+  }
 
 }

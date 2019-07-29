@@ -19,6 +19,15 @@ export default class DiagramView extends View {
     this.visibleOutbound = true;
     // 1日の始まりは4時から。
     this.startTime = 4 * 60;
+    // (モバイル)拡大縮小動作中か？
+    this.isScaling = false;
+    // (モバイル)拡大縮小を始めた時の指の間の距離; 初期値は適当
+    this.initialDistance = { x: 10, y: 10 };
+    // (モバイル)拡大縮小中の最新の指の間の距離; 初期値は適当
+    this.lastScale = { x: 20, y: 20 };
+    // (モバイル)拡大縮小終了時のスクロール位置になるであろう座標
+    this.lastScrollX = 0;
+    this.lastScrollY = 0;
   }
   render() {
     this.window = document.getElementById('mainWindow');
@@ -56,45 +65,69 @@ export default class DiagramView extends View {
     this.svgElement = h('svg', { id: 'diagram-svg' }, null, null, "http://www.w3.org/2000/svg");
     this.window.appendChild(this.svgElement);
 
-    document.getElementById('diagram-tools-inbound').addEventListener('click', () => { this.visibleOutbound = false;this.visibleInbound = true; this.draw();}, false);
-    document.getElementById('diagram-tools-both').addEventListener('click', () => { this.visibleOutbound = true;this.visibleInbound = true; this.draw();}, false);
-    document.getElementById('diagram-tools-outbound').addEventListener('click', () => { this.visibleOutbound = true;this.visibleInbound = false; this.draw();}, false);
+    document.getElementById('diagram-tools-inbound').addEventListener('click', () => { this.visibleOutbound = false; this.visibleInbound = true; this.draw(); }, false);
+    document.getElementById('diagram-tools-both').addEventListener('click', () => { this.visibleOutbound = true; this.visibleInbound = true; this.draw(); }, false);
+    document.getElementById('diagram-tools-outbound').addEventListener('click', () => { this.visibleOutbound = true; this.visibleInbound = false; this.draw(); }, false);
     document.getElementById('diagram-tools-widen').addEventListener('click', () => this.scale(this.xScale * 1.2), false);
     document.getElementById('diagram-tools-narrow').addEventListener('click', () => this.scale(this.xScale / 1.2), false);
     document.getElementById('diagram-tools-zoomin').addEventListener('click', () => this.scale(this.xScale * 1.2, this.yScale * 1.2), false);
     document.getElementById('diagram-tools-zoomout').addEventListener('click', () => this.scale(this.xScale / 1.2, this.yScale / 1.2), false);
-
+    this.window.addEventListener('touchmove', (e) => this.pinchScaling(e), false);
+    this.window.addEventListener('touchend', (e) => this.pinchEnd(e), false);
     this.draw();
+  }
+  // 二本指での拡大縮小
+  pinchScaling(event) {
+    const touches = event.changedTouches;
+    if (touches.length < 2) return;
+    if (event.cancelable) event.preventDefault();
+    // 指の間の距離
+    const distance = {
+      x: Math.max(20, Math.abs(touches[0].pageX - touches[1].pageX)),
+      y: Math.max(20, Math.abs(touches[0].pageY - touches[1].pageY))
+    };
+    // 今ピンチが始まったかどうか
+    if (!this.isScaling) {
+      this.isScaling = true;
+      this.initialDistance = distance;
+    } else {
+      if (distance.x < 20) distance.x = this.initialDistance.x;
+      if (distance.y < 20) distance.y = this.initialDistance.y;
+      this.lastScale = {
+        x: Math.max(1.5, Math.min(35, this.xScale * distance.x / this.initialDistance.x)),
+        y: Math.max(5.0, Math.min(35, this.yScale * distance.y / this.initialDistance.y))
+      };
+      this.svgElement.style.transition = this.stationContainer.style.transition = this.timeContainer.style.transition = 'transform 0.05s linear 0s';
+      const centerX = (touches[0].pageX + touches[1].pageX) / 2;
+      const centerY = (touches[0].pageY + touches[1].pageY) / 2;
+      [this.lastScrollX, this.lastScrollY] = this.CSSscaling(this.lastScale.x, this.lastScale.y, centerX, centerY);
+    }
+  }
+  pinchEnd() {
+    if (!this.isScaling) return;
+    this.isScaling = false;
+    // 拡大比率更新
+    this.xScale = this.lastScale.x;
+    this.yScale = this.lastScale.y;
+    this.resetCSSscaleing();
+    this.draw();
+    // 位置合わせ
+    this.window.scrollLeft = this.lastScrollX;
+    this.window.scrollTop = this.lastScrollY;
   }
   // 表示サイズの変更
   scale(newXScale = this.xScale, newYScale = this.yScale) {
-    // mainWindowのサイズの半分
-    const halfScreenWidth = this.window.offsetWidth / 2;
-    const halfScreenHeight = this.window.offsetHeight / 2;
-    // 伸縮比率
-    const xRatio = newXScale / this.xScale;
-    const yRatio = newYScale / this.yScale;
-    // スケーリング前のmainWindowのスクロール位置
-    const scrollLeft = this.window.scrollLeft;
-    const scrollTop = this.window.scrollTop;
-    // スケーリング後のmainWindowのスクロール位置
-    const newX = Math.max(0, (scrollLeft + halfScreenWidth) * xRatio - halfScreenWidth);
-    const newY = Math.max(0, (scrollTop + halfScreenHeight) * yRatio - halfScreenHeight);
+    this.svgElement.style.transition = this.stationContainer.style.transition = this.timeContainer.style.transition = 'transform 0.19s ease 0s';
+    const [newX, newY] = this.CSSscaling(newXScale, newYScale, this.window.offsetWidth / 2, this.window.offsetHeight / 2);
     // 拡大比率更新
     this.xScale = newXScale;
     this.yScale = newYScale;
-    // CSSでアニメーションをする
-    this.svgElement.style.transition = this.stationContainer.style.transition = this.timeContainer.style.transition = 'transform 0.19s ease 0s';
-    this.svgElement.style.transform = `translate(${scrollLeft - newX}px, ${scrollTop - newY}px) scale(${xRatio}, ${yRatio})`;
-    this.timeContainer.style.transform = `translate(${scrollLeft - newX}px, 0) scale(${xRatio}, 1)`;
-    this.stationContainer.style.transform = `translate(0, ${scrollTop - newY}px) scale(1, ${yRatio})`;
 
-    const drawFunc = this.draw(false);
+    const drawFunc = this.draw({ immediate: false });
     setTimeout(() =>
       requestAnimationFrame(() => {
         // CSSを元に戻す
-        this.svgElement.style.transition = this.timeContainer.style.transition = this.stationContainer.style.transition = 'none';
-        this.svgElement.style.transform = this.timeContainer.style.transform = this.stationContainer.style.transform = `scale(1, 1) translate(0, 0)`;
+        this.resetCSSscaleing();
         // JSで描画
         drawFunc();
         // 位置合わせ
@@ -102,16 +135,38 @@ export default class DiagramView extends View {
         this.window.scrollTop = newY;
       })
       , 200);
-
-
+  }
+  CSSscaling(newXScale = this.xScale, newYScale = this.yScale, centerX, centerY) {
+    // mainWindowのサイズの半分
+    // 伸縮比率
+    const xRatio = newXScale / this.xScale;
+    const yRatio = newYScale / this.yScale;
+    // スケーリング前のmainWindowのスクロール位置
+    const scrollLeft = this.window.scrollLeft;
+    const scrollTop = this.window.scrollTop;
+    // スケーリング後のmainWindowのスクロール位置
+    const newX = Math.max(0, (scrollLeft + centerX) * xRatio - centerX);
+    const newY = Math.max(0, (scrollTop + centerY) * yRatio - centerY);
+    // CSSでアニメーションをする
+    this.svgElement.style.transform = `translate(${scrollLeft - newX}px, ${scrollTop - newY}px) scale(${xRatio}, ${yRatio})`;
+    this.timeContainer.style.transform = `translate(${scrollLeft - newX}px, 0) scale(${xRatio}, 1)`;
+    this.stationContainer.style.transform = `translate(0, ${scrollTop - newY}px) scale(1, ${yRatio})`;
+    // 時刻を記録
+    this.lastCSSScalingTime = performance.now();
+    return [newX, newY];
+  }
+  // cssによる変形の初期化
+  resetCSSscaleing() {
+    this.svgElement.style.transition = this.timeContainer.style.transition = this.stationContainer.style.transition = 'none';
+    this.svgElement.style.transform = this.timeContainer.style.transform = this.stationContainer.style.transform = `scale(1, 1) translate(0, 0)`;
   }
   // 全体の描画
-  draw(immediate = true) {
+  draw({ immediate = true } = {}) {
     // line要素を集める
     const lines = [];
     const timeLabels = [];
     const stationLabels = [];
-
+    const position = { x: null, y: null, w: null, h: null };
 
     // 駅、横線描画
     // y座標
@@ -312,6 +367,8 @@ export default class DiagramView extends View {
     return result;
   }
   finish() { }
+
+
 }
 
 
