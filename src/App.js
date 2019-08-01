@@ -9,6 +9,7 @@ import WelcomeView from "./WelcomeView.js";
 import StationTimetableView from "./StationTimetableView.js";
 import { h } from "./Util.js";
 import Header from "./Header.js";
+import CanvasDiagramView from "./CanvasDiagramView.js";
 
 // App.js (module)
 // なんか、ここでメインの処理をすることになったよ〜
@@ -81,7 +82,7 @@ export default class App {
      * @param {number} idx 何番目のDia
      */
     showDiagramView(idx) {
-        this.mainView = new DiagramView(this, idx);
+        this.mainView = new CanvasDiagramView(this, idx);
         this.header.subtitle = this.data.Rosen[0].Dia[idx].DiaName;
         this.header.title = 'ダイヤグラム';
     }

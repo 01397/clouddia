@@ -2,7 +2,8 @@
     --app-bg-color: #f0f0f0;
     --sidebar-bg-color: #1f1a24;
 }
-*{
+
+* {
     cursor: default;
 }
 
@@ -35,12 +36,13 @@ html, body {
     transition: background-color 0.35s ease;
     z-index: 105;
 }
+
 #app.sidebar-on>#dialogBackground {
     display: block;
     background-color: #00000088;
 }
 
-#header{
+#header {
     position: fixed;
     top: 0;
     height: 40px;
@@ -50,12 +52,14 @@ html, body {
     box-shadow: 0 -10px 2px 10px #00000088;
     z-index: 100;
 }
-#header-toggleSidebar{
+
+#header-toggleSidebar {
     width: 40px;
     background-image: url(img/menu.svg);
     background-size: contain;
     background-repeat: no-repeat;
 }
+
 #header-titleContainer {
     line-height: 1;
     padding: 4px 0 4px 8px;
@@ -108,6 +112,7 @@ html, body {
 .sidebar-section-content:hover {
     background-color: #ffffff11;
 }
+
 .sidebar-section-content.selected {
     color: #fff;
     background-color: #a852ff40;
@@ -307,6 +312,24 @@ code {
     transform-origin: 0 8px;
 }
 
+#diagram-canvas {
+    transform-origin: left top;
+    position: fixed;
+    pointer-events: none;
+}
+
+.diagram-tools-button-rightMargin{
+    margin-right: 2px;
+}
+.diagram-tools-input {
+    display: none;
+}
+
+.diagram-tools-input:checked+.diagram-tools-svgicon {
+    background: #a852ff;
+    opacity: 1;
+}
+
 .diagram-label {
     position: absolute;
     font-size: 12px;
@@ -339,16 +362,33 @@ code {
 .diagram-tools-container {
     position: absolute;
     border-radius: 4px;
-    background-color: white;
+    background-color: #ccc;
     box-shadow: 0 0 2px #000000aa;
+    box-shadow: 2px 2px 6px -1px #000000aa;
+    border: 1px solid #bfbfbf;
     display: flex;
+    overflow: hidden;
 }
 
 .diagram-tools-button {
     width: 32px;
     height: 32px;
-    filter: brightness(1.2);
-    background-size: contain;
+    background-color: #fff;
+    transition: background-color 0.1s ease;
+}
+
+.diagram-tools-svgicon {
+    width: 100%;
+    height: 100%;
+    opacity: 0.65;
+}
+
+.diagram-tools-button:hover {
+    background-color: #ddd;
+}
+
+.diagram-tools-button:hover>.diagram-tools-svgicon {
+    opacity: 1;
 }
 
 #diagram-tools-container1 {
@@ -366,34 +406,6 @@ code {
 #diagram-tools-container3 {
     bottom: 0;
     right: 0;
-}
-
-#diagram-tools-zoomin {
-    background-image: url(img/plus.svg);
-}
-
-#diagram-tools-zoomout {
-    background-image: url(img/minus.svg);
-}
-
-#diagram-tools-widen {
-    background-image: url(img/widen.svg);
-}
-
-#diagram-tools-narrow {
-    background-image: url(img/narrow.svg);
-}
-
-#diagram-tools-inbound {
-    background-image: url(img/inbound.svg);
-}
-
-#diagram-tools-both {
-    background-image: url(img/both_directions.svg);
-}
-
-#diagram-tools-outbound {
-    background-image: url(img/outbound.svg);
 }
 
 .st-header {
@@ -575,10 +587,10 @@ code {
     #header {
         display: flex;
     }
-    #app.sidebar-on>#dialogBackground{
+    #app.sidebar-on>#dialogBackground {
         display: block;
     }
-    #sidebar{
+    #sidebar {
         position: absolute;
         z-index: 110;
         left: -200px;
@@ -588,13 +600,13 @@ code {
     #app.sidebar-on>#sidebar {
         left: 0;
     }
-    #app.no-file>#header{
+    #app.no-file>#header {
         background-image: url(img/logo_horizontal_dark.svg);
         background-position: center;
         background-size: auto 80%;
         background-repeat: no-repeat;
     }
-    #app.no-file>#header>#header-toggleSidebar{
+    #app.no-file>#header>#header-toggleSidebar {
         display: none;
     }
 }

@@ -9,7 +9,7 @@ export const h = (tag, attr = null, body = null, onclick = null, ns = null) => {
     }
   }
   if (onclick != null) {
-    element.addEventListener('click', onclick, false);
+    element.addEventListener('click', onclick, {passive: true, capture: false});
   }
   if (typeof body === 'string') {
     element.textContent = body;

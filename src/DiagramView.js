@@ -72,9 +72,17 @@ export default class DiagramView extends View {
     document.getElementById('diagram-tools-narrow').addEventListener('click', () => this.scale(this.xScale / 1.2), false);
     document.getElementById('diagram-tools-zoomin').addEventListener('click', () => this.scale(this.xScale * 1.2, this.yScale * 1.2), false);
     document.getElementById('diagram-tools-zoomout').addEventListener('click', () => this.scale(this.xScale / 1.2, this.yScale / 1.2), false);
+    this.window.addEventListener('touchstart', (e) => this.touchstart(e), true);
     this.window.addEventListener('touchmove', (e) => this.pinchScaling(e), false);
     this.window.addEventListener('touchend', (e) => this.pinchEnd(e), false);
     this.draw();
+  }
+
+  // user-scalable=noが適用されないiOSでの拡大を防ぐ
+  touchstart(event) {
+    if (event.touches.length > 1 && event.cancelable) {
+      event.preventDefault();
+    }
   }
   // 二本指での拡大縮小
   pinchScaling(event) {
@@ -103,6 +111,7 @@ export default class DiagramView extends View {
       [this.lastScrollX, this.lastScrollY] = this.CSSscaling(this.lastScale.x, this.lastScale.y, centerX, centerY);
     }
   }
+  // 拡大縮小の終了
   pinchEnd() {
     if (!this.isScaling) return;
     this.isScaling = false;
@@ -136,6 +145,7 @@ export default class DiagramView extends View {
       })
       , 200);
   }
+  // CSSでごまかす
   CSSscaling(newXScale = this.xScale, newYScale = this.yScale, centerX, centerY) {
     // mainWindowのサイズの半分
     // 伸縮比率
@@ -166,7 +176,6 @@ export default class DiagramView extends View {
     const lines = [];
     const timeLabels = [];
     const stationLabels = [];
-    const position = { x: null, y: null, w: null, h: null };
 
     // 駅、横線描画
     // y座標
