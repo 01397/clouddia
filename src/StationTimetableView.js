@@ -6,6 +6,8 @@ import { h, ouColorToHex } from "./Util.js";
 export default class StationTimetableView extends View {
   constructor(app, idx) {
     super(app);
+    // 何番目のダイヤか
+    this.idx = idx;
     // 使用するデータたち
     this.stations = this.app.data.Rosen[0].Eki;
     this.diagramTitle = this.app.data.Rosen[0].Dia[idx].DiaName;
@@ -83,7 +85,7 @@ export default class StationTimetableView extends View {
     const data = { stationName, trains: [], topStation: null, topStationList: new Map() };
 
     // 発車時刻や種別、行き先などを繰り返し追加していく
-    trains.forEach(train => {
+    trains.forEach((train, index) => {
       for (const i of indexList) {
         const idx = isInbound ? this.stations.length - i - 1 : i;
         if (train.timetable[idx] === null || train.timetable[idx].stopType !== 1 || train.timetable[idx].departure === null || (train.timetable[idx + 1] && train.timetable[idx + 1].stopType === 3)) continue;
@@ -94,7 +96,12 @@ export default class StationTimetableView extends View {
         data.trains.push({
           trainType: train.Syubetsu,
           terminalIndex: train.terminalIndex,
-          time: train.timetable[idx].departure
+          time: train.timetable[idx].departure,
+          trainData: {
+            diaIndex: this.idx,
+            index,
+            direction: isInbound ? 'inbound': 'outbound'
+          }
         });
         break;
       }
@@ -172,7 +179,9 @@ export default class StationTimetableView extends View {
               class: 'st-train-minute',
               style: 'color: ' + ouColorToHex(this.app.data.Rosen[0].Ressyasyubetsu[val.trainType].JikokuhyouMojiColor)
             }, min)
-          ])
+          ],
+          () => this.app.infoPanel.showTrain(val.trainData)
+        )
       );
     });
     // 1時間ずつの行

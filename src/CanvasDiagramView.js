@@ -1,7 +1,7 @@
 'use strict';
 
 import View from "./View.js";
-import { h, ouColorToHex, MinutesToHHMM } from "./Util.js";
+import { h, ouColorToHex, MinutesToHHMM, getDistance2 } from "./Util.js";
 
 // CanvasDiagramView.js (module)
 // ダイヤグラムを表示する。斜め線いっぱいのやつ。
@@ -18,7 +18,7 @@ export default class CanvasDiagramView extends View {
     this.stations = this.app.data.Rosen[0].Eki;
     this.inboundTrains = this.app.data.Rosen[0].Dia[idx]['Nobori'][0].Ressya;
     this.outboundTrains = this.app.data.Rosen[0].Dia[idx]['Kudari'][0].Ressya;
-    // 表示サイズ
+    // 表示設定
     this.xScale = 10 * this.devicePixelRatio;
     this.yScale = 20 * this.devicePixelRatio;
     this.minXScale = 1.5 * this.devicePixelRatio;
@@ -30,11 +30,15 @@ export default class CanvasDiagramView extends View {
     this.paddingLeft = 80 * this.devicePixelRatio;
     this.visibleInbound = true;
     this.visibleOutbound = false;
-    this.visibleTrainNumber = false;
-    this.visibleTrainName = false;
-    // スクロール、倍率変更以外に、再描画が必要な場合true
+    this.visibleTrainNumber = true;
+    this.visibleTrainName = true;
+    this.selectedTrain = null;
+    // trueにすると次のanimationFrameで再描画される。(スクロールと倍率変更の時は不要)
     this.forceDraw = false;
-    // 描画の開始時刻1日の始まりは4時から。
+     // 最後の描画以降にマウスカーソルの移動があったか
+    this.pointerPosition = {x: 0, y: 0};
+    this.pointerMoved = false;
+    // 描画の開始時刻。1日の始まりは4時から。
     this.startTime = 4 * 60;
     // 駅間距離
     this.stationDistance = this.getStationDistanceArray();
@@ -47,6 +51,7 @@ export default class CanvasDiagramView extends View {
   // 初回描画。
   render() {
     this.window = document.getElementById('mainWindow');
+    this.window.classList.add('no-bg');
     // 右下(ボタン群)
     const toolContainer = h('div', { id: 'diagram-tools' }, [
       h('div', { id: 'diagram-tools-container1', class: 'diagram-tools-container' }, [
@@ -55,11 +60,11 @@ export default class CanvasDiagramView extends View {
       ]),
       h('div', { id: 'diagram-tools-container3', class: 'diagram-tools-container' }, [
         h('label', { class: 'diagram-tools-button' }, [
-          h('input', { class: 'diagram-tools-input', type: 'checkbox'}, null,() => { this.visibleTrainNumber = !this.visibleTrainNumber; this.forceDraw = true; }),
+          h('input', { class: 'diagram-tools-input', type: 'checkbox', checked: 'checked' }, null, () => { this.visibleTrainNumber = !this.visibleTrainNumber; this.forceDraw = true; }),
           h('img', { class: 'diagram-tools-svgicon', src: 'img/trainNumber.svg' })
         ]),
         h('label', { class: 'diagram-tools-button diagram-tools-button-rightMargin' }, [
-          h('input', { class: 'diagram-tools-input', type: 'checkbox'},null, () => { this.visibleTrainName = !this.visibleTrainName; this.forceDraw = true; }),
+          h('input', { class: 'diagram-tools-input', type: 'checkbox', checked: 'checked' }, null, () => { this.visibleTrainName = !this.visibleTrainName; this.forceDraw = true; }),
           h('img', { class: 'diagram-tools-svgicon', src: 'img/trainName.svg' })
         ]),
         h('label', { class: 'diagram-tools-button' }, [
@@ -83,12 +88,31 @@ export default class CanvasDiagramView extends View {
     this.canvas.style.transform = `scale(${this.canvasScale})`;
     this.canvas.width = this.window.offsetWidth * this.devicePixelRatio;
     this.canvas.height = this.window.offsetHeight * this.devicePixelRatio;
-    this.context = this.canvas.getContext('2d');
+    this.context = this.canvas.getContext('2d', { alpha: false });
     this.canvasWrapper.appendChild(this.canvas);
 
-    this.window.addEventListener('touchstart', (e) => this.touchstart(e), true);
-    this.window.addEventListener('touchmove', (e) => this.pinchScaling(e), false);
-    this.window.addEventListener('touchend', (e) => this.pinchEnd(e), false);
+    if (('ontouchstart' in document) && ('orientation' in window)) {
+      this.window.addEventListener('touchstart', (e) => this.touchstart(e), true);
+      this.window.addEventListener('touchmove', (e) => this.pinchScaling(e), false);
+      this.window.addEventListener('touchend', (e) => this.pinchEnd(e), false);
+      this.window.addEventListener('touchend', (e) => {
+        const rect = e.target.getBoundingClientRect();
+        this.pointerPosition = {x: e.changedTouches[0].clientX - rect.left, y: e.changedTouches[0].clientY - rect.top};
+        this.pointerMoved = true;
+        this.forceDraw = true;
+      });
+    } else {
+      this.window.addEventListener('mousemove', (e) => {
+        this.pointerPosition= {x:e.offsetX, y:e.offsetY};
+        this.pointerMoved = true;
+        this.forceDraw = true;
+      });
+      this.window.addEventListener('click', (e) => {
+        const train = this.getTrainByCoordinate({x:e.offsetX, y:e.offsetY});
+        if(train === null)return;
+        this.app.infoPanel.showTrain(train);
+      });
+    }
     this.window.append(toolContainer, this.canvasWrapper);
     this.scale(10, 20);
     this.draw();
@@ -154,7 +178,10 @@ export default class CanvasDiagramView extends View {
       w: this.window.offsetWidth * this.devicePixelRatio,
       h: this.window.offsetHeight * this.devicePixelRatio
     };
-    if(position.x / this.devicePixelRatio < 600)this.paddingLeft = 50 * this.devicePixelRatio;
+    this.paddingLeft = ((position.w / this.devicePixelRatio < 600) ? 50 : 80) * this.devicePixelRatio;
+    if(position.w != this.lastPosition.w) this.canvas.width = position.w;
+    if(position.h != this.lastPosition.h) this.canvas.height = position.h;
+
     // 再描画は必要か？
     if (this.forceDraw || this.reservedScale.length !== 0 || position.x !== this.lastPosition.x || position.y !== this.lastPosition.y || this.reservedScale.length !== 0 || position.w !== this.lastPosition.w || position.h !== this.lastPosition.h) {
       // 表示倍率を変更するか？
@@ -171,8 +198,12 @@ export default class CanvasDiagramView extends View {
         this.window.scrollLeft = position.x / this.devicePixelRatio;
         this.window.scrollTop = position.y / this.devicePixelRatio;
       }
+      if(this.pointerMoved) {
+        this.selectedTrain = this.getTrainByCoordinate(this.pointerPosition);
+      }
       // canvas初期化
-      this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+      this.context.fillStyle = "#f0f0f0";
+      this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
       this.context.font = Math.min(12 * this.devicePixelRatio, this.yScale) + 'px "Noto Sans JP"';
       this.context.fillStyle = '#444444';
       this.context.lineWidth = 1;
@@ -264,31 +295,41 @@ export default class CanvasDiagramView extends View {
       this.context.textAlign = 'left';
       this.context.textBaseline = 'bottom';
 
-      // 色ごとにまとめてstrokeするから、
+      // strokeの回数とか、fillStyleの変更は少ない方がいいらしい。
+      // だから、色ごとにまとめて描画する。
       // まずは、画面内か判定して色ごとに分類
       const paths = {};
-      const xl = - position.x + this.paddingLeft;
-      const yt = - position.y + this.paddingTop;
-      const xw = position.x + position.w;
-      const selectTrains = (trains) => {
+      const xl = - position.x + this.paddingLeft; //よく使う数値
+      const yt = - position.y + this.paddingTop; //よく使う数値
+      const xw = position.x + position.w; //よく使う数値
+      const selectTrains = (trains, isInbound) => {
         const len = trains.length;
         for (let i = 0; i < len; i++) {
           const val = trains[i];
           // 画面外は描かないよ
           if (position.w < val.path[1] * this.xScale + xl || val.path[val.path.length - 2] * this.xScale + xl < 0) continue;
-          if (!(val.color in paths)) {
-            paths[val.color] = [val];
+          // 色ごとに分類するよ
+          const color = (this.selectedTrain != null && this.selectedTrain.direction === (isInbound ? 'inbound' : 'outbound') && this.selectedTrain.index === i) ? (val.color + 'ff') : val.color;
+          if (!(color in paths)) {
+            paths[color] = [val];
           } else {
-            paths[val.color].push(val);
+            paths[color].push(val);
           }
         }
       };
-      if (this.visibleInbound) selectTrains(this.drawingData.inbound);
-      if (this.visibleOutbound) selectTrains(this.drawingData.outbound);
-
-      //そんで線を引く
+      if (this.visibleInbound) selectTrains(this.drawingData.inbound, true);
+      if (this.visibleOutbound) selectTrains(this.drawingData.outbound, false);
+      let lineWidth = 1;
+      //線と文字を描く
       for (let color in paths) {
         this.context.beginPath();
+        if (this.selectedTrain !== null) {
+          const newLineWidth = this.devicePixelRatio * (color.length === 9 ? 3 : 1);
+          if(lineWidth !== newLineWidth){
+            lineWidth = newLineWidth;
+            this.context.lineWidth = newLineWidth;
+          }
+        }
         this.context.strokeStyle = color;
         this.context.fillStyle = color;
         for (const val of paths[color]) {
@@ -310,12 +351,13 @@ export default class CanvasDiagramView extends View {
         this.context.stroke();
       }
 
-      // 描画範囲を復元
+
+      // 描画領域を復元
       this.context.restore();
       this.context.lineWidth = 1;
       this.context.beginPath();
       // 描画 影
-      // グラデーションは遅延の元なので手書きする。あらかじめ書いて再利用するのがいいのかと思ったりする
+      // グラデーションは遅いから細線3本で影を表しまーす。あらかじめ書いて再利用するのがいいのかと思ったりするけど、そんな変わらなそう。
       this.context.strokeStyle = "#00000044";
       this.context.moveTo(0.5 + this.paddingLeft, 0.5 + 0);
       this.context.lineTo(0.5 + this.paddingLeft, 0.5 + this.canvas.height);
@@ -335,18 +377,12 @@ export default class CanvasDiagramView extends View {
       this.context.lineTo(0.5 + this.canvas.width, 0.5 + this.paddingTop + 2);
       this.context.stroke();
 
-
-
       // 次回、位置が動いたか確認できるように記録
       this.lastPosition = position;
       this.forceDraw = false;
+
+      this.window.style.cursor = this.selectedTrain !== null ? 'pointer' : 'default';
     }
-    requestAnimationFrame(this.draw.bind(this));
-  }
-  drawBreak() {
-    requestAnimationFrame(this.drawBreak2.bind(this));
-  }
-  drawBreak2() {
     requestAnimationFrame(this.draw.bind(this));
   }
 
@@ -373,7 +409,9 @@ export default class CanvasDiagramView extends View {
     return { totalDistance, outbound, inbound };
   }
 
-  //上り列車のパスを計算するときは下から座標を引いていくので、heightに高さの値を入れる。
+  // [connection, x, y, connection, x, y, connection, x, y, ....]という配列を返す。
+  // connectionは、true/falseで、前の点(x,y)と線を結ぶかどうか。例えば、経由なしの時はfalseになる
+  // 上り列車のパスを計算するときは下から座標を引いていくのでheightに高さの値を入れる。下り列車の時はheight == null
   getTrainDrawingData(timetable, height = null) {
     // 最後に出力する
     let result = [];
@@ -425,7 +463,7 @@ export default class CanvasDiagramView extends View {
           connection = true;
           distance = 0;
         }
-        // 経由なしに飛び込む時、そのy座標を控える
+        // 経由なしに飛び込む時、そのy座標を控える(始発駅を除く)
         if (lastX != -1 && timetable[i].stopType !== 3 && timetable[i + 1] && timetable[i + 1].stopType == 3) {
           pendingPoints.push([y, distance]);
         }
@@ -435,11 +473,18 @@ export default class CanvasDiagramView extends View {
     });
     return result;
   }
+
   // 駅間距離(描画用)
   getStationDistanceArray() {
     return this.getMinimumRunTime();
   }
-  // 駅間の最小所要時間(ただし1以上)
+
+  /**
+   * 駅間の最小所要時間の配列を返す
+   * ただし最小値は1, 隣り合う2駅を通る列車がない場合はNumber.MAX_SAFE_INTEGER
+   * 当たり前だけど、配列の長さは (駅の数 - 1)
+   * @returns {number[]} 駅間最小所要時間(分)
+   */
   getMinimumRunTime() {
     const len = this.stations.length;
     // 結果は初期値-1で埋めておく
@@ -471,6 +516,15 @@ export default class CanvasDiagramView extends View {
     f(this.outboundTrains, false);
     return result;
   }
+  /**
+   * 拡大縮小のアニメーションを計算
+   * @param {number} xOrig 元のx方向拡大率
+   * @param {number} yOrig 元のy方向拡大率
+   * @param {number} xNew 変化後のx方向拡大率
+   * @param {number} yNew 変化後のy方向拡大率
+   * @param {number} frames アニメーション所要フレーム数
+   * @return {number[]} [拡大率x, 拡大率y, スクロール位置x, スクロール位置y]
+   */
   getEaseAnimScales(xOrig, yOrig, xNew, yNew, frames) {
     const result = [];
     for (let i = 0; i < frames; i++) {
@@ -486,6 +540,44 @@ export default class CanvasDiagramView extends View {
         Math.max(0, (this.lastPosition.y + this.lastPosition.h / 2) * sy / yOrig - this.lastPosition.h / 2)
       ]);
     }
+    return result;
+  }
+
+  /* クリックやタップにより列車を選択 */
+  // x, yはクリック座標
+  getTrainByCoordinate({x, y}) {
+    const x0 = this.lastPosition.x + x * this.devicePixelRatio - this.paddingLeft;
+    const y0 = this.lastPosition.y + y * this.devicePixelRatio - this.paddingTop;
+    const dMax = 81 * this.devicePixelRatio;
+    let minDistance = dMax;
+    let result = [];
+    const func = (trains, direction) => {
+      const trainLength = trains.length;
+      for (let i = 0; i < trainLength; i++) {
+        const path = trains[i].path;
+        const pathLength = path.length / 3;
+        let distance = dMax;
+        for (let j = 0; j < pathLength - 1; j++) {
+          // path[j*3]   -> 前から線を繋げるならtrue, 線が飛ぶならfalse
+          // path[j*3+1] -> x座標
+          // path[j*3+2] -> y座標
+          if (path[j * 3 + 3] === false) continue;
+          const x1 = path[j * 3 + 1] * this.xScale;
+          const x2 = path[j * 3 + 4] * this.xScale;
+          const y1 = path[j * 3 + 2] * this.yScale;
+          const y2 = path[j * 3 + 5] * this.yScale;
+          if (x1 === x2 && y1 === y2) continue;
+          distance = Math.min(distance, getDistance2({ x: x0, x1, x2, y: y0, y1, y2 }));//距離の2乗だけど、比較できるからそれでいい
+        }
+        if (distance < minDistance) {
+          minDistance = distance;
+          result = {direction, index: i, diaIndex: this.idx};
+        }
+      }
+    };
+    if (this.visibleInbound) func(this.drawingData.inbound, 'inbound');//上りはindexに0.5を足した値を保管する。そうすれば数字ひとつで上下の区別も表せる。うん、汚い。
+    if (this.visibleOutbound) func(this.drawingData.outbound, 'outbound');
+    if (minDistance >= dMax) return null;
     return result;
   }
 }

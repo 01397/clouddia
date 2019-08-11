@@ -1,7 +1,6 @@
 "use strict";
 
 import TrainTimetableView from "./TrainTimetableView.js";
-import DiagramView from "./DiagramView.js";
 import Sidebar from "./Sidebar.js";
 import ComingSoonView from "./ComingSoonView.js";
 import OudiaParser from "./OudiaParser.js";
@@ -10,6 +9,7 @@ import StationTimetableView from "./StationTimetableView.js";
 import { h } from "./Util.js";
 import Header from "./Header.js";
 import CanvasDiagramView from "./CanvasDiagramView.js";
+import InfoPanel from "./InfoPanel.js";
 
 // App.js (module)
 // なんか、ここでメインの処理をすることになったよ〜
@@ -30,13 +30,19 @@ export default class App {
             h('div', {id: 'header'}),
             h('div', {id: 'sidebar'}),
             h('div', {id: 'mainWindow'}),
+            h('div', {id: 'infoPanel'}),
             dialogBackground
         );
         // サイドバーちゃん\(=∂_∂=)/
         this.sidebar = new Sidebar(this);
         // ヘッダーちゃん (~^v^~)//
         this.header = new Header(this);
+        // パネルちゃん
+        this.infoPanel = new InfoPanel(this);
         this._mainView = null;
+    }
+    set isActiveInfoPanel(val) {
+        this.wrapper.classList[val ? 'add' : 'remove']('activeInfoPanel');
     }
     set data(json) {
         this._data = json;

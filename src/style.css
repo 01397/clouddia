@@ -4,7 +4,9 @@
 }
 
 * {
-    cursor: default;
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
 }
 
 html, body {
@@ -20,9 +22,11 @@ html, body {
 #app {
     width: 100%;
     height: 100%;
-    background-color: var(--app-bg-color);
     display: flex;
     box-sizing: border-box;
+}
+.activeInfoPanel {
+    padding-right: 224px;
 }
 
 #dialogBackground {
@@ -142,26 +146,102 @@ html, body {
     position: relative;
     overflow: scroll;
     -webkit-overflow-scrolling: touch;
+    background-color: var(--app-bg-color);
 }
 
-#mainWindow.startPage>h1 {
+#mainWindow.no-bg {
+    background-color: transparent;
+}
+
+.activeInfoPanel #infoPanel{
+    display: block;
+}
+
+#infoPanel{
+    display: none;
+    padding: 8px 8px 8px 7px;
+    width: 208px;
+    background-color: #f2e5ff;
+    border-left: 1px solid #a852ff;
+    color: #222222;
+    overflow-y: scroll;
+    box-shadow: 6px 0 5px 5px #000000aa;
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    top: 0;
+}
+
+.info-train-type {
+    color: white;
+    font-weight: bold;
+    border-radius: 4px;
+    padding: 0 0.25em;
+    margin-right: 0.25em;
+    font-size: 15px;
+}
+.info-train-terminal {
+    font-size: 15px;
+    font-weight: bold;
+}
+.info-train-terminal::after{
+    content: '行';
+    font-weight: normal;
+    font-size: 0.9em;
+}
+.info-train-timetable-item{
+    display:flex;
+    font-size: 12px;
+    margin-bottom: 2px;
+}
+.info-train-timetable-title {
+    flex: 1;
+    overflow-x: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    padding-right: 0.5em;
+    text-align: right;
+    height: 20px;
+    line-height: 20px;
+}
+.info-train-timetable-time {
+    width: 2.5em;
+    background-color: #ffffff;
+    margin: 0 0.1em;
+    border: 1px solid #bfbfbf;
+    padding: 0 0.2em;
+}
+.info-train-timetable-time.disabled{
+    background-color: #fafafa;
+    color: #444444;
+    border-color: #ddd;
+}
+
+
+.startPage {
+    max-width: 666px;
+    margin: auto;
+    padding: 8px
+}
+
+.startPage>h1 {
     color: #222222;
     font-size: 20px;
     margin: 16px 0;
 }
 
-#mainWindow.startPage>h2 {
+.startPage>h2 {
     color: #666666;
     font-size: 16px;
     margin: 24px 0 0;
 }
 
-#mainWindow.startPage>p {
-    margin: 0;
+.startPage>p, .start-release {
+    margin: 0 0 0 0.5em;
     color: #222222;
 }
 
-#mainWindow.startPage>p>a {
+.startPage>p>a {
     color: #a852ff;
     text-decoration: none;
     background: linear-gradient(to bottom, transparent 40%, #a852ffaa 60%);
@@ -170,13 +250,9 @@ html, body {
     background-size: 100% 200%;
 }
 
-#mainWindow.startPage>p>a:hover {
+.startPage>p>a:hover {
     color: #ffffff;
     background-position: 0 100%;
-}
-
-#mainWindow.startPage {
-    padding: 8px
 }
 
 h3 {
@@ -228,6 +304,45 @@ h3 {
     font-size: 24px;
     font-weight: bold;
     color: #fff;
+}
+
+.start-release>div {
+    display: flex;
+    margin-bottom: 8px;
+}
+
+.start-date {
+    width: 5em;
+}
+
+.start-date+div {
+    font-size: 12px;
+    color: #444;
+}
+
+.start-relaeseLabel {
+    display: inline-block;
+    text-align: center;
+    width: 4em;
+    margin: 0px .2em 1px .5em;
+    border-radius: 4px;
+    color: #fff;
+    border: 1px solid #888;
+}
+
+.start-new {
+    border-color: #a852ff;
+    color: #a852ff;
+}
+
+.start-update {
+    border-color: #52a8ff;
+    color: #52a8ff;
+}
+
+.start-fixed {
+    border-color: #a8a8a8;
+    color: #a8a8a8;
 }
 
 input#fileURL {
@@ -318,9 +433,15 @@ code {
     pointer-events: none;
 }
 
-.diagram-tools-button-rightMargin{
+#diagram-canvasWrapper {
+    position: relative;
+    z-index: -1;
+}
+
+.diagram-tools-button-rightMargin {
     margin-right: 2px;
 }
+
 .diagram-tools-input {
     display: none;
 }
@@ -358,12 +479,15 @@ code {
     bottom: 8px;
     z-index: 4;
 }
+.activeInfoPanel #diagram-tools{
+    right: 232px;
+
+}
 
 .diagram-tools-container {
     position: absolute;
     border-radius: 4px;
     background-color: #ccc;
-    box-shadow: 0 0 2px #000000aa;
     box-shadow: 2px 2px 6px -1px #000000aa;
     border: 1px solid #bfbfbf;
     display: flex;
@@ -384,7 +508,7 @@ code {
 }
 
 .diagram-tools-button:hover {
-    background-color: #ddd;
+    background-color: #dddddd;
 }
 
 .diagram-tools-button:hover>.diagram-tools-svgicon {
@@ -461,6 +585,7 @@ code {
     width: 20px;
     margin: 4px 2px;
     text-align: center;
+    cursor: pointer;
 }
 
 .st-minutes {
@@ -583,9 +708,23 @@ code {
 @media screen and (max-width: 600px) {
     #app {
         padding-top: 40px;
+        flex-direction: column;
     }
     #header {
         display: flex;
+    }
+    .activeInfoPanel {
+        padding-right: 0;
+        padding-bottom: 30vh;
+    }
+    #infoPanel{
+        width: unset;
+        height: 30vh;
+        box-shadow: 0 6px 5px 5px #000000aa;
+        border-left: none;
+        border-top: 1px solid #a852ff;
+        top: unset;
+        left: 0;
     }
     #app.sidebar-on>#dialogBackground {
         display: block;

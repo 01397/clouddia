@@ -22,7 +22,9 @@ export default class TrainTimetableView extends View{
   constructor(app, idx, key) {
     super(app);
     this.sheet = [['', '', '']];
-
+    // 何番目のダイヤか
+    this.idx = idx;
+    this.direction = key === 'Nobori' ? 'inbound' : 'outbound';
     // 縦列の文字色
     this.colStyle = [null];
     this.rowStyle = [0, 0, 0];
@@ -33,7 +35,7 @@ export default class TrainTimetableView extends View{
     const {trains, rowCount, format} = this.loadStationAppearance({idx, key});
 
     // 列車を一つずつ見ていこー。
-    this.fillSheet({trains, rowCount, format})
+    this.fillSheet({trains, rowCount, format});
   }
 
   // 時刻表を埋める前に、駅の着発表示を調べる。
@@ -318,7 +320,8 @@ export default class TrainTimetableView extends View{
           w: this.cellWidth,
           h: this.cellHeight,
           border: this.rowStyle[j],
-          bg: j % 2 == 0
+          bg: j % 2 == 0,
+          onclick: () => this.app.infoPanel.showTrain({diaIndex: this.idx, direction: this.direction, index: i - 1})
         });
       }
     }
@@ -370,7 +373,7 @@ export default class TrainTimetableView extends View{
     // 表示領域(セル番地)を更新
     this.lastBox = { x: i0, y: j0, w: iM - i0, h: jM - j0 };
   }
-  addCell({ fragment, iterator, content, elementSet, key, color, x, y, w, h, border, bg = false, padding = null }) {
+  addCell({ fragment, iterator, content, elementSet, key, color, x, y, w, h, border, bg = false, padding = null, onclick = null }) {
     // 画面外のdivちゃんがいれば再利用、そうじゃなきゃdivちゃんを出産。
     const iResult = iterator.next();
     let div;
@@ -389,6 +392,7 @@ export default class TrainTimetableView extends View{
     div.style.color = color;
     div.style.borderBottomColor = border;
     div.style.backgroundColor = bg ? '#a552ff0a' : 'transparent';
+    div.addEventListener('click', onclick, false);
     if (padding != null) div.style.padding = padding + 'px 0';
     elementSet.set(key, div);
     if (iResult.done) {
