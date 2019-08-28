@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="64" viewBox="0 0 320 64">
+    <g transform="scale(.25)">
+        <path stroke="#dddddd" stroke-width="16" stroke-linecap="round" fill="none" d="m64 208 l28 -70 l64 0 l25 -62.5" />
+        <path stroke="#a852ff" stroke-width="16" stroke-linecap="round" fill="none" d="m128 208 l64 0 a48 48 0 0 0 0 -96 a64 64 0 0 0 -11.5 -36.5" />
+        <path stroke="#52a8ff" stroke-width="16" stroke-linecap="round" fill="none" d="m139 48.9 a64 64 0 0 0 -75 63.1 a48 48 0 0 0 0 96 l36 0 l60 -150" />
+        <circle stroke="#aaa" stroke-width="12" stroke-linecap="round" fill="#ffffff" cx="128" cy="138" r="16"/>
+    </g>
+    <g stroke-width="8" stroke="#999" stroke-linecap="round" stroke-linejoin="round" transform="translate(64 -174)">
+        <path d="M35 195a15 15 0 1 0 0 20" fill="none"/>
+        <path d="M50 191v28" fill="none"/>
+        <path d="M75 220 a10 10 0 0 0 0 -20a10 10 0 0 0 0 20" fill="none" stroke-linecap="butt"/>
+        <path d="M97.5 200 v10 a10 10 0 0 0 20 0v-10" fill="none"/>
+        <path d="M150 190 v30 m0 -10 a10 10 0 0 0 -20 0a10 10 0 0 0 20 0" fill="none"/>
+    </g>
+     <g stroke-width="8" stroke="#a852ff" stroke-linecap="round" stroke-linejoin="round" transform="translate(64 -174)">
+        <path d="M170 190 v30 h10 a15 15 0 0 0 0 -30 z" fill="none"/>
+        <path d="M210 203 v17" fill="none"/>
+        <path d="M245 210 a10 10 0 0 0 -20 0a10 10 0 0 0 20 0m0 -10v20" fill="none"/>
+    </g>
+    <circle cx="210" cy="190" r="5" fill="#a852ff" transform="translate(64 -174)"/>
+</svg>

@@ -1,0 +1,1246 @@
+@charset "UTF-8";
+/*----------------------------------------
+  start: Start
+  tt: TrainTimetable
+  dg: Diagram
+  st: StationTimetable
+  fs: FileSetting
+  sub: SubView
+  form: fields
+----------------------------------------*/
+
+/*----------------------------------------
+
+    app layout
+
+----------------------------------------*/
+
+:root {
+    --bg-color-dark: #1f1a24;
+    --bg-color-light: #f0f0f0;
+    --theme-purple: #a852ff;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 12px;
+    overflow: hidden;
+    font-weight: 300;
+}
+
+#app {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+#header {
+    display: flex;
+    background-color: var(--bg-color-dark);
+    color: #ffffff;
+}
+
+#header-container {
+    flex-grow: 1;
+    min-width: 0;
+}
+
+#header-logo {
+    width: 64px;
+    min-width: 64px;
+    background-image: url(./img/logo_dark.svg);
+    background-size: 90%;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+#bottom-container {
+    display: flex;
+    flex-grow: 1;
+    min-height: 0;
+}
+
+#mainContainer {
+    flex: 1;
+    /*background-color: var(--bg-color-light);*/
+    position: relative;
+    overflow: scroll;
+    -webkit-overflow-scrolling: touch;
+}
+
+#subContainer {
+    background-color: #fff;
+    width: 300px;
+    position: fixed;
+    top: 64px;
+    right: -300px;
+    bottom: 0;
+}
+
+/*----------------------------------------
+
+    toolbar
+
+----------------------------------------*/
+
+#toolbar {
+    height: 40px;
+}
+
+/*----------------------------------------
+
+    tabbar
+
+----------------------------------------*/
+
+#tabbar {
+    height: 24px;
+    overflow-x: hidden;
+    white-space: nowrap;
+}
+
+.tabbar-tab {
+    height: 24px;
+    font-size: 12px;
+    line-height: 24px;
+    margin: 0 4px;
+    display: inline-block;
+    color: #808080;
+    background-color: #cccccc;
+    padding: 0 4px;
+    border-radius: 6px 6px 0 0;
+    max-width: 30%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    cursor: pointer;
+}
+
+.tabbar-tab.active {
+    background-color: #fff;
+}
+
+.tabbar-setting-tab {
+    width: 6em;
+    text-align: center;
+}
+
+/*----------------------------------------
+
+    sidebar
+
+----------------------------------------*/
+
+#sidebar {
+    width: 64px;
+    background-color: var(--bg-color-dark);
+    color: #ffffff;
+    display: flex;
+    flex-direction: column;
+}
+
+#sidebar>div {
+    position: relative;
+    margin: 4px 8px;
+}
+
+#sidebar>div.active svg {
+    stroke: #52a8ff;
+}
+
+#sidebar svg {
+    width: 48px;
+    height: 48px;
+    stroke: rgba(255, 255, 255, 0.7);
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    fill: none;
+    cursor: pointer;
+    transition: 0.15s ease stroke;
+}
+
+#sidebar svg:hover {
+    stroke: rgba(255, 255, 255, 1);
+}
+
+.sidebar-label {
+    opacity: 1;
+    background-color: var(--bg-color-dark);
+    border-radius: 4px;
+    color: #fff;
+    font-size: 12px;
+    position: absolute;
+    top: 16px;
+    left: 64px;
+    line-height: 16px;
+    z-index: 100;
+    font-weight: 500;
+    padding: 2px 4px;
+    width: 7em;
+    width: max-content;
+    transition: transform .5s ease, opacity .5s ease, box-shadow .15s ease;
+    transform: rotate(-20deg) scale(0);
+    transform-origin: -36px;
+    opacity: 0;
+    pointer-events: none;
+    border: 3px solid rgba(82, 168, 255, 0);
+    box-shadow: 0 0 0 0 var(--theme-purple);
+}
+
+#sidebar:hover .sidebar-label {
+    transform: rotate(0deg) scale(1);
+    opacity: 1;
+}
+
+#sidebar>div:hover .sidebar-label {
+    box-shadow: 0 0 4px 2px var(--theme-purple);
+}
+
+/*----------------------------------------
+
+    start: Start
+
+----------------------------------------*/
+
+.start-container {
+    max-width: 600px;
+    margin: 8px auto;
+}
+
+.start-logo {
+    height: 48px;
+    display: block;
+    margin: 0 auto;
+}
+
+.start-drop {
+    border: 2px solid var(--theme-purple);
+    border-radius: 8px;
+    padding: 16px 8px;
+    position: relative;
+    text-align: center;
+}
+
+.start-drop.drag:after {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background: #a852ff;
+    content: 'ここにファイルをドロップ！';
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 24px;
+    font-weight: bold;
+    color: #fff;
+}
+
+.start-drop-heading {
+    font-size: 16px;
+    margin: 4px 0;
+}
+
+.start-file {
+    display: none;
+}
+
+.start-file-button {
+    margin: 0 auto;
+    width: 60%;
+    min-width: 10em;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-sizing: border-box;
+}
+
+.start-drop-caption {
+    font-size: 10px;
+    color: #888;
+    margin-top: 4px;
+}
+
+.start-drop-or {
+    margin: 16px 0;
+    color: #444;
+}
+
+.start-drop-url-field {
+    flex: 1;
+    margin-right: 8px;
+}
+
+.start-drop-url-button {
+    appearance: none;
+    -webkit-appearance: none;
+    border-radius: 0 4px 4px 0;
+    background-color: #a852ff;
+    border: none;
+    color: white;
+    font-weight: bold;
+    font-size: 16px;
+    width: 50px;
+    background-image: linear-gradient(to bottom, #00000000, #00000044);
+    padding: 0;
+}
+
+.start-drop-url-wrapper {
+    display: flex;
+    width: 60%;
+    margin: 0 auto;
+    min-width: 10em;
+    height: 32px;
+}
+
+.start-readme-heading {
+    font-size: 18px;
+    color: #666666;
+    margin: 16px 0 4px;
+}
+
+.start-readme-paragraph {
+    color: #222222;
+    margin: 0;
+}
+
+/*----------------------------------------
+
+    tt: TrainTimetable
+
+----------------------------------------*/
+
+.tt-cell {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    line-height: 1;
+    text-align: center;
+    box-sizing: border-box;
+}
+
+.tt-cell-bg {
+    background-color: #f0f0f0;
+}
+
+#tt-station {
+    position: -webkit-sticky;
+    position: sticky;
+    left: 0;
+    background-color: var(--bg-color-light);
+    box-shadow: -10px 0 2px 10px #00000088;
+    z-index: 1;
+    color: #444444;
+}
+
+#tt-station>.tt-cell {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+#tt-header {
+    position: -webkit-sticky;
+    position: sticky;
+    top: 0;
+    background-color: var(--bg-color-light);
+    box-shadow: 0 -10px 2px 10px #00000088;
+    z-index: 2;
+}
+
+.tt-head-row {
+    position: absolute;
+}
+
+#tt-body {
+    display: flex;
+    position: absolute;
+    left: 80px;
+    background-color: #ffffff;
+    transform: translateZ(0);
+}
+
+.tt-row {
+    text-align: center;
+    position: absolute;
+    left: 0;
+    transform: translateX(0);
+    background-color: #ffffff;
+}
+
+#tt-body>.tt-row>.tt-cell {
+    background-image: linear-gradient(to right, transparent calc(100% - 1px), #fff calc(100% - 1px));
+    font-weight: 500;
+    letter-spacing: 0.75px;
+    will-change: color, border-bottom;
+}
+
+#tt-focus {
+    position: absolute;
+    /*TrainTimetableView.ts の focus() でborder-widthを考慮している*/
+    border: 2px solid rgba(168, 82, 255, 0.75);
+    border-radius: 3px;
+    z-index: 2;
+    pointer-events: none;
+}
+
+/*----------------------------------------
+
+    dg: Diagram
+
+----------------------------------------*/
+
+#dg-wrapper {
+    width: 100%;
+    height: 100%;
+    overflow: scroll;
+    -webkit-overflow-scrolling: touch;
+    position: relative;
+}
+
+#dg-canvasWrapper {
+    position: relative;
+    z-index: -1;
+}
+
+#dg-canvas {
+    transform-origin: left top;
+    position: fixed;
+    pointer-events: none;
+}
+
+.dg-tools-button-rightMargin {
+    margin-right: 2px;
+}
+
+.dg-tools-input {
+    display: none;
+}
+
+.dg-tools-input:checked+.dg-tools-svgicon {
+    background: var(--theme-purple);
+    opacity: 1;
+}
+
+.dg-label {
+    position: absolute;
+    font-size: 12px;
+    line-height: 1;
+    color: #444;
+}
+
+#dg-time>.dg-label {
+    width: 40px;
+    text-align: center;
+}
+
+#dg-station>.dg-label {
+    width: 80px;
+    left: 0;
+    text-align: right;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    border-bottom: 1px solid #ddd;
+}
+
+#dg-tools {
+    position: absolute;
+    right: 8px;
+    bottom: 8px;
+    z-index: 3;
+}
+
+.dg-tools-container {
+    position: absolute;
+    border-radius: 4px;
+    background-color: #ccc;
+    box-shadow: 2px 2px 6px -1px #000000aa;
+    border: 1px solid #bfbfbf;
+    display: flex;
+    overflow: hidden;
+}
+
+.dg-tools-button {
+    width: 32px;
+    height: 32px;
+    background-color: #fff;
+    transition: background-color 0.1s ease;
+}
+
+.dg-tools-svgicon {
+    width: 100%;
+    height: 100%;
+    opacity: 0.65;
+}
+
+.dg-tools-button:hover {
+    background-color: #dddddd;
+}
+
+.dg-tools-button:hover>.dg-tools-svgicon {
+    opacity: 1;
+}
+
+#dg-tools-container1 {
+    bottom: 40px;
+    right: 0;
+    width: 32px;
+    flex-wrap: wrap;
+}
+
+#dg-tools-container2 {
+    bottom: 40px;
+    right: 40px;
+}
+
+#dg-tools-container3 {
+    bottom: 0;
+    right: 0;
+}
+
+/*----------------------------------------
+
+    st: StationTimetable
+
+----------------------------------------*/
+
+.st-header {
+    margin: 8px 0;
+    color: #222;
+}
+
+.st-header-title {
+    font-size: 20px;
+    font-weight: 500;
+}
+
+.st-header-direction {
+    float: right;
+    line-height: 24px;
+    background: #e0e0e0;
+    border-radius: 4px;
+    padding: 0 4px;
+}
+
+.st-header-diagram {
+    color: #666;
+    font-size: 12px;
+}
+
+.st-sheet {
+    max-width: 700px;
+    flex: 1;
+    margin: 16px auto;
+}
+
+.st-row {
+    display: flex;
+    min-height: 28px;
+}
+
+.st-hour {
+    width: 32px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: 500;
+    color: #444;
+    font-size: 16px;
+}
+
+.st-row:nth-child(2n-1) {
+    background: #e0e0e0;
+}
+
+.st-train {
+    width: 20px;
+    margin: 4px 2px;
+    text-align: center;
+    cursor: pointer;
+}
+
+.st-minutes {
+    display: flex;
+    flex-wrap: wrap;
+    flex: 1;
+}
+
+.st-train-terminal {
+    font-size: 10px;
+    color: #444;
+    height: 12px;
+}
+
+.st-train-minute {
+    font-size: 15px;
+    width: 20px;
+    height: 20px;
+    line-height: 20px;
+}
+
+.st-footer {
+    font-size: 12px;
+    line-height: 1.2;
+    color: #333;
+    border-top: 1px solid #ccc;
+    padding-top: 8px;
+    margin: 4px 0;
+}
+
+#directionSelector {
+    display: none;
+}
+
+#stationSelector {
+    font-size: 14px;
+    padding: 4px 30px 4px 4px;
+    line-height: 1.5;
+    background: linear-gradient(45deg, transparent 50%, #fff 50%), linear-gradient(315deg, transparent 50%, #fff 50%), linear-gradient(to bottom, #00000000, #00000022), linear-gradient(to right, #e0e0e0 calc(100% - 26px), #d4a4ff calc(100% - 26px));
+    background-position: calc(100% - 13px) 50%, calc(100% - 8px) 50%, left top, left top;
+    background-size: 5px 5px, 5px 5px, cover, cover;
+    background-repeat: no-repeat;
+    border: 1px solid #aaa;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    -ms-progress-appearance: none;
+    appearance: none;
+    font-weight: 500;
+    position: relative;
+}
+
+#st-tools-wrapper {
+    position: sticky;
+    top: 0;
+    box-shadow: 0 -10px 2px 10px #00000088;
+    background-color: var(--bg-color-light);
+}
+
+#st-tools {
+    width: max-content;
+    margin: auto;
+    display: flex;
+    padding: 8px;
+}
+
+.st-tools-title {
+    color: #888;
+    font-weight: 500;
+    font-size: 12px;
+}
+
+.st-tools-direction {
+    border: 1px solid #aaa;
+    border-radius: 4px;
+    overflow: hidden;
+    display: flex;
+}
+
+.st-tools-direction-child {
+    padding: 4px;
+    text-align: center;
+    font-weight: 500;
+    flex: 1;
+    background-image: linear-gradient(to bottom, #00000000, #00000022);
+}
+
+#directionSelector:checked+.st-tools-direction>.st-tools-direction-child:last-child, .st-tools-direction>.st-tools-direction-child:first-child {
+    color: #00000066;
+    background-color: #dbb3ff;
+    ;
+}
+
+#directionSelector:checked+.st-tools-direction>.st-tools-direction-child:first-child, .st-tools-direction>.st-tools-direction-child:last-child {
+    color: white;
+    background-color: var(--theme-purple);
+}
+
+.st-tools-direction-checkbox:disabled {
+    display: none;
+}
+
+.st-tools-direction-item {
+    display: block;
+    color: #444;
+    font-size: 12px;
+    line-height: 1;
+}
+
+.st-tools-container {
+    margin: 0 4px;
+}
+
+#st-tools-direction-detail {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    flex-shrink: 2;
+}
+
+/*----------------------------------------
+
+    fs: FileSetting
+
+----------------------------------------*/
+
+.fs-1col-container {
+    max-width: 600px;
+    margin: auto;
+    padding: 16px 0;
+}
+
+.fs-2cols-container {
+    display: flex;
+    height: 100%;
+}
+
+.fs-left-container {
+    width: 300px;
+    border-right: 1px solid #888888;
+    height: 100%;
+    overflow-y: scroll;
+}
+
+.fs-right-container {
+    padding: 16px;
+    flex: 1;
+    overflow: scroll;
+    height: 100%;
+    box-sizing: border-box;
+}
+
+.fs-section {
+    margin-bottom: 16px;
+}
+
+.fs-section-header {
+    font-size: 20px;
+    color: #888888;
+    margin-bottom: 8px;
+}
+
+.fs-section .form-label {
+    text-align: right;
+    margin-right: 8px;
+}
+
+.fs-section.fs-label6 .form-label {
+    min-width: 6em;
+}
+
+.fs-section.fs-label5 .form-label {
+    min-width: 5em;
+}
+
+.fs-flex {
+    flex: 1;
+}
+
+.fs-text {
+    font-size: 16px;
+    color: #888888;
+}
+
+.fs-label {
+    display: flex;
+}
+
+.fs-width-5em {
+    width: 5em;
+}
+
+.fs-width-3em {
+    width: 3em;
+}
+
+.fs-railmap-station {
+    font-size: 16px;
+    fill: #666666;
+}
+
+.fs-railmap-main .fs-railmap-station {
+    font-weight: 500;
+}
+
+.fs-railmap-main .fs-railmap-station-small {
+    font-weight: 300;
+    font-size: 12px;
+}
+
+.fs-railmap-circle {
+    fill: #ffffff;
+    stroke: #666666;
+    stroke-width: 2;
+}
+
+.fs-railmap-main .fs-railmap-circle {
+    fill: #666666;
+}
+
+.fs-railmap-tracks {
+    font-weight: 500;
+    fill: #666666;
+    text-anchor: middle;
+}
+
+.fs-railmap-main .fs-railmap-tracks {
+    fill: #ffffff;
+}
+
+.fs-railmap-line {
+    stroke: #666666;
+    fill: none;
+    stroke-width: 2;
+}
+
+.fs-station-railmap {
+    cursor: pointer;
+}
+
+.fs-station-railmap g.hover>.fs-railmap-station {
+    fill: var(--theme-purple);
+}
+
+.fs-station-railmap g.hover>circle {
+    stroke: var(--theme-purple);
+}
+
+.fs-station-railmap g.fs-railmap-main.hover>circle {
+    fill: var(--theme-purple);
+}
+
+.fs-station-railmap g.hover>.fs-railmap-tracks {
+    fill: var(--theme-purple);
+}
+
+.fs-station-railmap g.fs-railmap-main.hover>.fs-railmap-tracks {
+    fill: #ffffff;
+}
+
+.fs-station-railmap g.fs-railmap-insert {
+    transform: translateY(0px);
+    display: none;
+    stroke: var(--theme-purple);
+    fill: white;
+}
+
+.fs-track-grid {
+    display: grid;
+    grid-template-rows: 16px repeat(auto-fill, 32px);
+    grid-template-columns: 100px 50px 50px 36px 36px 50px;
+    grid-column-gap: 8px;
+    grid-row-gap: 8px;
+}
+
+.fs-track-grid>.form-label {
+    text-align: center;
+    line-height: 1;
+}
+
+.fs-track-grid>* {
+    /*やってしまった... !important を書いてしまった...*/
+    margin: 0 !important;
+    align-self: center;
+    justify-self: center;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+.fs-typelist {
+    cursor: pointer;
+}
+
+.fs-typelist-item {
+    font-size: 16px;
+    fill: none;
+    opacity: .75;
+}
+
+.fs-typelist-item.hover {
+    opacity: 1;
+}
+
+.fs-typelist-item>.fs-typelist-name {
+    transition: transform ease 0.15s;
+}
+
+.fs-typelist-item.hover>.fs-typelist-name {
+    transform: translate(4px, 0px);
+}
+
+/*---------------------------------------
+
+    ts: TrainSubView
+
+----------------------------------------*/
+.ts-name{
+    flex: 3;
+    min-width: 0;
+}
+.ts-count{
+    flex: 1;
+    min-width: 0;
+}
+.ts-count-text{
+    color: #808080;
+    font-weight: 500;
+}
+/*---------------------------------------
+
+    sub: SubView
+
+----------------------------------------*/
+
+#subView {
+    display: none;
+    width: 300px;
+    border-left: 1px solid #888888;
+}
+
+.sub-tab-container {
+    display: flex;
+    height: 32px;
+    border-bottom: 1px solid #707070;
+}
+
+.sub-tab-item {
+    flex: 1;
+    color: #808080;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: 500;
+    font-size: 16px;
+    padding-top: 3px;
+    border-bottom: 3px solid transparent;
+    transition: border ease 0.2s;
+    cursor: pointer;
+}
+
+.sub-tab-item:last-child {
+    border-right: none;
+}
+
+.sub-tab-item.selected {
+    color: #404040;
+    border-bottom-color: var(--theme-purple);
+}
+
+.sub-content {
+    padding: 8px;
+}
+
+.sub-header {
+    font-size: 16px;
+}
+
+.sub-list-container {
+    padding-left: 4px;
+}
+
+.sub-stationTime-center {
+    width: 8px;
+    height: 32px;
+    border: 2px solid #808080;
+    border-left: none;
+    border-radius: 0 4px 4px 0;
+    margin-right: 4px;
+}
+
+.sub-stationTime-container .form-time {
+    width: 5em;
+}
+
+/*----------------------------------------
+
+    form: フォーム部品
+
+----------------------------------------*/
+
+.form-row {
+    display: flex;
+    align-items: center;
+    margin-top: 8px;
+}
+
+.form-row.no-margin {
+    margin: 0;
+}
+
+.form-buttonset {
+    background-color: #f0f0f0;
+    border-radius: 4px;
+    height: 32px;
+    display: flex;
+    overflow: hidden;
+}
+
+.form-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: #808080;
+    width: 5em;
+}
+
+.form-line, .form-color, .form-radio, .form-checkbox, .form-selector, .form-time, .form-text, .form-text-multiline {
+    height: 32px;
+    border: none;
+    -webkit-appearance: none;
+    appearance: none;
+    padding: 0 4px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #444444;
+    background-color: #f0f0f0;
+    border-radius: 4px;
+    font-family: inherit;
+    transition: background-color ease 0.2s, background-size ease 0.2s;
+}
+
+.form-line:hover, .form-radio:hover, .form-checkbox:hover, .form-selector:hover, .form-time:hover, .form-text:hover, .form-text-multiline:hover {
+    background-color: #dddddd;
+}
+
+.form-button.form-button-fill, .form-color {
+    transition: filter ease 0.2s;
+    filter: brightness(100%);
+}
+
+.form-button.form-button-fill:hover, .form-color:hover {
+    filter: brightness(92%);
+}
+
+.form-color {
+    width: 52px;
+}
+
+.form-color>input {
+    display: none;
+}
+
+.form-selector::placeholder, .form-time::placeholder, .form-text::placeholder, .form-text-multiline::placeholder {
+    font-weight: 300;
+}
+
+.form-time, .form-text, .form-text-multiline {
+    background-image: linear-gradient(to top, var(--theme-purple) 3px, transparent 3px);
+    background-size: 0 100%;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+.form-time:focus, .form-text:focus, .form-text-multiline:focus {
+    outline: none;
+    background-color: #f0f0f0;
+    background-size: 100% 100%;
+}
+
+.form-time.invalid, .form-text.invalid {
+    color: #ff4444;
+    background-image: linear-gradient(to top, #ff4444 3px, transparent 3px);
+}
+
+.form-time.invalid:focus, .form-text.invalid:focus {
+    color: #444444;
+}
+
+.form-text-multiline {
+    min-height: 10em;
+    resize: none;
+}
+
+.form-color+.form-button, .form-text+.form-text {
+    margin-left: 8px;
+}
+
+.form-time {
+    text-align: right;
+}
+
+.form-checkbox {
+    width: 20px;
+    height: 20px;
+    margin: 4px 8px;
+    outline: none;
+    background-image: url(./img/check.svg);
+    background-size: 0 80%;
+    background-position: center;
+    transition: background-size ease .2s;
+    background-repeat: no-repeat;
+    position: relative;
+    transition: background-color ease 0.2s;
+    cursor: pointer;
+}
+
+.form-checkbox:checked {
+    background-color: var(--theme-purple);
+    background-size: 80% 80%;
+}
+
+.form-checkbox:checked:hover {
+    background-color: #8c19ff;
+}
+
+.form-color:focus, .form-line:focus, .form-checkbox:focus, .form-radio:focus {
+    outline: none;
+    box-shadow: 0 0 2px 4px rgba(168, 82, 255, 0.4);
+}
+
+.form-radio {
+    width: 24px;
+    height: 24px;
+    outline: none;
+    border-radius: 100%;
+    background-image: radial-gradient(var(--theme-purple) 50%, transparent 60%);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 0 0;
+    cursor: pointer;
+}
+
+.form-radio:checked {
+    background-size: 70% 70%;
+}
+
+.form-buttonset-radio {
+    display: none;
+}
+
+.form-buttonset-radio:checked+div.form-buttonset-item {
+    background-color: var(--theme-purple);
+    color: #fff;
+}
+
+.form-buttonset-item {
+    width: 40px;
+    text-align: center;
+    line-height: 16px;
+}
+
+.form-buttonset-mark {
+    font-weight: 500;
+}
+
+.form-buttonset-label {
+    color: #808080;
+}
+
+.form-buttonset-radio:checked+div.form-buttonset-item>.form-buttonset-label {
+    color: #fff;
+}
+
+.form-button {
+    height: 32px;
+    border: 1px solid rgba(168, 82, 255, 0.5);
+    -webkit-appearance: none;
+    appearance: none;
+    padding: 0 8px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--theme-purple);
+    background-color: transparent;
+    border-radius: 4px;
+    font-family: inherit;
+    transition: border-color ease 0.2s, background-color ease 0.2s;
+    cursor: pointer;
+}
+
+.form-button:hover {
+    border-color: rgba(168, 82, 255, 1);
+    background-color: rgba(168, 82, 255, 0.1)
+}
+
+.form-button.form-button-red {
+    border-color: rgba(255, 81, 124, 0.5);
+    color: rgba(255, 102, 140, 1)
+}
+
+.form-button.form-button-red:hover {
+    border-color: rgba(255, 81, 124, 1);
+    background-color: rgba(255, 81, 124, 0.1);
+    color: rgba(255, 81, 124, 1);
+}
+
+.form-button.form-button-blue {
+    border-color: rgba(82, 168, 255, 0.5);
+    color: rgba(82, 168, 255, 1);
+}
+
+.form-button.form-button-blue:hover {
+    border-color: rgba(82, 168, 255, 1);
+    background-color: rgba(82, 168, 255, 0.1);
+}
+
+.form-button.form-button-fill {
+    border: none;
+    background-color: #a852ff;
+    color: #ffffff;
+    box-shadow: 2px 2px 4px -1px rgba(0, 0, 0, .3);
+}
+
+.form-line {
+    position: relative;
+    width: 120px;
+}
+
+.form-line line {
+    stroke: #222;
+    stroke-width: 2;
+}
+
+.form-line svg {
+    width: 100%;
+    height: 32px;
+}
+
+.form-line:focus .form-line-selector {
+    display: flex;
+    animation: appear .2s ease;
+    transform-origin: left top;
+}
+
+@keyframes appear {
+    0% {
+        opacity: 0;
+        transform: scale(0.6);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.form-line-selector {
+    display: none;
+    position: absolute;
+    top: 0;
+    z-index: 2;
+    box-shadow: 0 0 3px 1px rgba(0, 0, 0, 0.7);
+    flex-direction: column;
+}
+
+.form-line-item {
+    height: 32px;
+    background-color: #f0f0f0;
+}
+
+.form-line-item:hover {
+    background-color: #dddddd;
+}
+
+/*----------------------------------------
+
+    mobile devices
+
+----------------------------------------*/
+
+@media screen and (max-width: 600px) {
+    #subView {
+        display: none !important;
+    }
+}
