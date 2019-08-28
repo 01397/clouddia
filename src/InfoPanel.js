@@ -8,7 +8,7 @@ export default class InfoPanel {
     this.render();
   }
   render() {
-    const infopanel = h('div', { id: 'infoPanel' }, "hey!");
+    const infopanel = h('div', { id: 'infoPanel' }, "hello!");
     document.getElementById('infoPanel').replaceWith(infopanel);
   }
   showString(string) {
@@ -31,24 +31,24 @@ export default class InfoPanel {
         h('div', {class: className}, departure)
       ]);
     });
-    const infopanel = h('div', { id: 'infoPanel' }, [
+    const infopanel = h('div', null, [
       h('div', {style: 'text-align:right'}, 'CLOSE', () => this.app.isActiveInfoPanel = false),
       h('div', null, [
         h(
           'span',
           { class: 'info-train-type', style: 'background-color: ' + ouColorToHex(this.app.data.Rosen[0].Ressyasyubetsu[train.Syubetsu].JikokuhyouMojiColor) },
-          this.app.data.Rosen[0].Ressyasyubetsu[train.Syubetsu].Syubetsumei
+          this.app.data.Rosen[0].Ressyasyubetsu[train.Syubetsu].Syubetsumei || '(なし)'
         ), h(
           'span',
           { class: 'info-train-terminal' },
-          this.app.data.Rosen[0].Eki[train.terminalIndex].Ekimei
+          this.app.data.Rosen[0].Eki[train.terminalIndex].Ekimei || '(なし)'
         )
       ]),
-      h('div', null, '列車番号: ' + train.Ressyabangou),
-      h('div', null, '列車名: ' + train.Ressyamei),
+      h('div', null, '列車番号: ' + (train.Ressyabangou || '(なし)')),
+      h('div', null, '列車名: ' + (train.Ressyamei || '(なし)')),
       h('div', {class: 'info-train-timetable'}, content)
     ]);
-    document.getElementById('infoPanel').replaceWith(infopanel);
+    document.getElementById('infoPanel').firstChild.replaceWith(infopanel);
     this.app.isActiveInfoPanel = true;
   }
 }

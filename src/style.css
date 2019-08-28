@@ -1,3 +1,5 @@
+@charset "utf-8";
+
 :root {
     --app-bg-color: #f0f0f0;
     --sidebar-bg-color: #1f1a24;
@@ -24,6 +26,7 @@ html, body {
     height: 100%;
     display: flex;
     box-sizing: border-box;
+    transition: padding-right 0.3s ease-out;
 }
 .activeInfoPanel {
     padding-right: 224px;
@@ -154,11 +157,11 @@ html, body {
 }
 
 .activeInfoPanel #infoPanel{
-    display: block;
+    right: 0;
 }
 
 #infoPanel{
-    display: none;
+    transition: right 0.3s ease-out;
     padding: 8px 8px 8px 7px;
     width: 208px;
     background-color: #f2e5ff;
@@ -167,9 +170,10 @@ html, body {
     overflow-y: scroll;
     box-shadow: 6px 0 5px 5px #000000aa;
     position: fixed;
-    right: 0;
+    right: -224px;
     bottom: 0;
     top: 0;
+    z-index: 50
 }
 
 .info-train-type {
@@ -481,7 +485,6 @@ code {
 }
 .activeInfoPanel #diagram-tools{
     right: 232px;
-
 }
 
 .diagram-tools-container {
@@ -715,9 +718,14 @@ code {
     }
     .activeInfoPanel {
         padding-right: 0;
-        padding-bottom: 30vh;
+        /* 緊急措置↓ */
+        /* padding-bottom: 30vh;*/
+        /* 緊急措置↑ */
     }
     #infoPanel{
+        /* 緊急措置↓ */
+        display: none;
+        /* 緊急措置↑ */
         width: unset;
         height: 30vh;
         box-shadow: 0 6px 5px 5px #000000aa;
