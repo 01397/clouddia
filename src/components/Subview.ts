@@ -1,11 +1,11 @@
-import { h } from "../Util.js";
-import App from "../App.js";
+import App from '../App.js';
+import { h } from '../Util.js';
 
-export default class Subview {
-  app: App;
-  element: HTMLDivElement;
-  visible: boolean;
-  constructor(app:App) {
+export default abstract class Subview {
+  protected app: App;
+  protected element: HTMLDivElement;
+  protected visible: boolean;
+  constructor(app: App) {
     this.app = app;
 
     // お疲れ様、前subViewの終了
@@ -13,20 +13,20 @@ export default class Subview {
     delete app.sub;
 
     // EventListenerなどのしがらみのない、まっとうなDIVを取り戻す
-    let newDiv = h('div', {id: 'subView'}) as HTMLDivElement;
+    const newDiv = h('div', { id: 'subView' }) as HTMLDivElement;
     app.subElm.replaceWith(newDiv);
     app.subElm = newDiv;
     this.element = newDiv;
   }
-  show() {
-    if(this.visible)return;
+  public show() {
+    if (this.visible) return;
     this.element.style.display = 'block';
-    this.visible = true;;
+    this.visible = true;
   }
-  hide() {
-    if(!this.visible)return;
+  public hide() {
+    if (!this.visible) return;
     this.element.style.display = 'none';
-    this.visible = false;;
+    this.visible = false;
   }
-  finish(){}
+  public abstract finish(): void;
 }

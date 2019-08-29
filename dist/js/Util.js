@@ -2,8 +2,10 @@
 export const h = (tag, attr = null, body = null, onclick = null, ns = null) => {
     const element = ns === null ? document.createElement(tag) : document.createElementNS(ns, tag);
     if (attr != null) {
-        for (let key in attr) {
-            element.setAttribute(key, attr[key]);
+        for (const key in attr) {
+            if (attr.hasOwnProperty(key)) {
+                element.setAttribute(key, attr[key]);
+            }
         }
     }
     if (onclick != null) {
@@ -78,20 +80,20 @@ export const createColorField = (value, className, onchange = null) => {
     return label;
 };
 export const createLineStyleField = (value, className, onchange = null) => {
-    const changeValue = (value) => {
-        onchange(value);
-        contentLine.style.strokeDasharray = DashArrayStyle[value];
+    const changeValue = (newValue) => {
+        onchange(newValue);
+        contentLine.style.strokeDasharray = DASH_ARRAY_STYLE[newValue];
         wrapper.blur();
     };
-    const contentLine = h('line', { x1: 8, y1: 16, x2: 112, y2: 16, 'stroke-dasharray': DashArrayStyle[value] }, '', null, 'http://www.w3.org/2000/svg');
+    const contentLine = h('line', { x1: 8, y1: 16, x2: 112, y2: 16, 'stroke-dasharray': DASH_ARRAY_STYLE[value] }, '', null, 'http://www.w3.org/2000/svg');
     const wrapper = h('div', { class: 'form-line ' + className, tabindex: 0 }, [
         h('svg', { class: 'form-line-content' }, contentLine, null, 'http://www.w3.org/2000/svg'),
         h('div', { class: 'form-line-selector ' + className }, [
-            h('svg', { class: 'form-line-item' }, h('line', { x1: 8, y1: 16, x2: 112, y2: 16, 'stroke-dasharray': DashArrayStyle['Jissen'] }, '', null, 'http://www.w3.org/2000/svg'), () => changeValue('Jissen'), 'http://www.w3.org/2000/svg'),
-            h('svg', { class: 'form-line-item' }, h('line', { x1: 8, y1: 16, x2: 112, y2: 16, 'stroke-dasharray': DashArrayStyle['Hasen'] }, '', null, 'http://www.w3.org/2000/svg'), () => changeValue('Hasen'), 'http://www.w3.org/2000/svg'),
-            h('svg', { class: 'form-line-item' }, h('line', { x1: 8, y1: 16, x2: 112, y2: 16, 'stroke-dasharray': DashArrayStyle['Tensen'] }, '', null, 'http://www.w3.org/2000/svg'), () => changeValue('Tensen'), 'http://www.w3.org/2000/svg'),
-            h('svg', { class: 'form-line-item' }, h('line', { x1: 8, y1: 16, x2: 112, y2: 16, 'stroke-dasharray': DashArrayStyle['Ittensasen'] }, '', null, 'http://www.w3.org/2000/svg'), () => changeValue('Ittensasen'), 'http://www.w3.org/2000/svg')
-        ])
+            h('svg', { class: 'form-line-item' }, h('line', { x1: 8, y1: 16, x2: 112, y2: 16, 'stroke-dasharray': DASH_ARRAY_STYLE.Jissen }, '', null, 'http://www.w3.org/2000/svg'), () => changeValue('Jissen'), 'http://www.w3.org/2000/svg'),
+            h('svg', { class: 'form-line-item' }, h('line', { x1: 8, y1: 16, x2: 112, y2: 16, 'stroke-dasharray': DASH_ARRAY_STYLE.Hasen }, '', null, 'http://www.w3.org/2000/svg'), () => changeValue('Hasen'), 'http://www.w3.org/2000/svg'),
+            h('svg', { class: 'form-line-item' }, h('line', { x1: 8, y1: 16, x2: 112, y2: 16, 'stroke-dasharray': DASH_ARRAY_STYLE.Tensen }, '', null, 'http://www.w3.org/2000/svg'), () => changeValue('Tensen'), 'http://www.w3.org/2000/svg'),
+            h('svg', { class: 'form-line-item' }, h('line', { x1: 8, y1: 16, x2: 112, y2: 16, 'stroke-dasharray': DASH_ARRAY_STYLE.Ittensasen }, '', null, 'http://www.w3.org/2000/svg'), () => changeValue('Ittensasen'), 'http://www.w3.org/2000/svg'),
+        ]),
     ]);
     return wrapper;
 };
@@ -116,7 +118,7 @@ const fieldInput = (field, e) => {
         str += value.slice(-4, -2) + ' ';
     str += value.slice(-2);
     field.value = str;
-    //キャレット位置修正
+    // キャレット位置修正
     let a = 0;
     let i = 0;
     while (a !== selectionEnd) {
@@ -157,7 +159,7 @@ const fieldBlur = (field, e) => {
         field.value += ' 00';
     }
 };
-export const DashArrayStyle = {
+export const DASH_ARRAY_STYLE = {
     'Jissen': '',
     'Hasen': '8 2',
     'Tensen': '2 2',
@@ -168,7 +170,9 @@ export const timeStringCheck = (string) => {
     if (!/^\d{3,6}$/.test(string)) {
         return false;
     }
-    let h, m, s;
+    let h;
+    let m;
+    let s;
     if (string.length <= 4) {
         h = Number(string.slice(0, -2));
         m = Number(string.slice(-2));
@@ -202,7 +206,7 @@ export const timeStringToNumber = (oudstr) => {
 export const numberToTimeString = (number, format) => {
     if (format === 'HMM_space') {
         let hour = String(Math.floor(number / 3600));
-        if (hour.length == 1)
+        if (hour.length === 1)
             hour = '\u2007' + hour;
         return hour + String(Math.floor(number % 3600 / 60)).padStart(2, '0');
     }
@@ -223,27 +227,6 @@ export const numberToTimeString = (number, format) => {
     }
     return '';
 };
-// 時分を表す文字列を、0:00からの経過分数に変換
-// 例) '752' → 472
-export const HHMMtoMinutes = HHMMstring => {
-    if (HHMMstring == "")
-        return null;
-    return HHMMstring.slice(0, -2) * 60 + HHMMstring.slice(-2) * 1;
-};
-// 0:00からの経過分数を、時分を表す文字列に変換
-// 例) 893 → '1453'
-export const MinutesToHHMM = (min = null, str = "") => {
-    if (min === null)
-        return null;
-    return Math.floor(min / 60) + str + String(min % 60).padStart(2, '0');
-};
-// Oudiaで用いられる色を、#rrggbbの形に変換
-export const ouColorToHex = (ouColor) => {
-    const b = ouColor.slice(2, 4);
-    const g = ouColor.slice(4, 6);
-    const r = ouColor.slice(6, 8);
-    return '#' + r + g + b;
-};
 // 点と線分の距離の2乗
 export const getDistance2 = ({ x, y, x1, y1, x2, y2 }) => {
     const r = (x2 - x1) ** 2 + (y2 - y1) ** 2;
@@ -255,13 +238,10 @@ export const getDistance2 = ({ x, y, x1, y1, x2, y2 }) => {
     return ((x2 - x1) * (y1 - y) - (y2 - y1) * (x1 - x)) ** 2 / r;
 };
 export class Color {
-    constructor(r, g, b) {
-        this.r = r;
-        this.g = g;
-        this.b = b;
-    }
     static from(str) {
-        let r = 0, g = 0, b = 0;
+        let r = 0;
+        let g = 0;
+        let b = 0;
         if (/^[0-9a-fA-F]{8}$/.test(str)) {
             // 00bbggrr (oudia)
             b = parseInt(str.slice(2, 4), 16);
@@ -281,6 +261,11 @@ export class Color {
             b = parseInt(str[3], 16);
         }
         return new this(r, g, b);
+    }
+    constructor(r, g, b) {
+        this.r = r;
+        this.g = g;
+        this.b = b;
     }
     toHEXString() {
         return '#' + this.r.toString(16).padStart(2, '0') + this.g.toString(16).padStart(2, '0') + this.b.toString(16).padStart(2, '0');

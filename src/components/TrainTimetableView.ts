@@ -1,45 +1,45 @@
-import { h, numberToTimeString, timeFormat } from "../Util.js";
-import View from "./View.js";
-import App from "../App.js";
-import { TrainType } from "../DiagramParser.js";
+import App from '../App.js';
+import { Train, TrainType } from '../DiagramParser.js';
+import { h, numberToTimeString, timeFormat } from '../Util.js';
+import View from './View.js';
 
 // TrainTimetableView.js (module)
 // 列車時刻表を表示する。
 
-const TableMark = {
-  stop: "○",
-  blank: "‥",
-  pass: "\u00a0ﾚ",
-  nonroute: "||"
+const TABLE_MARK = {
+  blank: '‥',
+  nonroute: '||',
+  pass: '\u00a0ﾚ',
+  stop: '○',
 };
 
 export default class TrainTimetableView extends View {
-  stationStyle: {
-    arrival: boolean, departure: boolean, border: boolean
-  }[];
-  tBody: HTMLElement;
-  tHeader: HTMLElement;
-  tStation: HTMLElement;
-  cellHeight: number;
-  stationCellWidth: number;
-  diaIndex: number;
-  direction: number;
-  timeFormat: timeFormat;
-  sheet: {
+  private stationStyle: Array<{
+    arrival: boolean, departure: boolean, border: boolean,
+  }>;
+  private tBody: HTMLElement;
+  private tHeader: HTMLElement;
+  private tStation: HTMLElement;
+  private cellHeight: number;
+  private stationCellWidth: number;
+  private diaIndex: number;
+  private direction: number;
+  private timeFormat: timeFormat;
+  private sheet: Array<{
     number: string;
     type: TrainType;
     name: string;
     note: string;
     count: string;
-    cells: { text: string, color: string, bg: boolean, border: boolean, rowId: string }[];
-  }[];
-  cellWidth: number;
-  lastArea: { x: number; w: number; };
-  headerHeight: number;
-  columns: Map<number, { header: HTMLElement, body: HTMLElement }>;
-  rendering: boolean;
-  reqId: number;
-  focusElement: HTMLElement;
+    cells: Array<{ text: string, color: string, bg: boolean, border: boolean, rowId: string }>;
+  }>;
+  private cellWidth: number;
+  private lastArea: { x: number; w: number; };
+  private headerHeight: number;
+  private columns: Map<number, { header: HTMLElement, body: HTMLElement }>;
+  private rendering: boolean;
+  private reqId: number;
+  private focusElement: HTMLElement;
 
   constructor(app: App, diaIndex: number, direction: number) {
     super(app, direction === 0 ? 'OutboundTrainTimetable' : 'InboundTrainTimetable');
@@ -65,14 +65,14 @@ export default class TrainTimetableView extends View {
     this.element.addEventListener('click', (event) => {
       const trainIndex = (event.target as HTMLElement).parentElement.dataset.colId;
       const target = (event.target as HTMLElement);
-      if(!('rowId' in target.dataset))return;
+      if (!('rowId' in target.dataset)) return;
       this.focus(target);
       const [stationIndex, cellType] = target.dataset.rowId.split('-');
       this.app.selection = [{
-        train: this.app.data.railway.diagrams[this.diaIndex].trains[this.direction][trainIndex],
-        stationIndex: Number(stationIndex),
         cellType,
-        selectType: 'train-station'
+        selectType: 'train-station',
+        stationIndex: Number(stationIndex),
+        train: this.app.data.railway.diagrams[this.diaIndex].trains[this.direction][trainIndex],
       }];
     });
     // 現在の表示領域
@@ -89,14 +89,24 @@ export default class TrainTimetableView extends View {
     const task = () => {
       this.render();
       this.reqId = requestAnimationFrame(task);
-    }
+    };
     task();
+  }
+
+  public finish() {
+    cancelAnimationFrame(this.reqId);
+  }
+  public update() {
+    this.loadTrains();
+    for (let i = this.lastArea.x; i < this.lastArea.x + this.lastArea.w; i++) {
+      this.reuseColumn(i, i, true);
+    }
   }
 
   /**
    * 駅のdiv要素を生成して、駅毎の表示内容を調べますよ〜
    */
-  loadStations() {
+  private loadStations() {
     const stations = this.app.data.railway.stations;
     const len = stations.length;
     const stationFragment = document.createDocumentFragment();
@@ -106,8 +116,8 @@ export default class TrainTimetableView extends View {
       const style = station.timetableStyle;
       const stationAppearance = {
         arrival: style.arrival[this.direction],
+        border: false,
         departure: style.departure[this.direction],
-        border: false
       };
       if (this.direction === 0) {
         stationAppearance.border = station.border;
@@ -123,8 +133,8 @@ export default class TrainTimetableView extends View {
         style:
           `height: ${(Number(style.arrival[this.direction]) + Number(style.departure[this.direction])) * this.cellHeight}px;` +
           (stationAppearance.border ? `border-bottom: 1px solid #222222;` : '') +
-          (station.isMain ? `font-weight: 500;` : '')
-      }, station.name)
+          (station.isMain ? `font-weight: 500;` : ''),
+      }, station.name);
       stationFragment.appendChild(div);
       this.stationStyle.push(stationAppearance);
     }
@@ -134,20 +144,20 @@ export default class TrainTimetableView extends View {
   /**
    * 列車の種別,行先,時刻を読み込む。表示はまだ。
    */
-  loadTrains() {
+  private loadTrains() {
     const trainList = this.app.data.railway.diagrams[this.diaIndex].trains[this.direction];
     const stations = this.app.data.railway.stations;
     const stationLen = stations.length;
     this.sheet = [];
-    trainList.forEach(train => {
+    trainList.forEach((train: Train) => {
       const col = {
         number: train.number,
         type: this.app.data.railway.trainTypes[train.type],
         name: train.name,
         note: train.note,
         count: train.count,
-        cells: []
-      }
+        cells: [],
+      };
       const trainType = this.app.data.railway.trainTypes[train.type];
       const color = trainType.textColor.toHEXString();
       const timetable = train.timetable;
@@ -162,56 +172,54 @@ export default class TrainTimetableView extends View {
         // データがなければ運行なし or 経由なし
         if (!data) {
           const isBlank = (i < timetable.firstStationIndex || timetable.terminalStationIndex < i);
-          if (arrival) col.cells.push({ text: isBlank ? TableMark.blank : TableMark.nonroute, color, bg: i % 2 == 0, rowId: sid + '-arrival' });
-          if (departure) col.cells.push({ text: isBlank ? TableMark.blank : TableMark.nonroute, color, bg: i % 2 == 0, rowId: sid + '-departure' });
+          if (arrival) col.cells.push({ text: isBlank ? TABLE_MARK.blank : TABLE_MARK.nonroute, color, bg: i % 2 === 0, rowId: sid + '-arrival' });
+          if (departure) col.cells.push({ text: isBlank ? TABLE_MARK.blank : TABLE_MARK.nonroute, color, bg: i % 2 === 0, rowId: sid + '-departure' });
         } else if (data.stopType === 1) {
           // 着時刻
           if (arrival) {
-            // 前駅が経由なしなら着時刻省略
             if (i !== 0 && timetable.data[i - 1] === null) {
-              col.cells.push({ text: TableMark.blank, color, bg: i % 2 == 0, rowId: sid + '-arrival' });
-            }
-            // 着時刻なく、始発駅でなければ発時刻を表示
-            else if (i === timetable.firstStationIndex) {
-              col.cells.push({ text: TableMark.blank, color, bg: i % 2 == 0, rowId: sid + '-arrival' });
+              // 前駅が経由なしなら着時刻省略
+              col.cells.push({ text: TABLE_MARK.blank, color, bg: i % 2 === 0, rowId: sid + '-arrival' });
+            } else if (i === timetable.firstStationIndex) {
+              // 着時刻なく、始発駅でなければ発時刻を表示
+              col.cells.push({ text: TABLE_MARK.blank, color, bg: i % 2 === 0, rowId: sid + '-arrival' });
             } else {
-              col.cells.push({ text: numberToTimeString(data.arrival || data.departure, this.timeFormat), color, bg: i % 2 == 0, rowId: sid + '-arrival' });
+              col.cells.push({ text: numberToTimeString(data.arrival || data.departure, this.timeFormat), color, bg: i % 2 === 0, rowId: sid + '-arrival' });
             }
           }
           // 発時刻
           if (departure) {
             // 次駅が経由なしなら発時刻省略
             if (i !== stationLen - 1 && timetable.data[i + 1] === null) {
-              col.cells.push({ text: TableMark.blank, color, bg: i % 2 == 0, rowId: sid + '-departure' });
-            }
-            // 発時刻なく、着時刻の表示がなければ着時刻を表示
-            else if (data.departure !== null) {
-              col.cells.push({ text: numberToTimeString(data.departure, this.timeFormat), color, bg: i % 2 == 0, rowId: sid + '-departure' });
+              col.cells.push({ text: TABLE_MARK.blank, color, bg: i % 2 === 0, rowId: sid + '-departure' });
+            } else if (data.departure !== null) {
+              // 発時刻なく、着時刻の表示がなければ着時刻を表示
+              col.cells.push({ text: numberToTimeString(data.departure, this.timeFormat), color, bg: i % 2 === 0, rowId: sid + '-departure' });
             } else if (arrival && i !== timetable.terminalStationIndex) {
-              col.cells.push({ text: numberToTimeString(data.arrival, this.timeFormat), color, bg: i % 2 == 0, rowId: sid + '-departure' });
+              col.cells.push({ text: numberToTimeString(data.arrival, this.timeFormat), color, bg: i % 2 === 0, rowId: sid + '-departure' });
             } else if (i < timetable.firstStationIndex || timetable.terminalStationIndex <= i) {
-              col.cells.push({ text: TableMark.blank, color, bg: i % 2 == 0, rowId: sid + '-departure' });
+              col.cells.push({ text: TABLE_MARK.blank, color, bg: i % 2 === 0, rowId: sid + '-departure' });
             } else {
-              col.cells.push({ text: TableMark.stop, color, bg: i % 2 == 0, rowId: sid + '-departure' });
+              col.cells.push({ text: TABLE_MARK.stop, color, bg: i % 2 === 0, rowId: sid + '-departure' });
             }
           }
         } else if (data.stopType === 2) {
-          if (arrival) col.cells.push({ text: TableMark.pass, color, bg: i % 2 == 0, rowId: sid + '-departure' });
-          if (departure) col.cells.push({ text: TableMark.pass, color, bg: i % 2 == 0, rowId: sid + '-departure' });
+          if (arrival) col.cells.push({ text: TABLE_MARK.pass, color, bg: i % 2 === 0, rowId: sid + '-departure' });
+          if (departure) col.cells.push({ text: TABLE_MARK.pass, color, bg: i % 2 === 0, rowId: sid + '-departure' });
         }
         col.cells[col.cells.length - 1].border = border;
       }
       this.sheet.push(col);
     });
   }
-  render() {
+  private render() {
     if (!this.rendering) return;
     const viewArea = {
       x: Math.floor(this.element.scrollLeft / this.cellWidth),
-      w: Math.floor((this.element.offsetWidth - this.stationCellWidth) / this.cellWidth)
-    }
+      w: Math.floor((this.element.offsetWidth - this.stationCellWidth) / this.cellWidth),
+    };
     viewArea.x = Math.max(viewArea.x - 1, 0);
-    viewArea.w = Math.min(viewArea.w + 2, this.sheet.length - viewArea.x - 1)
+    viewArea.w = Math.min(viewArea.w + 2, this.sheet.length - viewArea.x - 1);
 
     // 再利用可能な(=画面外の)Column探し
     const reusableIndex: Set<number> = new Set();
@@ -240,14 +248,14 @@ export default class TrainTimetableView extends View {
     this.lastArea = viewArea;
   }
 
-  createColumn(colIndex: number) {
+  private createColumn(colIndex: number) {
     const data = this.sheet[colIndex];
     let lastBg = null;
-    const bodyContent = data.cells.map(({ text = "", color = "#000000", bg = false, border = false, rowId = '' }: { text: string, color: string, bg: boolean, border: boolean, rowId: string }, i: number) => {
+    const bodyContent = data.cells.map(({ text = '', color = '#000000', bg = false, border = false, rowId = '' }: { text: string, color: string, bg: boolean, border: boolean, rowId: string }, i: number) => {
       const result = h('div', {
         style: `color: ${color};height: ${this.cellHeight}px;` + (bg === lastBg ? 'border-top:1px solid rgba(0,0,0,0.1)' : '') + (border ? 'border-bottom:1px solid #444444' : ''),
         class: 'tt-cell' + (bg ? ' tt-cell-bg' : ''),
-        'data-row-id': rowId
+        'data-row-id': rowId,
       }, text);
       lastBg = bg;
       return result;
@@ -262,7 +270,7 @@ export default class TrainTimetableView extends View {
     this.tBody.appendChild(body);
     this.columns.set(colIndex, { header, body });
   }
-  reuseColumn(oldIdx: number, newIdx: number, forceUpdate: boolean) {
+  private reuseColumn(oldIdx: number, newIdx: number, forceUpdate: boolean) {
     const oldData = this.sheet[oldIdx];
     const newData = this.sheet[newIdx];
     const oldCol = this.columns.get(oldIdx);
@@ -281,27 +289,18 @@ export default class TrainTimetableView extends View {
     this.columns.delete(oldIdx);
     this.columns.set(newIdx, oldCol);
   }
-  deleteColumn(colIndex: number) {
+  private deleteColumn(colIndex: number) {
     const { header, body } = this.columns.get(colIndex);
     this.tHeader.removeChild(header);
     this.tBody.removeChild(body);
     this.columns.delete(colIndex);
   }
-  focus(element: HTMLElement) {
+  private focus(element: HTMLElement) {
     const rect = element.getBoundingClientRect();
     const rect2 = this.tBody.getBoundingClientRect();
     this.focusElement.style.left = (rect.left - rect2.left - 2) + 'px';
     this.focusElement.style.top = (rect.top - rect2.top - 2) + 'px';
     this.focusElement.style.width = (rect.width - rect2.width) + 'px';
     this.focusElement.style.height = (rect.height - rect2.height) + 'px';
-  }
-  finish() {
-    cancelAnimationFrame(this.reqId);
-  }
-  update() {
-    this.loadTrains();
-    for (let i = this.lastArea.x; i < this.lastArea.x + this.lastArea.w; i++) {
-      this.reuseColumn(i, i, true);
-    }
   }
 }

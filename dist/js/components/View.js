@@ -1,4 +1,4 @@
-import { h } from "../Util.js";
+import { h } from '../Util.js';
 export default class View {
     constructor(app, viewType) {
         this.app = app;
@@ -8,11 +8,10 @@ export default class View {
             app.main.finish();
         delete app.main;
         // EventListenerなどのしがらみのない、まっとうなDIVを取り戻す
-        let newDiv = h('div', { id: 'mainContainer' });
+        const newDiv = h('div', { id: 'mainContainer' });
         app.mainElm.replaceWith(newDiv);
         app.mainElm = newDiv;
         this.element = newDiv;
     }
-    finish() { }
 }
 //# sourceMappingURL=View.js.map

@@ -1,11 +1,11 @@
-import { h } from "../Util.js";
-import App from "../App.js";
+import App from '../App.js';
+import { h } from '../Util.js';
 
 export type viewTypeString = 'Start' | 'StationTimetable' | 'InboundTrainTimetable' | 'OutboundTrainTimetable' | 'Diagram' | 'FileSetting';
-export default class View {
-  app: App;
-  element: HTMLDivElement;
-  constructor(app:App, viewType:viewTypeString) {
+export default abstract class View {
+  protected app: App;
+  protected element: HTMLDivElement;
+  constructor(app: App, viewType: viewTypeString) {
     this.app = app;
     this.app.currentView = viewType;
 
@@ -14,10 +14,11 @@ export default class View {
     delete app.main;
 
     // EventListenerなどのしがらみのない、まっとうなDIVを取り戻す
-    let newDiv = h('div', {id: 'mainContainer'}) as HTMLDivElement;
+    const newDiv = h('div', {id: 'mainContainer'}) as HTMLDivElement;
     app.mainElm.replaceWith(newDiv);
     app.mainElm = newDiv;
     this.element = newDiv;
   }
-  finish(){}
+  // tslint:disable-next-line: one-line
+  public abstract finish(): void;
 }

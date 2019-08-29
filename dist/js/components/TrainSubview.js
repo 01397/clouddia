@@ -1,6 +1,6 @@
-import Subview from "./Subview.js";
-import { h, numberToTimeString, createTimeField, timeStringToNumber, timeStringCheck, createTextField, createMultilineTextField } from "../Util.js";
-import TrainTimetableView from "./TrainTimetableView.js";
+import { createMultilineTextField, createTextField, createTimeField, h, numberToTimeString, timeStringCheck, timeStringToNumber } from '../Util.js';
+import Subview from './Subview.js';
+import TrainTimetableView from './TrainTimetableView.js';
 export default class TrainSubview extends Subview {
     constructor(app, tabId) {
         super(app);
@@ -12,6 +12,9 @@ export default class TrainSubview extends Subview {
     }
     get tabId() {
         return this._tabId;
+    }
+    finish() {
+        return;
     }
     update(selection) {
         let content;
@@ -29,7 +32,7 @@ export default class TrainSubview extends Subview {
                 this._tabId = 1;
             }
             tabList.push(h('div', { class: 'sub-tab-item' + (this.tabId === 1 ? ' selected' : '') }, '列車', () => { this.tabId = 1; }));
-            //tabList.push(h('div', { class: 'sub-tab-item' + (this.tabId === 2 ? ' selected' : '') }, '運用', () => { this.tabId = 2 }));
+            // tabList.push(h('div', { class: 'sub-tab-item' + (this.tabId === 2 ? ' selected' : '') }, '運用', () => { this.tabId = 2 }));
             const tab = h('div', { class: 'sub-tab-container' }, tabList);
             if (this.tabId === 0) {
                 // 液タブ ...じゃなかった、駅タブ
@@ -52,7 +55,7 @@ export default class TrainSubview extends Subview {
                             arrival: null,
                             departure: null,
                             stopType: value + 1,
-                            track: null
+                            track: null,
                         };
                     }
                     if (this.app.main instanceof TrainTimetableView) {
@@ -63,8 +66,8 @@ export default class TrainSubview extends Subview {
                     const radioAttr = (stopType === i) ?
                         { class: 'form-buttonset-radio', type: 'radio', value: i, name: 'sub-stationType', checked: 'checked' } :
                         { class: 'form-buttonset-radio', type: 'radio', value: i, name: 'sub-stationType' };
-                    const radio = h('input', radioAttr);
-                    radio.addEventListener('change', buttonsetChange);
+                    const input = h('input', radioAttr);
+                    input.addEventListener('change', buttonsetChange);
                     return radio;
                 });
                 const buttonset = h('div', { class: 'form-buttonset' }, [
@@ -72,30 +75,30 @@ export default class TrainSubview extends Subview {
                         radio[0],
                         h('div', { class: 'form-buttonset-item' }, [
                             h('div', { class: 'form-buttonset-mark' }, '○'),
-                            h('div', { class: 'form-buttonset-label' }, '停車')
-                        ])
+                            h('div', { class: 'form-buttonset-label' }, '停車'),
+                        ]),
                     ]),
                     h('label', null, [
                         radio[1],
                         h('div', { class: 'form-buttonset-item' }, [
                             h('div', { class: 'form-buttonset-mark' }, 'ﾚ'),
-                            h('div', { class: 'form-buttonset-label' }, '通過')
-                        ])
+                            h('div', { class: 'form-buttonset-label' }, '通過'),
+                        ]),
                     ]),
                     h('label', null, [
                         radio[2],
                         h('div', { class: 'form-buttonset-item' }, [
                             h('div', { class: 'form-buttonset-mark' }, '‥'),
-                            h('div', { class: 'form-buttonset-label' }, 'なし')
-                        ])
-                    ])
+                            h('div', { class: 'form-buttonset-label' }, 'なし'),
+                        ]),
+                    ]),
                 ]);
                 // 番線
                 const trackOptions = station.tracks.map((stationTrack, i) => h('option', { value: i }, stationTrack.name));
                 const trackSelector = h('select', { class: 'form-selector ts-track' }, trackOptions);
                 if (ttd)
                     trackSelector.value = String(ttd.track);
-                trackSelector.addEventListener('change', e => {
+                trackSelector.addEventListener('change', (e) => {
                     if (!ttd)
                         return;
                     ttd.track = Number(e.currentTarget.value);
@@ -112,28 +115,28 @@ export default class TrainSubview extends Subview {
                         h('div', { class: 'sub-list-container' }, [
                             h('div', { class: 'form-row' }, [
                                 h('div', { class: 'form-label' }, '駅扱い'),
-                                buttonset
+                                buttonset,
                             ]),
                             h('div', { class: 'form-row' }, [
                                 h('div', { class: 'form-label' }, '発着番線'),
-                                trackSelector
+                                trackSelector,
                             ]),
                             h('div', { class: 'form-row sub-stationTime-container' }, [
                                 h('div', { class: 'sub-stationTime-left' }, [
                                     h('div', { class: 'form-row' }, [
                                         h('div', { class: 'form-label' }, '到着時刻'),
-                                        createTimeField(arrival, 'ts-arrival no-margin', () => { this.updateTime('arrival'); })
+                                        createTimeField(arrival, 'ts-arrival no-margin', () => { this.updateTime('arrival'); }),
                                     ]),
                                     h('div', { class: 'form-row' }, [
                                         h('div', { class: 'form-label' }, '発車時刻'),
-                                        createTimeField(departure, 'ts-departure', () => { this.updateTime('departure'); })
-                                    ])
+                                        createTimeField(departure, 'ts-departure', () => { this.updateTime('departure'); }),
+                                    ]),
                                 ]),
                                 h('div', { class: 'sub-stationTime-center' }),
-                                createTimeField(delta, 'ts-delta', () => { this.updateTime('delta'); })
-                            ])
-                        ])
-                    ])
+                                createTimeField(delta, 'ts-delta', () => { this.updateTime('delta'); }),
+                            ]),
+                        ]),
+                    ]),
                 ];
             }
             else if (this.tabId === 1) {
@@ -143,7 +146,7 @@ export default class TrainSubview extends Subview {
                 const trainTypeSelector = h('select', { class: 'form-selector' }, trainTypeOptions);
                 trainTypeSelector.value = String(selection[0].train.type);
                 trainTypeSelector.style.color = trainTypeList[selection[0].train.type].textColor.toHEXString();
-                trainTypeSelector.addEventListener('change', e => {
+                trainTypeSelector.addEventListener('change', (e) => {
                     selection[0].train.type = Number(e.currentTarget.value);
                     trainTypeSelector.style.color = trainTypeList[selection[0].train.type].textColor.toHEXString();
                     if (this.app.main instanceof TrainTimetableView) {
@@ -156,24 +159,24 @@ export default class TrainSubview extends Subview {
                         h('div', { class: 'sub-list-container' }, [
                             h('div', { class: 'form-row' }, [
                                 h('div', { class: 'form-label' }, '種別'),
-                                trainTypeSelector
+                                trainTypeSelector,
                             ]),
                             h('div', { class: 'form-row' }, [
                                 h('div', { class: 'form-label' }, '列車番号'),
-                                createTextField(selection[0].train.number, '', '', e => selection[0].train.number = e.currentTarget.value)
+                                createTextField(selection[0].train.number, '', '', (e) => selection[0].train.number = e.currentTarget.value),
                             ]),
                             h('div', { class: 'form-row' }, [
                                 h('div', { class: 'form-label' }, '列車名'),
-                                createTextField(selection[0].train.name, '', 'ts-name', e => selection[0].train.name = e.currentTarget.value),
-                                createTextField(selection[0].train.count, '', 'ts-count', e => selection[0].train.count = e.currentTarget.value),
-                                h('div', { class: 'ts-count-text' }, '号')
+                                createTextField(selection[0].train.name, '', 'ts-name', (e) => selection[0].train.name = e.currentTarget.value),
+                                createTextField(selection[0].train.count, '', 'ts-count', (e) => selection[0].train.count = e.currentTarget.value),
+                                h('div', { class: 'ts-count-text' }, '号'),
                             ]),
                             h('div', { class: 'form-row' }, [
                                 h('div', { class: 'form-label' }, '備考'),
-                                createMultilineTextField(selection[0].train.note, '', '', e => selection[0].train.note = e.currentTarget.value)
-                            ])
-                        ])
-                    ])
+                                createMultilineTextField(selection[0].train.note, '', '', (e) => selection[0].train.note = e.currentTarget.value),
+                            ]),
+                        ]),
+                    ]),
                 ];
             }
             this.content = h('div', { class: 'sub-content' }, content);
@@ -210,7 +213,6 @@ export default class TrainSubview extends Subview {
             }
             else if (ttd.arrival !== null) {
                 ttd.arrival = timeStringToNumber(departure.value) - timeStringToNumber(delta.value);
-                ;
             }
         }
         arrival.value = (ttd.arrival !== null) ? numberToTimeString(ttd.arrival, 'HH MM SS') : '';

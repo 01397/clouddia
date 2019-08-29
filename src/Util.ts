@@ -2,8 +2,11 @@
 export const h = (tag: string, attr: {} = null, body: string | number | Node | Node[] = null, onclick: (e: Event) => void = null, ns: string = null): Element => {
   const element = ns === null ? document.createElement(tag) : document.createElementNS(ns, tag);
   if (attr != null) {
-    for (let key in attr) {
-      element.setAttribute(key, attr[key]);
+    for (const key in attr) {
+      if (attr.hasOwnProperty(key)) {
+        element.setAttribute(key, attr[key]);
+
+      }
     }
   }
   if (onclick != null) {
@@ -39,9 +42,9 @@ export const createTextField = (value: string, placeholder: string = '', classNa
 };
 export const createMultilineTextField = (value: string, placeholder: string = '', className?: string, onchange: (e?: Event) => any = null): HTMLTextAreaElement => {
   const field = h('textarea', { class: 'form-text-multiline fs-flex' }, value) as HTMLTextAreaElement;
-  if(onchange !== null)field.addEventListener('change', onchange);
+  if (onchange !== null) field.addEventListener('change', onchange);
   return field;
-}
+};
 export const createCheckbox = (checked: boolean, className?: string, onchange: (e?: Event) => any = null): HTMLInputElement => {
   const checkbox = h('input', { class: 'form-checkbox ' + className, type: 'checkbox' }) as HTMLInputElement;
   checkbox.checked = checked;
@@ -68,31 +71,31 @@ export const createColorField = (value: string, className?: string, onchange: (e
   return label;
 };
 export const createLineStyleField = (value: string, className?: string, onchange: (value: string) => any = null): HTMLDivElement => {
-  const changeValue = (value) => {
-    onchange(value);
-    contentLine.style.strokeDasharray = DashArrayStyle[value];
+  const changeValue = (newValue) => {
+    onchange(newValue);
+    contentLine.style.strokeDasharray = DASH_ARRAY_STYLE[newValue];
     wrapper.blur();
-  }
-  const contentLine = h('line', { x1: 8, y1: 16, x2: 112, y2: 16, 'stroke-dasharray': DashArrayStyle[value] }, '', null, 'http://www.w3.org/2000/svg') as SVGLineElement;
+  };
+  const contentLine = h('line', { x1: 8, y1: 16, x2: 112, y2: 16, 'stroke-dasharray': DASH_ARRAY_STYLE[value] }, '', null, 'http://www.w3.org/2000/svg') as SVGLineElement;
   const wrapper = h('div', { class: 'form-line ' + className, tabindex: 0 }, [
     h('svg', { class: 'form-line-content' }, contentLine, null, 'http://www.w3.org/2000/svg'),
     h('div', { class: 'form-line-selector ' + className }, [
       h('svg', { class: 'form-line-item' },
-        h('line', { x1: 8, y1: 16, x2: 112, y2: 16, 'stroke-dasharray': DashArrayStyle['Jissen'] }, '', null, 'http://www.w3.org/2000/svg')
+        h('line', { x1: 8, y1: 16, x2: 112, y2: 16, 'stroke-dasharray': DASH_ARRAY_STYLE.Jissen }, '', null, 'http://www.w3.org/2000/svg')
         , () => changeValue('Jissen'), 'http://www.w3.org/2000/svg'),
       h('svg', { class: 'form-line-item' },
-        h('line', { x1: 8, y1: 16, x2: 112, y2: 16, 'stroke-dasharray': DashArrayStyle['Hasen'] }, '', null, 'http://www.w3.org/2000/svg')
+        h('line', { x1: 8, y1: 16, x2: 112, y2: 16, 'stroke-dasharray': DASH_ARRAY_STYLE.Hasen }, '', null, 'http://www.w3.org/2000/svg')
         , () => changeValue('Hasen'), 'http://www.w3.org/2000/svg'),
       h('svg', { class: 'form-line-item' },
-        h('line', { x1: 8, y1: 16, x2: 112, y2: 16, 'stroke-dasharray': DashArrayStyle['Tensen'] }, '', null, 'http://www.w3.org/2000/svg')
+        h('line', { x1: 8, y1: 16, x2: 112, y2: 16, 'stroke-dasharray': DASH_ARRAY_STYLE.Tensen }, '', null, 'http://www.w3.org/2000/svg')
         , () => changeValue('Tensen'), 'http://www.w3.org/2000/svg'),
       h('svg', { class: 'form-line-item' },
-        h('line', { x1: 8, y1: 16, x2: 112, y2: 16, 'stroke-dasharray': DashArrayStyle['Ittensasen'] }, '', null, 'http://www.w3.org/2000/svg')
-        , () => changeValue('Ittensasen'), 'http://www.w3.org/2000/svg')
-    ])
+        h('line', { x1: 8, y1: 16, x2: 112, y2: 16, 'stroke-dasharray': DASH_ARRAY_STYLE.Ittensasen }, '', null, 'http://www.w3.org/2000/svg')
+        , () => changeValue('Ittensasen'), 'http://www.w3.org/2000/svg'),
+    ]),
   ]) as HTMLDivElement;
   return wrapper;
-}
+};
 const fieldInput = (field: HTMLInputElement, e: Event): void => {
   // 空白を無視したキャレット位置
   let value = field.value;
@@ -112,12 +115,12 @@ const fieldInput = (field: HTMLInputElement, e: Event): void => {
   if (value.length > 2) str += value.slice(-4, -2) + ' ';
   str += value.slice(-2);
   field.value = str;
-  //キャレット位置修正
+  // キャレット位置修正
   let a = 0;
   let i = 0;
   while (a !== selectionEnd) {
     if (str[i] !== ' ') a++;
-    i++
+    i++;
   }
   field.selectionEnd = field.selectionStart = i;
   // validation
@@ -142,27 +145,29 @@ const fieldKeydown = (field: HTMLInputElement, e: KeyboardEvent): void => {
     e.preventDefault();
     field.value = numberToTimeString((timeStringToNumber(field.value) - (e.shiftKey ? 5 : 60) + 86400) % 86400, 'HH MM SS');
   }
-}
+};
 const fieldBlur = (field: HTMLInputElement, e: FocusEvent): void => {
   const value = field.value;
   if (timeStringCheck(value) && value.length < 7) {
     field.value += ' 00';
   }
-}
+};
 
-export const DashArrayStyle = {
+export const DASH_ARRAY_STYLE = {
   'Jissen': '',
   'Hasen': '8 2',
   'Tensen': '2 2',
   'Ittensasen': '8 2 2 2',
-}
+};
 
 export const timeStringCheck = (string: string): boolean => {
   string = string.replace(/ /g, '');
   if (!/^\d{3,6}$/.test(string)) {
     return false;
   }
-  let h, m, s;
+  let h: number;
+  let m: number;
+  let s: number;
   if (string.length <= 4) {
     h = Number(string.slice(0, -2));
     m = Number(string.slice(-2));
@@ -174,8 +179,7 @@ export const timeStringCheck = (string: string): boolean => {
   }
   if (h < 0 || 24 < h || m < 0 || 59 < m || s < 0 || 59 < s) return false;
   return true;
-}
-
+};
 
 /**
  * 文字列形式の時刻を秒を表す数字に変換
@@ -191,7 +195,7 @@ export const timeStringToNumber = (oudstr: string): number => {
   } else {
     return Number(oudstr.slice(0, -4)) * 3600 + Number(oudstr.slice(-4, -2)) * 60 + Number(oudstr.slice(-2));
   }
-}
+};
 /**
  * 文字列形式の時刻を秒を表す数字に変換
  * @param string HHMM, HHMMSSの形式。3~6文字。
@@ -200,7 +204,7 @@ export type timeFormat = 'HMM_space' | 'HMM' | 'min_HH:MM' | 'H:MM' | 'HH MM SS'
 export const numberToTimeString = (number: number, format: timeFormat): string => {
   if (format === 'HMM_space') {
     let hour = String(Math.floor(number / 3600));
-    if (hour.length == 1) hour = '\u2007' + hour;
+    if (hour.length === 1) hour = '\u2007' + hour;
     return hour + String(Math.floor(number % 3600 / 60)).padStart(2, '0');
   }
   if (format === 'HMM') {
@@ -219,29 +223,6 @@ export const numberToTimeString = (number: number, format: timeFormat): string =
     return Math.floor(number / 3600) + String(Math.floor(number % 3600 / 60)).padStart(2, '0') + String(number % 60).padStart(2, '0');
   }
   return '';
-}
-
-// 時分を表す文字列を、0:00からの経過分数に変換
-// 例) '752' → 472
-export const HHMMtoMinutes = HHMMstring => {
-  if (HHMMstring == "") return null;
-  return HHMMstring.slice(0, -2) * 60 + HHMMstring.slice(-2) * 1;
-};
-
-
-// 0:00からの経過分数を、時分を表す文字列に変換
-// 例) 893 → '1453'
-export const MinutesToHHMM = (min = null, str = "") => {
-  if (min === null) return null;
-  return Math.floor(min / 60) + str + String(min % 60).padStart(2, '0');
-};
-
-// Oudiaで用いられる色を、#rrggbbの形に変換
-export const ouColorToHex = (ouColor) => {
-  const b = ouColor.slice(2, 4);
-  const g = ouColor.slice(4, 6);
-  const r = ouColor.slice(6, 8);
-  return '#' + r + g + b;
 };
 
 // 点と線分の距離の2乗
@@ -251,19 +232,13 @@ export const getDistance2 = ({ x, y, x1, y1, x2, y2 }) => {
   if (t < 0) return (x1 - x) ** 2 + (y1 - y) ** 2;
   if (t > r) return (x2 - x) ** 2 + (y2 - y) ** 2;
   return ((x2 - x1) * (y1 - y) - (y2 - y1) * (x1 - x)) ** 2 / r;
-}
+};
 
 export class Color {
-  r: number;
-  g: number;
-  b: number;
-  constructor(r: number, g: number, b: number) {
-    this.r = r;
-    this.g = g;
-    this.b = b
-  }
-  static from(str: string): Color {
-    let r = 0, g = 0, b = 0;
+  public static from(str: string): Color {
+    let r = 0;
+    let g = 0;
+    let b = 0;
     if (/^[0-9a-fA-F]{8}$/.test(str)) {
       // 00bbggrr (oudia)
       b = parseInt(str.slice(2, 4), 16);
@@ -280,12 +255,20 @@ export class Color {
       g = parseInt(str[2], 16);
       b = parseInt(str[3], 16);
     }
-    return new this(r, g, b)
+    return new this(r, g, b);
   }
-  toHEXString() {
+  private r: number;
+  private g: number;
+  private b: number;
+  constructor(r: number, g: number, b: number) {
+    this.r = r;
+    this.g = g;
+    this.b = b;
+  }
+  public toHEXString() {
     return '#' + this.r.toString(16).padStart(2, '0') + this.g.toString(16).padStart(2, '0') + this.b.toString(16).padStart(2, '0');
   }
-  toOudiaString() {
+  public toOudiaString() {
     return ('00' + this.b.toString(16).padStart(2, '0') + this.g.toString(16).padStart(2, '0') + this.r.toString(16).padStart(2, '0')).toUpperCase();
   }
 }

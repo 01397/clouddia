@@ -1,10 +1,10 @@
-import { h } from '../Util.js'
 import App from '../App.js';
+import { h } from '../Util.js';
 export default class Tabbar {
   private element: Element;
   private selectedTab: Element;
-  app: App;
-  _status: string;
+  private app: App;
+  private _status: string;
   constructor(app: App, element: Element) {
     this.app = app;
     this.element = element;
@@ -23,29 +23,29 @@ export default class Tabbar {
         break;
     }
   }
-  showDiagramTabs() {
+  private showDiagramTabs() {
     const elements = this.app.data.railway.diagrams.map((diagram, i): Element =>
-      h('div', { class: 'tabbar-tab' + (i === 0 ? ' active' : ''), 'data-tab-id': i }, diagram.name, this.tabClicked.bind(this))
+      h('div', { class: 'tabbar-tab' + (i === 0 ? ' active' : ''), 'data-tab-id': i }, diagram.name, this.tabClicked.bind(this)),
     );
     this.selectedTab = elements[0];
     this.element.innerHTML = '';
     this.element.append(...elements);
   }
-  showSettingTabs() {
+  private showSettingTabs() {
     const elements = [
       h('div', { class: 'tabbar-tab tabbar-setting-tab active', 'data-tab-id': '0' }, '基本設定', this.tabClicked.bind(this)),
       h('div', { class: 'tabbar-tab tabbar-setting-tab', 'data-tab-id': '1' }, '駅', this.tabClicked.bind(this)),
-      h('div', { class: 'tabbar-tab tabbar-setting-tab', 'data-tab-id': '2' }, '種別', this.tabClicked.bind(this))/*,
+      h('div', { class: 'tabbar-tab tabbar-setting-tab', 'data-tab-id': '2' }, '種別', this.tabClicked.bind(this)), /*,
       h('div', { class: 'tabbar-tab tabbar-setting-tab', 'data-tab-id': '3' }, 'ダイヤ', this.tabClicked.bind(this))*/
-    ]
+    ];
     this.selectedTab = elements[0];
     this.element.innerHTML = '';
     this.element.append(...elements);
   }
   private tabClicked(e: Event) {
-    this.changeTab(Number((e.currentTarget as HTMLElement).dataset.tabId))
+    this.changeTab(Number((e.currentTarget as HTMLElement).dataset.tabId));
   }
-  changeTab(tabId: number) {
+  private changeTab(tabId: number) {
     const target = this.element.children[tabId];
     if (!target) return;
     if (this.selectedTab !== null) {

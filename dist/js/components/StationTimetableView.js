@@ -1,5 +1,5 @@
-import View from "./View.js";
-import { h } from "../Util.js";
+import { h } from '../Util.js';
+import View from './View.js';
 export default class StationTimetableView extends View {
     constructor(app, diaIndex) {
         super(app, 'StationTimetable');
@@ -14,7 +14,7 @@ export default class StationTimetableView extends View {
             const key = station.name;
             if (!(key in this.stationList)) {
                 this.stationList[key] = {
-                    indexList: new Set([idx])
+                    indexList: new Set([idx]),
                 };
             }
             else {
@@ -26,6 +26,8 @@ export default class StationTimetableView extends View {
         // 駅名のプルダウン
         const stationElements = [];
         for (const key in this.stationList) {
+            if (!this.stationList.hasOwnProperty(key))
+                continue;
             stationElements.push(h('option', { value: key }, key));
         }
         this.stationSelectorElement = h('select', { id: 'stationSelector' }, stationElements);
@@ -36,33 +38,41 @@ export default class StationTimetableView extends View {
         const tools = h('div', { id: 'st-tools-wrapper' }, [
             h('div', { id: 'st-tools' }, [
                 h('div', { class: 'st-tools-container' }, [
-                    h('div', { class: "st-tools-title" }, '駅名'),
-                    this.stationSelectorElement
+                    h('div', { class: 'st-tools-title' }, '駅名'),
+                    this.stationSelectorElement,
                 ]),
                 h('div', { class: 'st-tools-container' }, [
-                    h('div', { class: "st-tools-title" }, '方向'),
+                    h('div', { class: 'st-tools-title' }, '方向'),
                     h('label', null, [
                         this.directionSelectorElement,
-                        h('div', { class: "st-tools-direction" }, [
-                            h('div', { class: "st-tools-direction-child" }, '上り'),
-                            h('div', { class: "st-tools-direction-child" }, '下り')
-                        ])
+                        h('div', { class: 'st-tools-direction' }, [
+                            h('div', { class: 'st-tools-direction-child' }, '上り'),
+                            h('div', { class: 'st-tools-direction-child' }, '下り'),
+                        ]),
                     ]),
                 ]),
-                h('div', { class: 'st-tools-container', id: "st-tools-direction-detail" })
-            ])
+                h('div', { class: 'st-tools-container', id: 'st-tools-direction-detail' }),
+            ]),
         ]);
         this.element.append(tools, this.timetableElement);
         this.display();
     }
-    // 時刻表データを組み上げる
+    finish() {
+        return;
+    }
+    /**
+     * 時刻表データを組み上げる
+     * @param stationName 駅名
+     * @param isInbound 上りか？
+     * @param selectedIndexList 駅Indexたち
+     */
     compile(stationName, isInbound = true, selectedIndexList = new Set()) {
         const indexList = this.stationList[stationName].indexList;
         const trains = isInbound ? this.inboundTrains : this.outboundTrains;
         // 駅の出現回数(合計, 分岐ごと)
         const stationCount = new Array(this.stations.length).fill(0);
         const stationCount2 = [];
-        indexList.forEach(val => stationCount2[val] = new Array(this.stations.length).fill(0));
+        indexList.forEach((val) => stationCount2[val] = new Array(this.stations.length).fill(0));
         // 種別の出現確認
         const typeList = new Array(this.app.data.railway.trainTypes.length).fill(false);
         // これを作りたい
@@ -84,32 +94,34 @@ export default class StationTimetableView extends View {
                 stationCount[terminalStationIndex] += 1;
                 typeList[train.type] = true;
                 data.trains.push({
-                    train,
-                    trainType: train.type,
                     terminalIndex: terminalStationIndex,
                     time: train.timetable.data[stationIndex].departure,
+                    train,
                     trainData: {
+                        direction: isInbound ? 0 : 1,
                         index,
-                        direction: isInbound ? 0 : 1
-                    }
+                    },
+                    trainType: train.type,
                 });
                 break;
             }
         });
         data.trains.sort((a, b) => a.time - b.time);
         // 最も多かった行き先を探す。
-        let maxIdx = 0, maxVal = 0;
+        let maxIdx = 0;
+        let maxVal = 0;
         stationCount.forEach((val, i) => {
             if (maxVal < val)
                 [maxVal, maxIdx] = [val, i];
         });
         data.topStation = maxIdx;
         // 最も多かった行き先を探す。分岐ごとに。
-        indexList.forEach((val, i) => {
-            let maxIdx = 0, maxVal = 0;
-            stationCount2[val].forEach((val, i) => {
-                if (maxVal < val)
-                    [maxVal, maxIdx] = [val, i];
+        indexList.forEach((val) => {
+            maxIdx = 0;
+            maxVal = 0;
+            stationCount2[val].forEach((v, j) => {
+                if (maxVal < v)
+                    [maxVal, maxIdx] = [v, j];
             });
             if (maxVal !== 0)
                 data.topStationList.set(maxIdx, val);
@@ -118,18 +130,17 @@ export default class StationTimetableView extends View {
         let count = 1;
         const shortName = [];
         stationCount.forEach((val, i) => {
-            if (val == 0 || i == maxIdx)
+            if (val === 0 || i === maxIdx)
                 return;
-            const stationName = this.stations[i].name;
             // かぶりのない文字を探す
-            loop1: for (let s = 0; s < stationName.length; s++) {
+            loop1: for (const currentStationName of this.stations[i].name) {
                 for (const key in shortName) {
-                    if (key == stationName)
+                    if (key === currentStationName)
                         continue;
-                    if (shortName.includes(stationName[s]))
+                    if (shortName.includes(currentStationName))
                         continue loop1;
                 }
-                shortName[i] = stationName[s];
+                shortName[i] = currentStationName;
                 return;
             }
             shortName[i] = count++;
@@ -156,36 +167,36 @@ export default class StationTimetableView extends View {
         // 時刻のElementを時間帯別に格納する2次元配列。
         const times = new Array(24).fill(null).map(() => []);
         // 時刻ひとつひとつ
-        data.trains.forEach(val => {
+        data.trains.forEach((val) => {
             const hour = Math.floor(val.time / 3600);
             const min = Math.floor(val.time % 3600 / 60);
             times[hour].push(h('div', {
-                class: 'st-train'
+                class: 'st-train',
             }, [
                 h('div', {
                     class: 'st-train-terminal',
                 }, val.terminalIndex !== data.topStation ? data.shortName[val.terminalIndex] : ''),
                 h('div', {
                     class: 'st-train-minute',
-                    style: 'color: ' + this.app.data.railway.trainTypes[val.trainType].textColor.toHEXString()
-                }, min)
+                    style: 'color: ' + this.app.data.railway.trainTypes[val.trainType].textColor.toHEXString(),
+                }, min),
             ], () => this.app.selection = [{
-                    train: val.train,
-                    stationIndex: null,
                     cellType: null,
-                    selectType: 'stationTimetable'
+                    selectType: 'stationTimetable',
+                    stationIndex: null,
+                    train: val.train,
                 }]));
         });
         // 1時間ずつの行
         const rows = (new Array(24)).fill(null).map((v, i) => h('div', {
-            class: 'st-row'
+            class: 'st-row',
         }, [
             h('div', {
-                class: 'st-hour'
+                class: 'st-hour',
             }, (i + startHour) % 24),
             h('div', {
-                class: 'st-minutes'
-            }, times[(i + startHour) % 24])
+                class: 'st-minutes',
+            }, times[(i + startHour) % 24]),
         ]));
         // 時刻表の表部分
         const wrapper = h('div', { class: 'st-wrapper' }, rows);
@@ -205,17 +216,17 @@ export default class StationTimetableView extends View {
         });
         const footer = h('div', { class: 'st-footer' }, [
             h('div', { class: 'st-footer-types' }, types()),
-            h('div', { class: 'st-footer-terminals' }, str2)
+            h('div', { class: 'st-footer-terminals' }, str2),
         ]);
         // 画面に追加
         const sheet = h('div', {
-            class: 'st-sheet'
+            class: 'st-sheet',
         }, [wrapper, footer]);
         this.timetableElement.replaceWith(sheet);
         this.timetableElement = sheet;
         if (!changeDetail) {
             // 設定部分更新
-            let directionContent = [];
+            const directionContent = [];
             for (const [key, val] of data.topStationList) {
                 const input = h('input', { type: 'checkbox', checked: true, class: 'st-tools-direction-checkbox' });
                 input.disabled = data.topStationList.size === 1;
@@ -223,11 +234,11 @@ export default class StationTimetableView extends View {
                 input.addEventListener('change', () => this.display(true));
                 directionContent.push(h('label', { class: 'st-tools-direction-item' }, [
                     input,
-                    h('span', null, this.stations[key].name + '方面')
+                    h('span', null, this.stations[key].name + '方面'),
                 ]));
             }
-            const oldDirectionDetail = document.getElementById("st-tools-direction-detail");
-            const newDirectionDetail = h('div', { id: "st-tools-direction-detail" }, directionContent);
+            const oldDirectionDetail = document.getElementById('st-tools-direction-detail');
+            const newDirectionDetail = h('div', { id: 'st-tools-direction-detail' }, directionContent);
             oldDirectionDetail.replaceWith(newDirectionDetail);
         }
     }

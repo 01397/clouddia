@@ -1,44 +1,44 @@
-import DiagramParser, { DiagramFile, Train, TrainType } from "./DiagramParser.js";
-import { h } from "./Util.js";
-import Sidebar from "./components/Sidebar.js";
-import Tabbar from "./components/Tabbar.js";
-import Toolbar from "./components/Toolbar.js";
-import View, { viewTypeString } from "./components/View.js";
-import StartView from "./components/StartView.js";
-import StationTimetableView from "./components/StationTimetableView.js";
-import TrainTimetableView from "./components/TrainTimetableView.js";
-import DiagramView from "./components/DiagramView.js";
-import Subview from "./components/Subview.js";
-import TrainSubview from "./components/TrainSubview.js";
-import FileSettingView from "./components/FileSettingView.js";
-import StationSettingView from "./components/StationSettingView.js";
-import TrainTypeSettingView from "./components/TrainTypeSettingView.js";
+import DiagramView from './components/DiagramView.js';
+import FileSettingView from './components/FileSettingView.js';
+import Sidebar from './components/Sidebar.js';
+import StartView from './components/StartView.js';
+import StationSettingView from './components/StationSettingView.js';
+import StationTimetableView from './components/StationTimetableView.js';
+import Subview from './components/Subview.js';
+import Tabbar from './components/Tabbar.js';
+import Toolbar from './components/Toolbar.js';
+import TrainSubview from './components/TrainSubview.js';
+import TrainTimetableView from './components/TrainTimetableView.js';
+import TrainTypeSettingView from './components/TrainTypeSettingView.js';
+import View, { viewTypeString } from './components/View.js';
+import DiagramParser, { DiagramFile, Train } from './DiagramParser.js';
+import { h } from './Util.js';
 
-export interface SelectionObject { train?: Train; stationIndex?: number; cellType?: string; selectType: string };
+export interface ISelectionObject { train?: Train; stationIndex?: number; cellType?: string; selectType: string; }
 
 export default class App {
-  version: number;
-  data: DiagramFile;
-  sidebarElm: Element;
-  toolbarElm: Element;
-  tabbarElm: Element;
-  mainElm: Element;
-  subElm: Element;
-  rootElm: Element;
-  sidebar: Sidebar;
-  tabbar: Tabbar;
-  toolbar: Toolbar;
-  main: View;
-  currentDiaIndex: number;
-  sub: Subview;
-  _selection: SelectionObject[];
-  currentView: viewTypeString;
+  public data: DiagramFile;
+  public mainElm: Element;
+  public subElm: Element;
+  public main: View;
+  public sub: Subview;
+  public sidebarElm: Element;
+  public toolbarElm: Element;
+  public tabbarElm: Element;
+  public currentView: viewTypeString;
+  public version: number;
+  public rootElm: Element;
+  public sidebar: Sidebar;
+  public tabbar: Tabbar;
+  public toolbar: Toolbar;
+  public currentDiaIndex: number;
+  public _selection: ISelectionObject[];
 
   constructor(root: Element) {
     this.version = 3;
-    this.sidebarElm = h('div', { id: "sidebar" }, null);
-    this.toolbarElm = h('div', { id: "toolbar" }, null);
-    this.tabbarElm = h('div', { id: "tabbar" }, null);
+    this.sidebarElm = h('div', { id: 'sidebar' }, null);
+    this.toolbarElm = h('div', { id: 'toolbar' }, null);
+    this.tabbarElm = h('div', { id: 'tabbar' }, null);
     this.mainElm = h('div', { id: 'mainContainer' }, null);
     this.subElm = h('div', { id: 'subContainer' }, null);
     this.rootElm = h('div', { id: 'app' }, [
@@ -46,14 +46,14 @@ export default class App {
         h('div', { id: 'header-logo' }),
         h('div', { id: 'header-container' }, [
           this.toolbarElm,
-          this.tabbarElm
-        ])
+          this.tabbarElm,
+        ]),
       ]),
       h('div', { id: 'bottom-container' }, [
         this.sidebarElm,
         this.mainElm,
-        this.subElm
-      ])
+        this.subElm,
+      ]),
     ]);
     root.replaceWith(this.rootElm);
 
@@ -72,7 +72,7 @@ export default class App {
   /**
    * ファイルに関する設定(FileSettingView)の表示
    */
-  showFileSettingView(viewId) {
+  public showFileSettingView(viewId) {
     switch (viewId) {
       case 0:
         this.main = new FileSettingView(this);
@@ -93,39 +93,39 @@ export default class App {
    * @param diaIndex 何番目のダイヤか
    * @param direction 0:下り, 1:上り
    */
-  showTrainTimetableView(diaIndex: number = null, direction: number) {
+  public showTrainTimetableView(diaIndex: number = null, direction: number) {
     if (diaIndex === null) diaIndex = this.currentDiaIndex;
     else this.currentDiaIndex = diaIndex;
     this.main = new TrainTimetableView(this, diaIndex, direction);
     this.sidebar.status = direction + 1;
-    this.sub.show()
+    this.sub.show();
     this.tabbar.status = 'diagram';
   }
   /**
    * 駅時刻表(StationTimetableView)の表示
    * @param diaIndex 何番目のダイヤか
    */
-  showStationTimetableView(diaIndex: number = null) {
+  public showStationTimetableView(diaIndex: number = null) {
     if (diaIndex === null) diaIndex = this.currentDiaIndex;
     else this.currentDiaIndex = diaIndex;
     this.main = new StationTimetableView(this, diaIndex);
     this.sidebar.status = 3;
-    this.sub.show()
+    this.sub.show();
     this.tabbar.status = 'diagram';
   }
   /**
    * ダイヤグラム(DiagramView)の表示
    * @param diaIndex 何番目のダイヤか
    */
-  showDiagramView(diaIndex: number = null) {
+  public showDiagramView(diaIndex: number = null) {
     if (diaIndex === null) diaIndex = this.currentDiaIndex;
     else this.currentDiaIndex = diaIndex;
     this.main = new DiagramView(this, diaIndex);
     this.sidebar.status = 4;
-    this.sub.show()
+    this.sub.show();
     this.tabbar.status = 'diagram';
   }
-  set selection(selection: SelectionObject[]) {
+  set selection(selection: ISelectionObject[]) {
     this._selection = selection;
     if (this.sub instanceof TrainSubview) {
       this.sub.update(selection);
@@ -134,7 +134,7 @@ export default class App {
   get selection() {
     return this._selection;
   }
-  save() {
+  public save() {
     const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
     const unicodeArray = [];
     const oudiaString = this.data.toOudiaString();
@@ -148,7 +148,7 @@ export default class App {
     const anchor = h('a', {
       href: URL.createObjectURL(new Blob([shiftJISuInt8], { type: 'text/plain' })),
       download: 'test.oud',
-      style: 'display: none'
+      style: 'display: none',
     }) as HTMLAnchorElement;
     document.body.appendChild(anchor);
     anchor.click();
@@ -157,7 +157,8 @@ export default class App {
   public loadOudia(oudstring: string, fileName: string): void {
     const parser = new DiagramParser();
     parser.parse(oudstring)
-      .then(result => {
+      .then((result) => {
+        // tslint:disable-next-line: no-console
         console.log(result);
         this.data = result;
         this.sidebar = new Sidebar(this, this.sidebarElm);
@@ -166,18 +167,19 @@ export default class App {
         this.sub = new TrainSubview(this, 0);
         this.showTrainTimetableView(0, 0);
       }).catch((e: Error) => {
+        // tslint:disable-next-line: no-console
         console.error('parse error.', e);
       });
   }
   public loadOnlineFile(fileURL: string) {
     const url = 'http://soasa.starfree.jp/fileRequest.php?url=' + fileURL;
     fetch(url, { mode: 'cors' })
-      .then(response => response.blob())
-      .then(blob => new Promise(resolve => {
+      .then((response) => response.blob())
+      .then((blob) => new Promise((resolve) => {
         const reader = new FileReader();
         reader.onload = () => this.loadOudia(reader.result as string, 'Web上のファイル');
         reader.readAsText(blob, 'shift-jis');
       }))
-      .catch(err => console.error(err));
+      .catch((err) => { throw err; });
   }
 }

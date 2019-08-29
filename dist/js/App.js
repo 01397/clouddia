@@ -1,23 +1,22 @@
-import DiagramParser from "./DiagramParser.js";
-import { h } from "./Util.js";
-import Sidebar from "./components/Sidebar.js";
-import Tabbar from "./components/Tabbar.js";
-import Toolbar from "./components/Toolbar.js";
-import StartView from "./components/StartView.js";
-import StationTimetableView from "./components/StationTimetableView.js";
-import TrainTimetableView from "./components/TrainTimetableView.js";
-import DiagramView from "./components/DiagramView.js";
-import TrainSubview from "./components/TrainSubview.js";
-import FileSettingView from "./components/FileSettingView.js";
-import StationSettingView from "./components/StationSettingView.js";
-import TrainTypeSettingView from "./components/TrainTypeSettingView.js";
-;
+import DiagramView from './components/DiagramView.js';
+import FileSettingView from './components/FileSettingView.js';
+import Sidebar from './components/Sidebar.js';
+import StartView from './components/StartView.js';
+import StationSettingView from './components/StationSettingView.js';
+import StationTimetableView from './components/StationTimetableView.js';
+import Tabbar from './components/Tabbar.js';
+import Toolbar from './components/Toolbar.js';
+import TrainSubview from './components/TrainSubview.js';
+import TrainTimetableView from './components/TrainTimetableView.js';
+import TrainTypeSettingView from './components/TrainTypeSettingView.js';
+import DiagramParser from './DiagramParser.js';
+import { h } from './Util.js';
 export default class App {
     constructor(root) {
         this.version = 3;
-        this.sidebarElm = h('div', { id: "sidebar" }, null);
-        this.toolbarElm = h('div', { id: "toolbar" }, null);
-        this.tabbarElm = h('div', { id: "tabbar" }, null);
+        this.sidebarElm = h('div', { id: 'sidebar' }, null);
+        this.toolbarElm = h('div', { id: 'toolbar' }, null);
+        this.tabbarElm = h('div', { id: 'tabbar' }, null);
         this.mainElm = h('div', { id: 'mainContainer' }, null);
         this.subElm = h('div', { id: 'subContainer' }, null);
         this.rootElm = h('div', { id: 'app' }, [
@@ -25,14 +24,14 @@ export default class App {
                 h('div', { id: 'header-logo' }),
                 h('div', { id: 'header-container' }, [
                     this.toolbarElm,
-                    this.tabbarElm
-                ])
+                    this.tabbarElm,
+                ]),
             ]),
             h('div', { id: 'bottom-container' }, [
                 this.sidebarElm,
                 this.mainElm,
-                this.subElm
-            ])
+                this.subElm,
+            ]),
         ]);
         root.replaceWith(this.rootElm);
         this.currentView = null;
@@ -130,7 +129,7 @@ export default class App {
         const anchor = h('a', {
             href: URL.createObjectURL(new Blob([shiftJISuInt8], { type: 'text/plain' })),
             download: 'test.oud',
-            style: 'display: none'
+            style: 'display: none',
         });
         document.body.appendChild(anchor);
         anchor.click();
@@ -139,7 +138,8 @@ export default class App {
     loadOudia(oudstring, fileName) {
         const parser = new DiagramParser();
         parser.parse(oudstring)
-            .then(result => {
+            .then((result) => {
+            // tslint:disable-next-line: no-console
             console.log(result);
             this.data = result;
             this.sidebar = new Sidebar(this, this.sidebarElm);
@@ -148,19 +148,20 @@ export default class App {
             this.sub = new TrainSubview(this, 0);
             this.showTrainTimetableView(0, 0);
         }).catch((e) => {
+            // tslint:disable-next-line: no-console
             console.error('parse error.', e);
         });
     }
     loadOnlineFile(fileURL) {
         const url = 'http://soasa.starfree.jp/fileRequest.php?url=' + fileURL;
         fetch(url, { mode: 'cors' })
-            .then(response => response.blob())
-            .then(blob => new Promise(resolve => {
+            .then((response) => response.blob())
+            .then((blob) => new Promise((resolve) => {
             const reader = new FileReader();
             reader.onload = () => this.loadOudia(reader.result, 'Web上のファイル');
             reader.readAsText(blob, 'shift-jis');
         }))
-            .catch(err => console.error(err));
+            .catch((err) => { throw err; });
     }
 }
 //# sourceMappingURL=App.js.map

@@ -4,6 +4,16 @@
         "tslint:recommended"
     ],
     "jsRules": {},
-    "rules": {},
-    "rulesDirectory": []
+    "rules": {
+        "max-line-length": false,
+        "quotemark": [true, "single"],
+        "object-literal-key-quotes": false,
+        "curly": [true, "ignore-same-line"],
+        "variable-name": [
+            true,
+            "allow-leading-underscore"
+        ],
+        "object-literal-sort-keys": false,
+        "max-classes-per-file": false
+    }
 }

@@ -3,8 +3,15 @@
     "target": "es2018",
     "outDir": "dist/js/",
     "module": "es6",
-    "sourceMap": true
-    },
+    "sourceMap": true,
+    "strict": true,
+    "noImplicitAny": false,
+    "strictNullChecks": false,
+    "strictFunctionTypes": false,
+    "strictBindCallApply": false,
+    "strictPropertyInitialization": false,
+    "noImplicitThis": false
+  },
   "include": [
     "src/*"
   ],

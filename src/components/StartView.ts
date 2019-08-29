@@ -1,7 +1,6 @@
-import View from "./View.js";
-import App from "../App.js";
-import DiagramParser from "../DiagramParser.js";
-import { h, createButton, createTextField } from "../Util.js";
+import App from '../App.js';
+import { createButton, createTextField, h } from '../Util.js';
+import View from './View.js';
 
 export default class StartView extends View {
   constructor(app: App) {
@@ -10,7 +9,7 @@ export default class StartView extends View {
     fileSelector.addEventListener('change', (e: Event) => {
       const target = e.currentTarget as HTMLInputElement;
       this.loadLocalFile(target.files[0]);
-    })
+    });
     const fileSelectLabel = h('div', { class: 'form-button form-button-fill start-file-button' }, 'ファイルを選ぶ');
     const urlField = createTextField('', 'oudiaファイルのURL', 'start-drop-url-field');
     const urlButton = createButton('開く', null, () => this.app.loadOnlineFile(urlField.value));
@@ -18,7 +17,7 @@ export default class StartView extends View {
       h('h3', { class: 'start-drop-heading' }, '端末内のファイルを使う'),
       h('label', { class: 'start-file-label' }, [
         fileSelectLabel,
-        fileSelector
+        fileSelector,
       ]),
       h('div', { class: 'start-drop-caption' }, '枠内にファイルをドロップしてもOKです'),
       h('div', { class: 'start-drop-or' }, 'または'),
@@ -29,7 +28,7 @@ export default class StartView extends View {
       ]),
       h('div', { class: 'start-drop-caption' }, '直リンク禁止のファイルは、まず公開者に許可を取ることを推奨します'),
     ]);
-    dropArea.addEventListener('dragover', evt => {
+    dropArea.addEventListener('dragover', (evt: DragEvent) => {
       evt.preventDefault();
       dropArea.classList.add('drag');
     });
@@ -54,17 +53,20 @@ export default class StartView extends View {
         h('p', { class: 'start-readme-paragraph' }, 'スマホ対応は微妙です、そのうちちゃんとやります。'),
         h('p', { class: 'start-readme-paragraph' }, [
           document.createTextNode('Twitter: '),
-          h('a', { href: 'https://twitter.com/01_397' }, '大井さかな(@01_397)')
+          h('a', { href: 'https://twitter.com/01_397' }, '大井さかな(@01_397)'),
         ]),
         h('p', { class: 'start-readme-paragraph' }, [
           document.createTextNode('ソースコード: '),
-          h('a', { href: 'https://github.com/01397/clouddia' }, 'GitHub')
-        ])
-      ])
-    ])
+          h('a', { href: 'https://github.com/01397/clouddia' }, 'GitHub'),
+        ]),
+      ]),
+    ]);
     this.element.appendChild(content);
   }
-  loadLocalFile(file: File) {
+  public finish(): void {
+    return;
+  }
+  private loadLocalFile(file: File) {
     const name = file.name;
     const reader = new FileReader();
     reader.addEventListener('load', () => this.app.loadOudia(reader.result as string, name), false);

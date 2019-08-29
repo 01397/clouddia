@@ -1,11 +1,11 @@
-import View from './View.js';
 import App from '../App.js';
-import { h, createTextField, createColorField, Color, createButton, createLineStyleField, DashArrayStyle, createCheckbox } from '../Util.js';
+import { Color, createButton, createCheckbox, createColorField, createLineStyleField, createTextField, DASH_ARRAY_STYLE, h } from '../Util.js';
+import View from './View.js';
 
 export default class TrainTypeSettingView extends View {
-  rightContainer: Element;
-  svgElement: Element;
-  hoverElement: Element;
+  private rightContainer: Element;
+  private svgElement: Element;
+  private hoverElement: Element;
   constructor(app: App) {
     super(app, 'FileSetting');
     this.hoverElement = null;
@@ -22,16 +22,19 @@ export default class TrainTypeSettingView extends View {
       if (this.hoverElement !== null) this.hoverElement.classList.remove('hover');
     });
     this.svgElement.addEventListener('click', (e: MouseEvent) => {
-      this.edit(Math.floor(e.offsetY / 36))
+      this.edit(Math.floor(e.offsetY / 36));
     });
     this.rightContainer = h('div', { class: 'fs-right-container' }, '列車種別が選択されていません');
     this.element.appendChild(
       h('div', { class: 'fs-2cols-container' }, [
         h('div', { class: 'fs-left-container' }, this.svgElement),
-        this.rightContainer
-      ])
+        this.rightContainer,
+      ]),
     );
     this.updateList();
+  }
+  public finish(): void {
+    return;
   }
   private updateList() {
     const typeList = this.app.data.railway.trainTypes;
@@ -40,11 +43,11 @@ export default class TrainTypeSettingView extends View {
     this.svgElement.append(
       ...typeList.map((trainType, i: number) =>
         h('g', { class: 'fs-typelist-item', style: `transform:translate(0, ${36 * i}px)` }, [
-          h('path', { d: 'M8 30.5 l216 0 l12 -24 l56 0', stroke: trainType.strokeColor.toHEXString(), 'stroke-dasharray': DashArrayStyle[trainType.lineStyle], 'stroke-width': trainType.isBoldLine ? 3 : 1 }, '', null, 'http://www.w3.org/2000/svg'),
+          h('path', { d: 'M8 30.5 l216 0 l12 -24 l56 0', stroke: trainType.strokeColor.toHEXString(), 'stroke-dasharray': DASH_ARRAY_STYLE[trainType.lineStyle], 'stroke-width': trainType.isBoldLine ? 3 : 1 }, '', null, 'http://www.w3.org/2000/svg'),
           h('text', { x: 8, y: 26, fill: trainType.textColor.toHEXString(), class: 'fs-typelist-name' }, trainType.name, null, 'http://www.w3.org/2000/svg'),
-          h('text', { x: 264, y: 26, fill: trainType.textColor.toHEXString(), class: 'fs-typelist-abbr', 'text-anchor': 'middle' }, trainType.abbrName, null, 'http://www.w3.org/2000/svg')
-        ], null, 'http://www.w3.org/2000/svg')
-      )
+          h('text', { x: 264, y: 26, fill: trainType.textColor.toHEXString(), class: 'fs-typelist-abbr', 'text-anchor': 'middle' }, trainType.abbrName, null, 'http://www.w3.org/2000/svg'),
+        ], null, 'http://www.w3.org/2000/svg'),
+      ),
     );
   }
   private edit(trainTypeIndex: number) {
@@ -58,7 +61,7 @@ export default class TrainTypeSettingView extends View {
             const value = (e.currentTarget as HTMLInputElement).value;
             this.svgElement.querySelectorAll('.fs-typelist-name')[trainTypeIndex].textContent = value;
             trainType.name = value;
-          })
+          }),
         ]),
         h('div', { class: 'form-row' }, [
           h('div', { class: 'form-label' }, '種別略称'),
@@ -66,14 +69,14 @@ export default class TrainTypeSettingView extends View {
             const value = (e.currentTarget as HTMLInputElement).value;
             this.svgElement.querySelectorAll('.fs-typelist-abbr')[trainTypeIndex].textContent = value;
             trainType.abbrName = value;
-          })
+          }),
         ]),
         h('div', { class: 'form-row' }, [
           h('div', { class: 'form-label', id: 'fs-traintype-color-text' }, '文字色'),
           createColorField(trainType.textColor.toHEXString(), '', (e) => {
             trainType.textColor = Color.from((e.currentTarget as HTMLInputElement).value);
             this.updateList();
-          })
+          }),
         ]),
         h('div', { class: 'form-row' }, [
           h('div', { class: 'form-label' }, '線色'),
@@ -85,23 +88,23 @@ export default class TrainTypeSettingView extends View {
             trainType.strokeColor = trainType.textColor;
             this.updateList();
             this.edit(trainTypeIndex);
-          })
+          }),
         ]),
         h('div', { class: 'form-row' }, [
           h('div', { class: 'form-label' }, '線スタイル'),
-          createLineStyleField(trainType.lineStyle, '', value => {
+          createLineStyleField(trainType.lineStyle, '', (value) => {
             trainType.lineStyle = value;
             this.updateList();
-          })
+          }),
         ]),
         h('div', { class: 'form-row' }, [
           h('div', { class: 'form-label' }, '太線'),
-          createCheckbox(trainType.isBoldLine, '', e => {
+          createCheckbox(trainType.isBoldLine, '', (e) => {
             trainType.isBoldLine = (e.currentTarget as HTMLInputElement).checked;
             this.updateList();
-          })
-        ])
-      ])
+          }),
+        ]),
+      ]),
     ];
     this.rightContainer.innerHTML = '';
     this.rightContainer.append(...content);

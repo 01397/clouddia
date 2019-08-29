@@ -1,0 +1,13 @@
+{
+  "name": "clouddia",
+  "version": "0.1.0",
+  "description": "online diagram editor",
+  "main": "index.js",
+  "repository": "git@github.com:01397/clouddia.git",
+  "author": "soasa <41501869+01397@users.noreply.github.com>",
+  "license": "GPL-3.0-or-later",
+  "private": false,
+  "scripts": {
+    "build": "tsc"
+  }
+}

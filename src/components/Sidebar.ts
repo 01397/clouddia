@@ -1,10 +1,10 @@
-import { h } from '../Util.js'
 import App from '../App.js';
+import { h } from '../Util.js';
 export default class Sidebar {
   private element: Element;
   private app: App;
   private activeItem: Element;
-  constructor(app:App, element: Element) {
+  constructor(app: App, element: Element) {
     this.app = app;
     this.element = element;
     this.activeItem = null;
@@ -42,12 +42,12 @@ export default class Sidebar {
     </svg><span class="sidebar-label" style="transition-delay:0.15s">ダイヤグラム</span></div>`;
     element.append(file, outbound, inbound, station, diagram);
   }
-  set status(value: number){
-    if(this.activeItem !== null) {
+  set status(value: number) {
+    if (this.activeItem !== null) {
       this.activeItem.classList.remove('active');
     }
     const target = this.element.children[value];
-    if(!target)return;
+    if (!target)return;
     target.classList.add('active');
     this.activeItem = target;
   }
