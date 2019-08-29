@@ -11,7 +11,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const type = m2 === null ? 'oud' : m2[1];
     if (m1 !== null) {
         switch (type) {
-            case 'oud': app.loadOnlineFile(m1[1]);
+            case 'oud':
+                app.loadOnlineFile(m1[1]);
         }
     }
     // tslint:disable-next-line: no-console

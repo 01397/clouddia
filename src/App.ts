@@ -14,7 +14,12 @@ import View, { viewTypeString } from './components/View.js';
 import DiagramParser, { DiagramFile, Train } from './DiagramParser.js';
 import { h } from './Util.js';
 
-export interface ISelectionObject { train?: Train; stationIndex?: number; cellType?: string; selectType: string; }
+export interface SelectionObject {
+  train?: Train;
+  stationIndex?: number;
+  cellType?: string;
+  selectType: string;
+}
 
 export default class App {
   public data: DiagramFile;
@@ -32,7 +37,7 @@ export default class App {
   public tabbar: Tabbar;
   public toolbar: Toolbar;
   public currentDiaIndex: number;
-  public _selection: ISelectionObject[];
+  public _selection: SelectionObject[];
 
   constructor(root: Element) {
     this.version = 3;
@@ -44,10 +49,7 @@ export default class App {
     this.rootElm = h('div', { id: 'app' }, [
       h('div', { id: 'header' }, [
         h('div', { id: 'header-logo' }),
-        h('div', { id: 'header-container' }, [
-          this.toolbarElm,
-          this.tabbarElm,
-        ]),
+        h('div', { id: 'header-container' }, [this.toolbarElm, this.tabbarElm]),
       ]),
       h('div', { id: 'bottom-container' }, [
         this.sidebarElm,
@@ -67,12 +69,12 @@ export default class App {
     this.data = null;
     this.currentDiaIndex = 0;
     this._selection = null;
-
   }
   /**
    * ファイルに関する設定(FileSettingView)の表示
    */
-  public showFileSettingView(viewId) {
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+  public showFileSettingView(viewId: number) {
     switch (viewId) {
       case 0:
         this.main = new FileSettingView(this);
@@ -125,7 +127,7 @@ export default class App {
     this.sub.show();
     this.tabbar.status = 'diagram';
   }
-  set selection(selection: ISelectionObject[]) {
+  set selection(selection: SelectionObject[]) {
     this._selection = selection;
     if (this.sub instanceof TrainSubview) {
       this.sub.update(selection);
@@ -135,7 +137,7 @@ export default class App {
     return this._selection;
   }
   public save() {
-    const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
+    const bom = new Uint8Array([0xef, 0xbb, 0xbf]);
     const unicodeArray = [];
     const oudiaString = this.data.toOudiaString();
     for (let i = 0; i < oudiaString.length; i++) {
@@ -146,7 +148,9 @@ export default class App {
     const shiftJISArray = Encoding.convert(unicodeArray, 'sjis', 'unicode');
     const shiftJISuInt8 = new Uint8Array(shiftJISArray);
     const anchor = h('a', {
-      href: URL.createObjectURL(new Blob([shiftJISuInt8], { type: 'text/plain' })),
+      href: URL.createObjectURL(
+        new Blob([shiftJISuInt8], { type: 'text/plain' })
+      ),
       download: 'test.oud',
       style: 'display: none',
     }) as HTMLAnchorElement;
@@ -156,8 +160,9 @@ export default class App {
   }
   public loadOudia(oudstring: string, fileName: string): void {
     const parser = new DiagramParser();
-    parser.parse(oudstring)
-      .then((result) => {
+    parser
+      .parse(oudstring)
+      .then(result => {
         // tslint:disable-next-line: no-console
         console.log(result);
         this.data = result;
@@ -166,7 +171,8 @@ export default class App {
         this.toolbar = new Toolbar(this, this.toolbarElm);
         this.sub = new TrainSubview(this, 0);
         this.showTrainTimetableView(0, 0);
-      }).catch((e: Error) => {
+      })
+      .catch((e: Error) => {
         // tslint:disable-next-line: no-console
         console.error('parse error.', e);
       });
@@ -174,12 +180,18 @@ export default class App {
   public loadOnlineFile(fileURL: string) {
     const url = 'http://soasa.starfree.jp/fileRequest.php?url=' + fileURL;
     fetch(url, { mode: 'cors' })
-      .then((response) => response.blob())
-      .then((blob) => new Promise((resolve) => {
-        const reader = new FileReader();
-        reader.onload = () => this.loadOudia(reader.result as string, 'Web上のファイル');
-        reader.readAsText(blob, 'shift-jis');
-      }))
-      .catch((err) => { throw err; });
+      .then(response => response.blob())
+      .then(
+        blob =>
+          new Promise(resolve => {
+            const reader = new FileReader();
+            reader.onload = () =>
+              this.loadOudia(reader.result as string, 'Web上のファイル');
+            reader.readAsText(blob, 'shift-jis');
+          })
+      )
+      .catch(err => {
+        throw err;
+      });
   }
 }

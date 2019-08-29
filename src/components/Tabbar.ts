@@ -24,8 +24,17 @@ export default class Tabbar {
     }
   }
   private showDiagramTabs() {
-    const elements = this.app.data.railway.diagrams.map((diagram, i): Element =>
-      h('div', { class: 'tabbar-tab' + (i === 0 ? ' active' : ''), 'data-tab-id': i }, diagram.name, this.tabClicked.bind(this)),
+    const elements = this.app.data.railway.diagrams.map(
+      (diagram, i): Element =>
+        h(
+          'div',
+          {
+            class: 'tabbar-tab' + (i === 0 ? ' active' : ''),
+            'data-tab-id': i,
+          },
+          diagram.name,
+          this.tabClicked.bind(this)
+        )
     );
     this.selectedTab = elements[0];
     this.element.innerHTML = '';
@@ -33,10 +42,25 @@ export default class Tabbar {
   }
   private showSettingTabs() {
     const elements = [
-      h('div', { class: 'tabbar-tab tabbar-setting-tab active', 'data-tab-id': '0' }, '基本設定', this.tabClicked.bind(this)),
-      h('div', { class: 'tabbar-tab tabbar-setting-tab', 'data-tab-id': '1' }, '駅', this.tabClicked.bind(this)),
-      h('div', { class: 'tabbar-tab tabbar-setting-tab', 'data-tab-id': '2' }, '種別', this.tabClicked.bind(this)), /*,
-      h('div', { class: 'tabbar-tab tabbar-setting-tab', 'data-tab-id': '3' }, 'ダイヤ', this.tabClicked.bind(this))*/
+      h(
+        'div',
+        { class: 'tabbar-tab tabbar-setting-tab active', 'data-tab-id': '0' },
+        '基本設定',
+        this.tabClicked.bind(this)
+      ),
+      h(
+        'div',
+        { class: 'tabbar-tab tabbar-setting-tab', 'data-tab-id': '1' },
+        '駅',
+        this.tabClicked.bind(this)
+      ),
+      h(
+        'div',
+        { class: 'tabbar-tab tabbar-setting-tab', 'data-tab-id': '2' },
+        '種別',
+        this.tabClicked.bind(this)
+      ) /*,
+      h('div', { class: 'tabbar-tab tabbar-setting-tab', 'data-tab-id': '3' }, 'ダイヤ', this.tabClicked.bind(this))*/,
     ];
     this.selectedTab = elements[0];
     this.element.innerHTML = '';

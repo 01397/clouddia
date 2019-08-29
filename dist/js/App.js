@@ -22,10 +22,7 @@ export default class App {
         this.rootElm = h('div', { id: 'app' }, [
             h('div', { id: 'header' }, [
                 h('div', { id: 'header-logo' }),
-                h('div', { id: 'header-container' }, [
-                    this.toolbarElm,
-                    this.tabbarElm,
-                ]),
+                h('div', { id: 'header-container' }, [this.toolbarElm, this.tabbarElm]),
             ]),
             h('div', { id: 'bottom-container' }, [
                 this.sidebarElm,
@@ -47,6 +44,7 @@ export default class App {
     /**
      * ファイルに関する設定(FileSettingView)の表示
      */
+    // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
     showFileSettingView(viewId) {
         switch (viewId) {
             case 0:
@@ -116,7 +114,7 @@ export default class App {
         return this._selection;
     }
     save() {
-        const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
+        const bom = new Uint8Array([0xef, 0xbb, 0xbf]);
         const unicodeArray = [];
         const oudiaString = this.data.toOudiaString();
         for (let i = 0; i < oudiaString.length; i++) {
@@ -137,8 +135,9 @@ export default class App {
     }
     loadOudia(oudstring, fileName) {
         const parser = new DiagramParser();
-        parser.parse(oudstring)
-            .then((result) => {
+        parser
+            .parse(oudstring)
+            .then(result => {
             // tslint:disable-next-line: no-console
             console.log(result);
             this.data = result;
@@ -147,7 +146,8 @@ export default class App {
             this.toolbar = new Toolbar(this, this.toolbarElm);
             this.sub = new TrainSubview(this, 0);
             this.showTrainTimetableView(0, 0);
-        }).catch((e) => {
+        })
+            .catch((e) => {
             // tslint:disable-next-line: no-console
             console.error('parse error.', e);
         });
@@ -155,13 +155,15 @@ export default class App {
     loadOnlineFile(fileURL) {
         const url = 'http://soasa.starfree.jp/fileRequest.php?url=' + fileURL;
         fetch(url, { mode: 'cors' })
-            .then((response) => response.blob())
-            .then((blob) => new Promise((resolve) => {
+            .then(response => response.blob())
+            .then(blob => new Promise(resolve => {
             const reader = new FileReader();
             reader.onload = () => this.loadOudia(reader.result, 'Web上のファイル');
             reader.readAsText(blob, 'shift-jis');
         }))
-            .catch((err) => { throw err; });
+            .catch(err => {
+            throw err;
+        });
     }
 }
 //# sourceMappingURL=App.js.map

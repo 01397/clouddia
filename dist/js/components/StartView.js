@@ -20,10 +20,7 @@ export default class StartView extends View {
             h('div', { class: 'start-drop-caption' }, '枠内にファイルをドロップしてもOKです'),
             h('div', { class: 'start-drop-or' }, 'または'),
             h('h3', { class: 'start-drop-heading' }, 'Web上のファイルを使う'),
-            h('div', { class: 'start-drop-url-wrapper' }, [
-                urlField,
-                urlButton,
-            ]),
+            h('div', { class: 'start-drop-url-wrapper' }, [urlField, urlButton]),
             h('div', { class: 'start-drop-caption' }, '直リンク禁止のファイルは、まず公開者に許可を取ることを推奨します'),
         ]);
         dropArea.addEventListener('dragover', (evt) => {
@@ -39,7 +36,11 @@ export default class StartView extends View {
             this.loadLocalFile(evt.dataTransfer.files[0]);
         });
         const content = h('div', { class: 'start-container' }, [
-            h('img', { class: 'start-logo', src: './img/logo_horizontal.svg', alt: 'CloudDia' }),
+            h('img', {
+                class: 'start-logo',
+                src: './img/logo_horizontal.svg',
+                alt: 'CloudDia',
+            }),
             dropArea,
             h('div', { class: 'start-readme' }, [
                 h('h1', { class: 'start-readme-heading' }, 'これは？'),

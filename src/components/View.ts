@@ -1,7 +1,13 @@
 import App from '../App.js';
 import { h } from '../Util.js';
 
-export type viewTypeString = 'Start' | 'StationTimetable' | 'InboundTrainTimetable' | 'OutboundTrainTimetable' | 'Diagram' | 'FileSetting';
+export type viewTypeString =
+  | 'Start'
+  | 'StationTimetable'
+  | 'InboundTrainTimetable'
+  | 'OutboundTrainTimetable'
+  | 'Diagram'
+  | 'FileSetting';
 export default abstract class View {
   protected app: App;
   protected element: HTMLDivElement;
@@ -14,7 +20,7 @@ export default abstract class View {
     delete app.main;
 
     // EventListenerなどのしがらみのない、まっとうなDIVを取り戻す
-    const newDiv = h('div', {id: 'mainContainer'}) as HTMLDivElement;
+    const newDiv = h('div', { id: 'mainContainer' }) as HTMLDivElement;
     app.mainElm.replaceWith(newDiv);
     app.mainElm = newDiv;
     this.element = newDiv;

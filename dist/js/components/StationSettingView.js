@@ -1,5 +1,5 @@
 import { Station } from '../DiagramParser.js';
-import { createButton, createCheckbox, createRadio, createTextField, h } from '../Util.js';
+import { createButton, createCheckbox, createRadio, createTextField, h, } from '../Util.js';
 import View from './View.js';
 export default class StationSettingView extends View {
     // TODO: 駅,番線の挿入,削除後に列車時刻表を直さなきゃ
@@ -14,7 +14,10 @@ export default class StationSettingView extends View {
                 this.hoverElement.classList.remove('hover');
             if (y % this.rowHeight < 28) {
                 this.hoverElement = null;
-                this.insertButton.style.transform = 'translateY(' + (Math.floor(y / this.rowHeight) * this.rowHeight + 12) + 'px)';
+                this.insertButton.style.transform =
+                    'translateY(' +
+                        (Math.floor(y / this.rowHeight) * this.rowHeight + 12) +
+                        'px)';
                 this.insertButton.style.display = 'inline';
             }
             else {
@@ -57,7 +60,7 @@ export default class StationSettingView extends View {
                 h('div', { class: 'fs-section-header' }, '名称'),
                 h('div', { class: 'form-row' }, [
                     h('div', { class: 'form-label' }, '駅名'),
-                    createTextField(station.name, '', '', null, (e) => {
+                    createTextField(station.name, '', '', null, e => {
                         const value = e.currentTarget.value;
                         this.svgElement.querySelectorAll('.fs-railmap-station')[stationIndex].textContent = value;
                         station.name = value;
@@ -65,7 +68,7 @@ export default class StationSettingView extends View {
                 ]),
                 h('div', { class: 'form-row' }, [
                     h('div', { class: 'form-label' }, '駅名略称'),
-                    createTextField(station.abbrName, '', '', (e) => {
+                    createTextField(station.abbrName, '', '', e => {
                         station.abbrName = e.currentTarget.value;
                     }),
                 ]),
@@ -75,10 +78,11 @@ export default class StationSettingView extends View {
                 h('div', { class: 'form-row' }, [
                     h('div', { class: 'form-label' }, '駅規模'),
                     h('label', { class: 'fs-label' }, [
-                        createCheckbox(station.isMain, null, (e) => {
+                        createCheckbox(station.isMain, null, e => {
                             const value = e.currentTarget.checked;
                             station.isMain = value;
-                            this.svgElement.querySelectorAll('g')[stationIndex].classList[value ? 'add' : 'remove']('fs-railmap-main');
+                            this.svgElement
+                                .querySelectorAll('g')[stationIndex].classList[value ? 'add' : 'remove']('fs-railmap-main');
                         }),
                         h('div', { class: 'fs-text' }, '主要駅'),
                     ]),
@@ -86,13 +90,13 @@ export default class StationSettingView extends View {
                 h('div', { class: 'form-row' }, [
                     h('div', { class: 'form-label' }, '上り列車'),
                     h('label', { class: 'fs-label' }, [
-                        createCheckbox(station.timetableStyle.arrival[0], '', (e) => {
+                        createCheckbox(station.timetableStyle.arrival[0], '', e => {
                             station.timetableStyle.arrival[0] = e.currentTarget.checked;
                         }),
                         h('div', { class: 'fs-text' }, '着時刻'),
                     ]),
                     h('label', { class: 'fs-label' }, [
-                        createCheckbox(station.timetableStyle.departure[0], '', (e) => {
+                        createCheckbox(station.timetableStyle.departure[0], '', e => {
                             station.timetableStyle.departure[0] = e.currentTarget.checked;
                         }),
                         h('div', { class: 'fs-text' }, '発時刻'),
@@ -101,13 +105,13 @@ export default class StationSettingView extends View {
                 h('div', { class: 'form-row' }, [
                     h('div', { class: 'form-label' }, '下り列車'),
                     h('label', { class: 'fs-label' }, [
-                        createCheckbox(station.timetableStyle.arrival[1], '', (e) => {
+                        createCheckbox(station.timetableStyle.arrival[1], '', e => {
                             station.timetableStyle.arrival[1] = e.currentTarget.checked;
                         }),
                         h('div', { class: 'fs-text' }, '着時刻'),
                     ]),
                     h('label', { class: 'fs-label' }, [
-                        createCheckbox(station.timetableStyle.departure[1], '', (e) => {
+                        createCheckbox(station.timetableStyle.departure[1], '', e => {
                             station.timetableStyle.departure[1] = e.currentTarget.checked;
                         }),
                         h('div', { class: 'fs-text' }, '発時刻'),
@@ -126,7 +130,7 @@ export default class StationSettingView extends View {
                     ...station.tracks.map((track, i) => {
                         const fragment = document.createDocumentFragment();
                         fragment.append(...[
-                            createTextField(track.name, '', '', (e) => {
+                            createTextField(track.name, '', '', e => {
                                 const value = e.currentTarget.value;
                                 if (value !== '') {
                                     track.name = value;
@@ -135,13 +139,16 @@ export default class StationSettingView extends View {
                                     e.currentTarget.value = track.name;
                                 }
                             }),
-                            createTextField(track.abbrName[0], '', '', (e) => track.abbrName[0] = e.currentTarget.value),
-                            createTextField(track.abbrName[1] === '' ? track.abbrName[0] : track.abbrName[1], '', '', (e) => {
+                            createTextField(track.abbrName[0], '', '', e => (track.abbrName[0] = e.currentTarget.value)),
+                            createTextField(track.abbrName[1] === ''
+                                ? track.abbrName[0]
+                                : track.abbrName[1], '', '', e => {
                                 const value = e.currentTarget.value;
-                                track.abbrName[1] = track.abbrName[0] === value ? '' : value;
+                                track.abbrName[1] =
+                                    track.abbrName[0] === value ? '' : value;
                             }),
-                            createRadio(station.mainTrack[0] === i, 'fs-inbound', '', (e) => station.mainTrack[0] = i),
-                            createRadio(station.mainTrack[1] === i, 'fs-outbound', '', (e) => station.mainTrack[1] = i),
+                            createRadio(station.mainTrack[0] === i, 'fs-inbound', '', e => (station.mainTrack[0] = i)),
+                            createRadio(station.mainTrack[1] === i, 'fs-outbound', '', e => (station.mainTrack[1] = i)),
                             createButton('削除', 'form-button-red', () => {
                                 station.tracks.splice(i, 1);
                                 this.editStation(stationIndex);
@@ -167,11 +174,13 @@ export default class StationSettingView extends View {
     insertStation(stationIndex) {
         const stations = this.app.data.railway.stations;
         stations.splice(stationIndex, 0, new Station());
-        stations.forEach((station) => {
-            if (station.brunchCoreStationIndex !== null && station.brunchCoreStationIndex >= stationIndex) {
+        stations.forEach(station => {
+            if (station.brunchCoreStationIndex !== null &&
+                station.brunchCoreStationIndex >= stationIndex) {
                 station.brunchCoreStationIndex++;
             }
-            if (station.loopOriginStationIndex !== null && station.loopOriginStationIndex >= stationIndex) {
+            if (station.loopOriginStationIndex !== null &&
+                station.loopOriginStationIndex >= stationIndex) {
                 station.loopOriginStationIndex++;
             }
         });
@@ -181,11 +190,13 @@ export default class StationSettingView extends View {
     removeStation(stationIndex) {
         const stations = this.app.data.railway.stations;
         stations.splice(stationIndex, 1);
-        stations.forEach((station) => {
-            if (station.brunchCoreStationIndex !== null && station.brunchCoreStationIndex >= stationIndex) {
+        stations.forEach(station => {
+            if (station.brunchCoreStationIndex !== null &&
+                station.brunchCoreStationIndex >= stationIndex) {
                 station.brunchCoreStationIndex--;
             }
-            if (station.loopOriginStationIndex !== null && station.loopOriginStationIndex >= stationIndex) {
+            if (station.loopOriginStationIndex !== null &&
+                station.loopOriginStationIndex >= stationIndex) {
                 station.loopOriginStationIndex--;
             }
         });
@@ -215,7 +226,8 @@ export default class StationSettingView extends View {
                 const dy = stations[i].brunchCoreStationIndex - i;
                 layer2.push(h('path', {
                     class: 'fs-railmap-line',
-                    d: `M44 ${y + 16} c-36 0, -36 ${dy * this.rowHeight}, 0 ${dy * this.rowHeight}`,
+                    d: `M44 ${y + 16} c-36 0, -36 ${dy * this.rowHeight}, 0 ${dy *
+                        this.rowHeight}`,
                 }, null, null, 'http://www.w3.org/2000/svg'));
             }
             else {
@@ -236,9 +248,11 @@ export default class StationSettingView extends View {
             }
             layer1.push(h('g', { class: stations[i].isMain ? 'fs-railmap-main' : '' }, content, null, 'http://www.w3.org/2000/svg'));
             // 駅間
-            if ((stations[i].brunchCoreStationIndex === null || stations[i].brunchCoreStationIndex < i) &&
-                (i + 1) in stations &&
-                (stations[i + 1].brunchCoreStationIndex === null || stations[i + 1].brunchCoreStationIndex > i + 1)) {
+            if ((stations[i].brunchCoreStationIndex === null ||
+                stations[i].brunchCoreStationIndex < i) &&
+                i + 1 in stations &&
+                (stations[i + 1].brunchCoreStationIndex === null ||
+                    stations[i + 1].brunchCoreStationIndex > i + 1)) {
                 layer2.push(h('line', {
                     class: 'fs-railmap-line',
                     x1: 44,

@@ -1,4 +1,4 @@
-import { Color, createButton, createCheckbox, createColorField, createLineStyleField, createTextField, DASH_ARRAY_STYLE, h } from '../Util.js';
+import { Color, createButton, createCheckbox, createColorField, createLineStyleField, createTextField, DASH_ARRAY_STYLE, h, } from '../Util.js';
 import View from './View.js';
 export default class TrainTypeSettingView extends View {
     constructor(app) {
@@ -36,10 +36,29 @@ export default class TrainTypeSettingView extends View {
         const typeList = this.app.data.railway.trainTypes;
         this.svgElement.setAttribute('height', String(36 * typeList.length));
         this.svgElement.innerHTML = '';
-        this.svgElement.append(...typeList.map((trainType, i) => h('g', { class: 'fs-typelist-item', style: `transform:translate(0, ${36 * i}px)` }, [
-            h('path', { d: 'M8 30.5 l216 0 l12 -24 l56 0', stroke: trainType.strokeColor.toHEXString(), 'stroke-dasharray': DASH_ARRAY_STYLE[trainType.lineStyle], 'stroke-width': trainType.isBoldLine ? 3 : 1 }, '', null, 'http://www.w3.org/2000/svg'),
-            h('text', { x: 8, y: 26, fill: trainType.textColor.toHEXString(), class: 'fs-typelist-name' }, trainType.name, null, 'http://www.w3.org/2000/svg'),
-            h('text', { x: 264, y: 26, fill: trainType.textColor.toHEXString(), class: 'fs-typelist-abbr', 'text-anchor': 'middle' }, trainType.abbrName, null, 'http://www.w3.org/2000/svg'),
+        this.svgElement.append(...typeList.map((trainType, i) => h('g', {
+            class: 'fs-typelist-item',
+            style: `transform:translate(0, ${36 * i}px)`,
+        }, [
+            h('path', {
+                d: 'M8 30.5 l216 0 l12 -24 l56 0',
+                stroke: trainType.strokeColor.toHEXString(),
+                'stroke-dasharray': DASH_ARRAY_STYLE[trainType.lineStyle],
+                'stroke-width': trainType.isBoldLine ? 3 : 1,
+            }, '', null, 'http://www.w3.org/2000/svg'),
+            h('text', {
+                x: 8,
+                y: 26,
+                fill: trainType.textColor.toHEXString(),
+                class: 'fs-typelist-name',
+            }, trainType.name, null, 'http://www.w3.org/2000/svg'),
+            h('text', {
+                x: 264,
+                y: 26,
+                fill: trainType.textColor.toHEXString(),
+                class: 'fs-typelist-abbr',
+                'text-anchor': 'middle',
+            }, trainType.abbrName, null, 'http://www.w3.org/2000/svg'),
         ], null, 'http://www.w3.org/2000/svg')));
     }
     edit(trainTypeIndex) {
@@ -49,7 +68,7 @@ export default class TrainTypeSettingView extends View {
                 h('div', { class: 'fs-section-header' }, '表示'),
                 h('div', { class: 'form-row' }, [
                     h('div', { class: 'form-label' }, '種別名'),
-                    createTextField(trainType.name, '', '', null, (e) => {
+                    createTextField(trainType.name, '', '', null, e => {
                         const value = e.currentTarget.value;
                         this.svgElement.querySelectorAll('.fs-typelist-name')[trainTypeIndex].textContent = value;
                         trainType.name = value;
@@ -57,7 +76,7 @@ export default class TrainTypeSettingView extends View {
                 ]),
                 h('div', { class: 'form-row' }, [
                     h('div', { class: 'form-label' }, '種別略称'),
-                    createTextField(trainType.abbrName, '', '', null, (e) => {
+                    createTextField(trainType.abbrName, '', '', null, e => {
                         const value = e.currentTarget.value;
                         this.svgElement.querySelectorAll('.fs-typelist-abbr')[trainTypeIndex].textContent = value;
                         trainType.abbrName = value;
@@ -65,14 +84,14 @@ export default class TrainTypeSettingView extends View {
                 ]),
                 h('div', { class: 'form-row' }, [
                     h('div', { class: 'form-label', id: 'fs-traintype-color-text' }, '文字色'),
-                    createColorField(trainType.textColor.toHEXString(), '', (e) => {
+                    createColorField(trainType.textColor.toHEXString(), '', e => {
                         trainType.textColor = Color.from(e.currentTarget.value);
                         this.updateList();
                     }),
                 ]),
                 h('div', { class: 'form-row' }, [
                     h('div', { class: 'form-label' }, '線色'),
-                    createColorField(trainType.strokeColor.toHEXString(), '', (e) => {
+                    createColorField(trainType.strokeColor.toHEXString(), '', e => {
                         trainType.strokeColor = Color.from(e.currentTarget.value);
                         this.updateList();
                     }),
@@ -84,14 +103,14 @@ export default class TrainTypeSettingView extends View {
                 ]),
                 h('div', { class: 'form-row' }, [
                     h('div', { class: 'form-label' }, '線スタイル'),
-                    createLineStyleField(trainType.lineStyle, '', (value) => {
+                    createLineStyleField(trainType.lineStyle, '', value => {
                         trainType.lineStyle = value;
                         this.updateList();
                     }),
                 ]),
                 h('div', { class: 'form-row' }, [
                     h('div', { class: 'form-label' }, '太線'),
-                    createCheckbox(trainType.isBoldLine, '', (e) => {
+                    createCheckbox(trainType.isBoldLine, '', e => {
                         trainType.isBoldLine = e.currentTarget.checked;
                         this.updateList();
                     }),
