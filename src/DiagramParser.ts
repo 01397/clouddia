@@ -6,15 +6,10 @@ export default class DiagramParser {
    * @param oudString oudia形式の文字列
    */
   public parse(oudString: string): Promise<DiagramFile> {
-    return new Promise(
-      (
-        resolve: (value?: DiagramFile) => void,
-        reject: (reason?: Error) => void
-      ) => {
-        const lines = oudString.split(/\r\n|\r|\n/);
-        resolve(DiagramFile.fromOudia(lines)[0] as DiagramFile);
-      }
-    );
+    return new Promise((resolve: (value?: DiagramFile) => void) => {
+      const lines = oudString.split(/\r\n|\r|\n/);
+      resolve(DiagramFile.fromOudia(lines)[0] as DiagramFile);
+    });
   }
 }
 

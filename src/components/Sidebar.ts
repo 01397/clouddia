@@ -25,7 +25,7 @@ export default class Sidebar {
     <line x1="57" x2="42" y1="11" y2="22" />
     <line x1="57" x2="42" y1="41" y2="52" />
     <line x1="23" x2="8" y1="11" y2="22" />
-    </svg><span class="sidebar-label" style="transition-delay:0s">下り列車時刻表</span></div>`;
+    </svg><span class="sidebar-label" style="transition-delay:0s"><span id="sidebar-label-inbound">${this.app.data.railway.directionName[0]}</span>列車時刻表</span></div>`;
     const inbound = h('div', { id: 'sidebar-inbound' }, null, () =>
       this.app.showTrainTimetableView(null, 1)
     );
@@ -37,7 +37,7 @@ export default class Sidebar {
     <line x1="7" x2="22" y1="11" y2="22" />
     <line x1="7" x2="22" y1="41" y2="52" />
     <line x1="41" x2="56" y1="11" y2="22" />
-    </svg><span class="sidebar-label" style="transition-delay:0.05s">上り列車時刻表</span></div>`;
+    </svg><span class="sidebar-label" style="transition-delay:0.05s"><span id="sidebar-label-outbound">${this.app.data.railway.directionName[1]}</span>列車時刻表</span></div>`;
     const station = h('div', { id: 'sidebar-diagram' }, null, () =>
       this.app.showStationTimetableView(null)
     );

@@ -33,22 +33,12 @@ export default class TrainTimetableView extends View {
         this.element.append(this.tBody, this.tHeader, this.tStation);
         this.element.addEventListener('scroll', () => (this.rendering = true));
         this.element.addEventListener('click', event => {
-            const trainIndex = event.target.parentElement.dataset
-                .colId;
             const target = event.target;
-            if (!('rowId' in target.dataset))
-                return;
-            this.focus(target);
-            const [stationIndex, cellType] = target.dataset.rowId.split('-');
-            this.app.selection = [
-                {
-                    cellType,
-                    selectType: 'train-station',
-                    stationIndex: Number(stationIndex),
-                    train: this.app.data.railway.diagrams[this.diaIndex].trains[this.direction][trainIndex],
-                },
-            ];
+            const data = target.dataset.address.split('-');
+            this.activeCell = [Number(data[0]), Number(data[1])];
+            this.selectCell(target);
         });
+        document.addEventListener('keydown', this.moveCell.bind(this), false);
         // 現在の表示領域
         this.lastArea = { x: 0, w: 0 };
         this.columns = new Map();
@@ -69,6 +59,7 @@ export default class TrainTimetableView extends View {
         task();
     }
     finish() {
+        document.removeEventListener('keydown', this.moveCell, false);
         cancelAnimationFrame(this.reqId);
     }
     update() {
@@ -129,6 +120,7 @@ export default class TrainTimetableView extends View {
         const stations = this.app.data.railway.stations;
         const stationLen = stations.length;
         this.sheet = [];
+        let colIndex = 0;
         trainList.forEach((train) => {
             const col = {
                 number: train.number,
@@ -141,13 +133,12 @@ export default class TrainTimetableView extends View {
             const trainType = this.app.data.railway.trainTypes[train.type];
             const color = trainType.textColor.toHEXString();
             const timetable = train.timetable;
+            let rowIndex = 0;
             for (let i = 0; i < stationLen; i++) {
                 // 時刻の配列
                 const data = timetable.data[i];
                 // 方向に応じた駅Index
                 const sid = this.direction === 0 ? i : stationLen - i - 1;
-                // 対応する駅
-                const station = stations[sid];
                 const { arrival, departure, border } = this.stationStyle[i];
                 // データがなければ運行なし or 経由なし
                 if (!data) {
@@ -158,14 +149,16 @@ export default class TrainTimetableView extends View {
                             text: isBlank ? TABLE_MARK.blank : TABLE_MARK.nonroute,
                             color,
                             bg: i % 2 === 0,
-                            rowId: sid + '-arrival',
+                            cellName: sid + '-arrival',
+                            address: colIndex + '-' + rowIndex++,
                         });
                     if (departure)
                         col.cells.push({
                             text: isBlank ? TABLE_MARK.blank : TABLE_MARK.nonroute,
                             color,
                             bg: i % 2 === 0,
-                            rowId: sid + '-departure',
+                            cellName: sid + '-departure',
+                            address: colIndex + '-' + rowIndex++,
                         });
                 }
                 else if (data.stopType === 1) {
@@ -177,7 +170,8 @@ export default class TrainTimetableView extends View {
                                 text: TABLE_MARK.blank,
                                 color,
                                 bg: i % 2 === 0,
-                                rowId: sid + '-arrival',
+                                cellName: sid + '-arrival',
+                                address: colIndex + '-' + rowIndex++,
                             });
                         }
                         else if (i === timetable.firstStationIndex) {
@@ -186,7 +180,8 @@ export default class TrainTimetableView extends View {
                                 text: TABLE_MARK.blank,
                                 color,
                                 bg: i % 2 === 0,
-                                rowId: sid + '-arrival',
+                                cellName: sid + '-arrival',
+                                address: colIndex + '-' + rowIndex++,
                             });
                         }
                         else {
@@ -194,7 +189,8 @@ export default class TrainTimetableView extends View {
                                 text: numberToTimeString(data.arrival || data.departure, this.timeFormat),
                                 color,
                                 bg: i % 2 === 0,
-                                rowId: sid + '-arrival',
+                                cellName: sid + '-arrival',
+                                address: colIndex + '-' + rowIndex++,
                             });
                         }
                     }
@@ -206,7 +202,8 @@ export default class TrainTimetableView extends View {
                                 text: TABLE_MARK.blank,
                                 color,
                                 bg: i % 2 === 0,
-                                rowId: sid + '-departure',
+                                cellName: sid + '-departure',
+                                address: colIndex + '-' + rowIndex++,
                             });
                         }
                         else if (data.departure !== null) {
@@ -215,7 +212,8 @@ export default class TrainTimetableView extends View {
                                 text: numberToTimeString(data.departure, this.timeFormat),
                                 color,
                                 bg: i % 2 === 0,
-                                rowId: sid + '-departure',
+                                cellName: sid + '-departure',
+                                address: colIndex + '-' + rowIndex++,
                             });
                         }
                         else if (arrival && i !== timetable.terminalStationIndex) {
@@ -223,7 +221,8 @@ export default class TrainTimetableView extends View {
                                 text: numberToTimeString(data.arrival, this.timeFormat),
                                 color,
                                 bg: i % 2 === 0,
-                                rowId: sid + '-departure',
+                                cellName: sid + '-departure',
+                                address: colIndex + '-' + rowIndex++,
                             });
                         }
                         else if (i < timetable.firstStationIndex ||
@@ -232,7 +231,8 @@ export default class TrainTimetableView extends View {
                                 text: TABLE_MARK.blank,
                                 color,
                                 bg: i % 2 === 0,
-                                rowId: sid + '-departure',
+                                cellName: sid + '-departure',
+                                address: colIndex + '-' + rowIndex++,
                             });
                         }
                         else {
@@ -240,7 +240,8 @@ export default class TrainTimetableView extends View {
                                 text: TABLE_MARK.stop,
                                 color,
                                 bg: i % 2 === 0,
-                                rowId: sid + '-departure',
+                                cellName: sid + '-departure',
+                                address: colIndex + '-' + rowIndex++,
                             });
                         }
                     }
@@ -251,19 +252,22 @@ export default class TrainTimetableView extends View {
                             text: TABLE_MARK.pass,
                             color,
                             bg: i % 2 === 0,
-                            rowId: sid + '-departure',
+                            cellName: sid + '-departure',
+                            address: colIndex + '-' + rowIndex++,
                         });
                     if (departure)
                         col.cells.push({
                             text: TABLE_MARK.pass,
                             color,
                             bg: i % 2 === 0,
-                            rowId: sid + '-departure',
+                            cellName: sid + '-departure',
+                            address: colIndex + '-' + rowIndex++,
                         });
                 }
                 col.cells[col.cells.length - 1].border = border;
             }
             this.sheet.push(col);
+            colIndex++;
         });
     }
     render() {
@@ -308,13 +312,14 @@ export default class TrainTimetableView extends View {
     createColumn(colIndex) {
         const data = this.sheet[colIndex];
         let lastBg = null;
-        const bodyContent = data.cells.map(({ text = '', color = '#000000', bg = false, border = false, rowId = '', }, i) => {
+        const bodyContent = data.cells.map(({ text = '', color = '#000000', bg = false, border = false, cellName = '', address = '', }) => {
             const result = h('div', {
                 style: `color: ${color};height: ${this.cellHeight}px;` +
                     (bg === lastBg ? 'border-top:1px solid rgba(0,0,0,0.1)' : '') +
                     (border ? 'border-bottom:1px solid #444444' : ''),
                 class: 'tt-cell' + (bg ? ' tt-cell-bg' : ''),
-                'data-row-id': rowId,
+                'data-cell-name': cellName,
+                'data-address': address,
             }, text);
             lastBg = bg;
             return result;
@@ -381,6 +386,46 @@ export default class TrainTimetableView extends View {
         this.focusElement.style.top = rect.top - rect2.top - 2 + 'px';
         this.focusElement.style.width = rect.width - rect2.width + 'px';
         this.focusElement.style.height = rect.height - rect2.height + 'px';
+    }
+    selectCell(target) {
+        const trainIndex = target.parentElement.dataset.colId;
+        if (!('cellName' in target.dataset))
+            return;
+        this.focus(target);
+        const [stationIndex, cellType] = target.dataset.cellName.split('-');
+        const [col, row] = target.dataset.address.split('-');
+        this.activeCell = [Number(col), Number(row)];
+        this.app.selection = [
+            {
+                cellType,
+                selectType: 'train-station',
+                stationIndex: Number(stationIndex),
+                train: this.app.data.railway.diagrams[this.diaIndex].trains[this.direction][trainIndex],
+            },
+        ];
+    }
+    moveCell(event) {
+        event.preventDefault();
+        let col = this.activeCell[0];
+        let row = this.activeCell[1];
+        switch (event.keyCode) {
+            case 37:
+                col--;
+                break;
+            case 38:
+                row--;
+                break;
+            case 39:
+                col++;
+                break;
+            case 40:
+                row++;
+                break;
+        }
+        const target = document.querySelector(`#tt-body>div>div[data-address="${col}-${row}"]`);
+        if (target === null)
+            return;
+        this.selectCell(target);
     }
 }
 //# sourceMappingURL=TrainTimetableView.js.map

@@ -13,7 +13,7 @@ import DiagramParser from './DiagramParser.js';
 import { h } from './Util.js';
 export default class App {
     constructor(root) {
-        this.version = 3;
+        this.version = '0.2.0';
         this.sidebarElm = h('div', { id: 'sidebar' }, null);
         this.toolbarElm = h('div', { id: 'toolbar' }, null);
         this.tabbarElm = h('div', { id: 'tabbar' }, null);
@@ -34,7 +34,7 @@ export default class App {
         this.currentView = null;
         this.sidebar = null;
         this.tabbar = null;
-        this.toolbar = null;
+        this.toolbar = new Toolbar(this, this.toolbarElm);
         this.main = new StartView(this);
         this.sub = null;
         this.data = null;
@@ -114,13 +114,14 @@ export default class App {
         return this._selection;
     }
     save() {
-        const bom = new Uint8Array([0xef, 0xbb, 0xbf]);
+        //const bom = new Uint8Array([0xef, 0xbb, 0xbf]);
         const unicodeArray = [];
         const oudiaString = this.data.toOudiaString();
         for (let i = 0; i < oudiaString.length; i++) {
             unicodeArray.push(oudiaString.charCodeAt(i));
         }
         // Encodingはencoding.jsの力を借ります。
+        // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
         // @ts-ignore
         const shiftJISArray = Encoding.convert(unicodeArray, 'sjis', 'unicode');
         const shiftJISuInt8 = new Uint8Array(shiftJISArray);
@@ -135,15 +136,16 @@ export default class App {
     }
     loadOudia(oudstring, fileName) {
         const parser = new DiagramParser();
+        console.log('loading: ' + fileName);
         parser
             .parse(oudstring)
             .then(result => {
+            console.log('loaded.');
             // tslint:disable-next-line: no-console
             console.log(result);
             this.data = result;
             this.sidebar = new Sidebar(this, this.sidebarElm);
             this.tabbar = new Tabbar(this, this.tabbarElm);
-            this.toolbar = new Toolbar(this, this.toolbarElm);
             this.sub = new TrainSubview(this, 0);
             this.showTrainTimetableView(0, 0);
         })
@@ -156,7 +158,7 @@ export default class App {
         const url = 'http://soasa.starfree.jp/fileRequest.php?url=' + fileURL;
         fetch(url, { mode: 'cors' })
             .then(response => response.blob())
-            .then(blob => new Promise(resolve => {
+            .then(blob => new Promise(() => {
             const reader = new FileReader();
             reader.onload = () => this.loadOudia(reader.result, 'Web上のファイル');
             reader.readAsText(blob, 'shift-jis');
@@ -164,6 +166,22 @@ export default class App {
             .catch(err => {
             throw err;
         });
+    }
+    setViewMenu(viewMenu) {
+        const menu = [
+            {
+                label: 'ファイル',
+                submenu: [
+                    {
+                        label: '保存',
+                        accelerator: 'CmdOrCtrl+S',
+                        click: () => this.save(),
+                    },
+                ],
+            },
+            ...viewMenu,
+        ];
+        this.toolbar.setMenu(menu);
     }
 }
 //# sourceMappingURL=App.js.map

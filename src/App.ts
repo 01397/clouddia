@@ -21,6 +21,59 @@ export interface SelectionObject {
   selectType: string;
 }
 
+export interface MenuItem {
+  label?: string;
+  click?: () => void;
+  accelerator?: string;
+  submenu?: MenuItem[];
+  enabled?: boolean;
+  visible?: boolean;
+  checked?: boolean;
+  type?: 'normal' | 'separator' | 'submenu' | 'checkbox' | 'radio';
+  role?:
+    | 'undo'
+    | 'redo'
+    | 'cut'
+    | 'copy'
+    | 'paste'
+    | 'pasteAndMatchStyle'
+    | 'selectAll'
+    | 'delete'
+    | 'minimize'
+    | 'close'
+    | 'quit'
+    | 'reload'
+    | 'forceReload'
+    | 'toggleDevTools'
+    | 'togglefullscreen'
+    | 'resetZoom'
+    | 'zoomIn'
+    | 'zoomOut'
+    | 'fileMenu'
+    | 'editMenu'
+    | 'viewMenu'
+    | 'windowMenu'
+    | 'appMenu'
+    | 'about'
+    | 'hide'
+    | 'hideOthers'
+    | 'unhide'
+    | 'startSpeaking'
+    | 'stopSpeaking'
+    | 'front'
+    | 'zoom'
+    | 'toggleTabBar'
+    | 'selectNextTab'
+    | 'selectPreviousTab'
+    | 'mergeAllWindows'
+    | 'moveTabToNewWindow'
+    | 'window'
+    | 'help'
+    | 'services'
+    | 'recentDocuments'
+    | 'clearRecentDocuments';
+}
+
 export default class App {
   public data: DiagramFile;
   public mainElm: Element;
@@ -31,7 +84,7 @@ export default class App {
   public toolbarElm: Element;
   public tabbarElm: Element;
   public currentView: viewTypeString;
-  public version: number;
+  public version: string;
   public rootElm: Element;
   public sidebar: Sidebar;
   public tabbar: Tabbar;
@@ -40,7 +93,7 @@ export default class App {
   public _selection: SelectionObject[];
 
   constructor(root: Element) {
-    this.version = 3;
+    this.version = '0.2.0';
     this.sidebarElm = h('div', { id: 'sidebar' }, null);
     this.toolbarElm = h('div', { id: 'toolbar' }, null);
     this.tabbarElm = h('div', { id: 'tabbar' }, null);
@@ -62,7 +115,7 @@ export default class App {
     this.currentView = null;
     this.sidebar = null;
     this.tabbar = null;
-    this.toolbar = null;
+    this.toolbar = new Toolbar(this, this.toolbarElm);
     this.main = new StartView(this);
     this.sub = null;
 
@@ -137,13 +190,14 @@ export default class App {
     return this._selection;
   }
   public save() {
-    const bom = new Uint8Array([0xef, 0xbb, 0xbf]);
+    //const bom = new Uint8Array([0xef, 0xbb, 0xbf]);
     const unicodeArray = [];
     const oudiaString = this.data.toOudiaString();
     for (let i = 0; i < oudiaString.length; i++) {
       unicodeArray.push(oudiaString.charCodeAt(i));
     }
     // Encodingはencoding.jsの力を借ります。
+    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
     // @ts-ignore
     const shiftJISArray = Encoding.convert(unicodeArray, 'sjis', 'unicode');
     const shiftJISuInt8 = new Uint8Array(shiftJISArray);
@@ -160,15 +214,16 @@ export default class App {
   }
   public loadOudia(oudstring: string, fileName: string): void {
     const parser = new DiagramParser();
+    console.log('loading: ' + fileName);
     parser
       .parse(oudstring)
       .then(result => {
+        console.log('loaded.');
         // tslint:disable-next-line: no-console
         console.log(result);
         this.data = result;
         this.sidebar = new Sidebar(this, this.sidebarElm);
         this.tabbar = new Tabbar(this, this.tabbarElm);
-        this.toolbar = new Toolbar(this, this.toolbarElm);
         this.sub = new TrainSubview(this, 0);
         this.showTrainTimetableView(0, 0);
       })
@@ -183,7 +238,7 @@ export default class App {
       .then(response => response.blob())
       .then(
         blob =>
-          new Promise(resolve => {
+          new Promise(() => {
             const reader = new FileReader();
             reader.onload = () =>
               this.loadOudia(reader.result as string, 'Web上のファイル');
@@ -193,5 +248,21 @@ export default class App {
       .catch(err => {
         throw err;
       });
+  }
+  public setViewMenu(viewMenu: MenuItem[]) {
+    const menu: MenuItem[] = [
+      {
+        label: 'ファイル',
+        submenu: [
+          {
+            label: '保存',
+            accelerator: 'CmdOrCtrl+S',
+            click: () => this.save(),
+          } as MenuItem,
+        ],
+      },
+      ...viewMenu,
+    ];
+    this.toolbar.setMenu(menu);
   }
 }

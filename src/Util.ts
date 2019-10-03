@@ -39,7 +39,7 @@ export const h = (
 export const createTimeField = (
   value: string,
   className?: string,
-  onchange: (e?: Event) => any = null
+  onchange: (e?: Event) => void = null
 ): HTMLInputElement => {
   const field = h('input', {
     class: 'form-time ' + className,
@@ -59,8 +59,8 @@ export const createTextField = (
   value: string,
   placeholder = '',
   className?: string,
-  onchange: (e?: Event) => any = null,
-  oninput: (e?: Event) => any = null
+  onchange: (e?: Event) => void = null,
+  oninput: (e?: Event) => void = null
 ): HTMLInputElement => {
   const field = h('input', {
     class: 'form-text ' + className,
@@ -77,7 +77,7 @@ export const createMultilineTextField = (
   value: string,
   placeholder = '',
   className?: string,
-  onchange: (e?: Event) => any = null
+  onchange: (e?: Event) => void = null
 ): HTMLTextAreaElement => {
   const field = h(
     'textarea',
@@ -90,7 +90,7 @@ export const createMultilineTextField = (
 export const createCheckbox = (
   checked: boolean,
   className?: string,
-  onchange: (e?: Event) => any = null
+  onchange: (e?: Event) => void = null
 ): HTMLInputElement => {
   const checkbox = h('input', {
     class: 'form-checkbox ' + className,
@@ -104,7 +104,7 @@ export const createRadio = (
   checked: boolean,
   name?: string,
   className?: string,
-  onchange: (e?: Event) => any = null
+  onchange: (e?: Event) => void = null
 ): HTMLInputElement => {
   const radio = h('input', {
     class: 'form-radio ' + className,
@@ -118,7 +118,7 @@ export const createRadio = (
 export const createButton = (
   value: string,
   className?: string,
-  onclick: (e?: Event) => any = null
+  onclick: (e?: Event) => void = null
 ): HTMLInputElement => {
   return h(
     'input',
@@ -130,7 +130,7 @@ export const createButton = (
 export const createColorField = (
   value: string,
   className?: string,
-  onchange: (e?: Event) => any = null
+  onchange: (e?: Event) => void = null
 ): HTMLLabelElement => {
   const colorField = h('input', { type: 'color', value }) as HTMLInputElement;
   const label = h(
@@ -148,7 +148,7 @@ export const createColorField = (
 export const createLineStyleField = (
   value: string,
   className?: string,
-  onchange: (value: string) => any = null
+  onchange: (value: string) => void = null
 ): HTMLDivElement => {
   const changeValue = newValue => {
     onchange(newValue);

@@ -20,6 +20,7 @@
   },
   "scripts": {
     "lint": "eslint src/** --ext .ts,.tsx",
-    "lint:fix": "yarn lint --fix"
+    "lint:fix": "yarn lint --fix",
+    "compile": "tsc"
   }
 }

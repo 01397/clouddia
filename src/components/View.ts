@@ -1,4 +1,4 @@
-import App from '../App.js';
+import App, { MenuItem } from '../App.js';
 import { h } from '../Util.js';
 
 export type viewTypeString =
@@ -11,7 +11,11 @@ export type viewTypeString =
 export default abstract class View {
   protected app: App;
   protected element: HTMLDivElement;
-  constructor(app: App, viewType: viewTypeString) {
+  constructor(
+    app: App,
+    viewType: viewTypeString,
+    menu: MenuItem[] = [{ label: 'メニュ' }]
+  ) {
     this.app = app;
     this.app.currentView = viewType;
 
@@ -24,7 +28,9 @@ export default abstract class View {
     app.mainElm.replaceWith(newDiv);
     app.mainElm = newDiv;
     this.element = newDiv;
+
+    app.setViewMenu(menu);
   }
-  // tslint:disable-next-line: one-line
+
   public abstract finish(): void;
 }

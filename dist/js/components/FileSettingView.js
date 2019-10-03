@@ -19,14 +19,24 @@ export default class FileSettingView extends View {
             placeholder: '下り',
             value: data.railway.directionName[0],
         });
-        directionNameField0.addEventListener('change', e => (data.railway.directionName[0] = e.currentTarget.value));
+        directionNameField0.addEventListener('change', e => {
+            const value = e.currentTarget.value;
+            data.railway.directionName[0] = value == '' ? '下り' : value;
+            document.getElementById('sidebar-label-inbound').textContent =
+                data.railway.directionName[0];
+        });
         const directionNameField1 = h('input', {
             class: 'form-text fs-flex',
             type: 'text',
             placeholder: '上り',
             value: data.railway.directionName[1],
         });
-        directionNameField1.addEventListener('change', e => (data.railway.directionName[1] = e.currentTarget.value));
+        directionNameField1.addEventListener('change', e => {
+            const value = e.currentTarget.value;
+            data.railway.directionName[1] = value == '' ? '上り' : value;
+            document.getElementById('sidebar-label-outbound').textContent =
+                data.railway.directionName[1];
+        });
         const startTimeField = createTimeField(numberToTimeString(data.railway.startTime, 'HH MM SS'), null, e => (data.railway.startTime = timeStringToNumber(e.currentTarget.value)));
         const content = h('div', { class: 'fs-1col-container' }, [
             h('div', { class: 'fs-section fs-label6' }, [

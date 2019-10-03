@@ -87,7 +87,7 @@ export default class TrainSubview extends Subview {
                         };
                     const input = h('input', radioAttr);
                     input.addEventListener('change', buttonsetChange);
-                    return radio;
+                    return input;
                 });
                 const buttonset = h('div', { class: 'form-buttonset' }, [
                     h('label', null, [
@@ -191,17 +191,37 @@ export default class TrainSubview extends Subview {
                             ]),
                             h('div', { class: 'form-row' }, [
                                 h('div', { class: 'form-label' }, '列車番号'),
-                                createTextField(selection[0].train.number, '', '', e => (selection[0].train.number = e.currentTarget.value)),
+                                createTextField(selection[0].train.number, '', '', e => {
+                                    selection[0].train.number = e.currentTarget.value;
+                                    if (this.app.main instanceof TrainTimetableView) {
+                                        this.app.main.update();
+                                    }
+                                }),
                             ]),
                             h('div', { class: 'form-row' }, [
                                 h('div', { class: 'form-label' }, '列車名'),
-                                createTextField(selection[0].train.name, '', 'ts-name', e => (selection[0].train.name = e.currentTarget.value)),
-                                createTextField(selection[0].train.count, '', 'ts-count', e => (selection[0].train.count = e.currentTarget.value)),
+                                createTextField(selection[0].train.name, '', 'ts-name', e => {
+                                    selection[0].train.name = e.currentTarget.value;
+                                    if (this.app.main instanceof TrainTimetableView) {
+                                        this.app.main.update();
+                                    }
+                                }),
+                                createTextField(selection[0].train.count, '', 'ts-count', e => {
+                                    selection[0].train.count = e.currentTarget.value;
+                                    if (this.app.main instanceof TrainTimetableView) {
+                                        this.app.main.update();
+                                    }
+                                }),
                                 h('div', { class: 'ts-count-text' }, '号'),
                             ]),
                             h('div', { class: 'form-row' }, [
                                 h('div', { class: 'form-label' }, '備考'),
-                                createMultilineTextField(selection[0].train.note, '', '', e => (selection[0].train.note = e.currentTarget.value)),
+                                createMultilineTextField(selection[0].train.note, '', '', e => {
+                                    selection[0].train.note = e.currentTarget.value;
+                                    if (this.app.main instanceof TrainTimetableView) {
+                                        this.app.main.update();
+                                    }
+                                }),
                             ]),
                         ]),
                     ]),

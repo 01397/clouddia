@@ -1,6 +1,6 @@
 import { h } from '../Util.js';
 export default class View {
-    constructor(app, viewType) {
+    constructor(app, viewType, menu = [{ label: 'メニュ' }]) {
         this.app = app;
         this.app.currentView = viewType;
         // お疲れ様、前mainViewの終了
@@ -12,6 +12,7 @@ export default class View {
         app.mainElm.replaceWith(newDiv);
         app.mainElm = newDiv;
         this.element = newDiv;
+        app.setViewMenu(menu);
     }
 }
 //# sourceMappingURL=View.js.map
