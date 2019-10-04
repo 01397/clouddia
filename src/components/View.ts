@@ -14,7 +14,7 @@ export default abstract class View {
   constructor(
     app: App,
     viewType: viewTypeString,
-    menu: MenuItem[] = [{ label: 'メニュ' }]
+    menu: MenuItem[] = [{ label: 'メニュー' }]
   ) {
     this.app = app;
     this.app.currentView = viewType;

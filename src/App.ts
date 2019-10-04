@@ -93,21 +93,17 @@ export default class App {
   public _selection: SelectionObject[];
 
   constructor(root: Element) {
-    this.version = '0.2.0';
-    this.sidebarElm = h('div', { id: 'sidebar' }, null);
+    this.version = '0.2.1';
+    this.sidebarElm = h('aside', { id: 'sidebar' }, null);
     this.toolbarElm = h('div', { id: 'toolbar' }, null);
     this.tabbarElm = h('div', { id: 'tabbar' }, null);
     this.mainElm = h('div', { id: 'mainContainer' }, null);
     this.subElm = h('div', { id: 'subContainer' }, null);
     this.rootElm = h('div', { id: 'app' }, [
-      h('div', { id: 'header' }, [
-        h('div', { id: 'header-logo' }),
-        h('div', { id: 'header-container' }, [this.toolbarElm, this.tabbarElm]),
-      ]),
-      h('div', { id: 'bottom-container' }, [
-        this.sidebarElm,
-        this.mainElm,
-        this.subElm,
+      this.sidebarElm,
+      h('main', { id: 'main' }, [
+        h('div', { id: 'header' }, [h('div', { id: 'header-container' }, [this.toolbarElm, this.tabbarElm])]),
+        h('div', { id: 'bottom-container' }, [this.mainElm, this.subElm]),
       ]),
     ]);
     root.replaceWith(this.rootElm);
@@ -122,6 +118,8 @@ export default class App {
     this.data = null;
     this.currentDiaIndex = 0;
     this._selection = null;
+
+    this.updateLocalData();
   }
   /**
    * ファイルに関する設定(FileSettingView)の表示
@@ -202,9 +200,7 @@ export default class App {
     const shiftJISArray = Encoding.convert(unicodeArray, 'sjis', 'unicode');
     const shiftJISuInt8 = new Uint8Array(shiftJISArray);
     const anchor = h('a', {
-      href: URL.createObjectURL(
-        new Blob([shiftJISuInt8], { type: 'text/plain' })
-      ),
+      href: URL.createObjectURL(new Blob([shiftJISuInt8], { type: 'text/plain' })),
       download: 'test.oud',
       style: 'display: none',
     }) as HTMLAnchorElement;
@@ -240,8 +236,7 @@ export default class App {
         blob =>
           new Promise(() => {
             const reader = new FileReader();
-            reader.onload = () =>
-              this.loadOudia(reader.result as string, 'Web上のファイル');
+            reader.onload = () => this.loadOudia(reader.result as string, 'Web上のファイル');
             reader.readAsText(blob, 'shift-jis');
           })
       )
@@ -264,5 +259,16 @@ export default class App {
       ...viewMenu,
     ];
     this.toolbar.setMenu(menu);
+  }
+  private updateLocalData() {
+    try {
+      window.localStorage.setItem('test', 'storage test.');
+      window.localStorage.getItem('test');
+      const version = window.localStorage.getItem('version');
+      if (version === this.version) return;
+      window.localStorage.setItem('version', this.version);
+    } catch (err) {
+      console.log(err);
+    }
   }
 }

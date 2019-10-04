@@ -7,16 +7,8 @@ export default class Toolbar {
   constructor(app: App, element: Element) {
     this.app = app;
     this.element = element;
-    const saveButton = h(
-      'button',
-      null,
-      '.oudで保存(β)',
-      this.app.save.bind(this.app)
-    );
-    const content = h('div', { id: 'toolbar' }, saveButton);
     this.menu = null;
     this.element.innerHTML = '';
-    this.element.append(content);
   }
   public setMenu(menu: MenuItem[]) {
     this.menu = menu;
@@ -40,7 +32,7 @@ export default class Toolbar {
       'div',
       { class: 'menu-container' },
       this.menu[i].submenu.map(item =>
-        h('div', { class: 'menu-item' }, item.label)
+        h('div', { class: 'menu-item' }, item.label, item.click)
       )
     ) as HTMLDivElement;
     menuElement.style.top = '16px';

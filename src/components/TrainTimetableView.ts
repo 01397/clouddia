@@ -52,10 +52,7 @@ export default class TrainTimetableView extends View {
   private activeCell: [number, number];
 
   constructor(app: App, diaIndex: number, direction: number) {
-    super(
-      app,
-      direction === 0 ? 'OutboundTrainTimetable' : 'InboundTrainTimetable'
-    );
+    super(app, direction === 0 ? 'OutboundTrainTimetable' : 'InboundTrainTimetable');
 
     // 表示設定
     this.diaIndex = diaIndex;
@@ -76,6 +73,7 @@ export default class TrainTimetableView extends View {
       style: `height:${this.headerHeight}px`,
     }) as HTMLElement;
     this.tStation = h('div', { id: 'tt-station' }) as HTMLElement;
+    this.activeCell = [0, 0];
     this.element.append(this.tBody, this.tHeader, this.tStation);
     this.element.addEventListener('scroll', () => (this.rendering = true));
     this.element.addEventListener('click', event => {
@@ -92,10 +90,7 @@ export default class TrainTimetableView extends View {
     this.rendering = true;
 
     this.tHeader.style.width =
-      this.app.data.railway.diagrams[this.diaIndex].trains[this.direction]
-        .length *
-        this.cellWidth +
-      'px';
+      this.app.data.railway.diagrams[this.diaIndex].trains[this.direction].length * this.cellWidth + 'px';
     this.tHeader.style.paddingLeft = this.stationCellWidth + 'px';
 
     this.loadStations();
@@ -142,19 +137,15 @@ export default class TrainTimetableView extends View {
         stationAppearance.border = false;
       }
       // その駅は何行分かな？
-      if (!style.arrival[this.direction] && !style.departure[this.direction])
-        continue;
+      if (!style.arrival[this.direction] && !style.departure[this.direction]) continue;
       const div = h(
         'div',
         {
           class: 'tt-cell',
           style:
-            `height: ${(Number(style.arrival[this.direction]) +
-              Number(style.departure[this.direction])) *
+            `height: ${(Number(style.arrival[this.direction]) + Number(style.departure[this.direction])) *
               this.cellHeight}px;` +
-            (stationAppearance.border
-              ? `border-bottom: 1px solid #222222;`
-              : '') +
+            (stationAppearance.border ? `border-bottom: 1px solid #222222;` : '') +
             (station.isMain ? `font-weight: 500;` : ''),
         },
         station.name
@@ -169,9 +160,7 @@ export default class TrainTimetableView extends View {
    * 列車の種別,行先,時刻を読み込む。表示はまだ。
    */
   private loadTrains() {
-    const trainList = this.app.data.railway.diagrams[this.diaIndex].trains[
-      this.direction
-    ];
+    const trainList = this.app.data.railway.diagrams[this.diaIndex].trains[this.direction];
     const stations = this.app.data.railway.stations;
     const stationLen = stations.length;
     this.sheet = [];
@@ -197,9 +186,7 @@ export default class TrainTimetableView extends View {
         const { arrival, departure, border } = this.stationStyle[i];
         // データがなければ運行なし or 経由なし
         if (!data) {
-          const isBlank =
-            i < timetable.firstStationIndex ||
-            timetable.terminalStationIndex < i;
+          const isBlank = i < timetable.firstStationIndex || timetable.terminalStationIndex < i;
           if (arrival)
             col.cells.push({
               text: isBlank ? TABLE_MARK.blank : TABLE_MARK.nonroute,
@@ -239,10 +226,7 @@ export default class TrainTimetableView extends View {
               });
             } else {
               col.cells.push({
-                text: numberToTimeString(
-                  data.arrival || data.departure,
-                  this.timeFormat
-                ),
+                text: numberToTimeString(data.arrival || data.departure, this.timeFormat),
                 color,
                 bg: i % 2 === 0,
                 cellName: sid + '-arrival',
@@ -278,10 +262,7 @@ export default class TrainTimetableView extends View {
                 cellName: sid + '-departure',
                 address: colIndex + '-' + rowIndex++,
               });
-            } else if (
-              i < timetable.firstStationIndex ||
-              timetable.terminalStationIndex <= i
-            ) {
+            } else if (i < timetable.firstStationIndex || timetable.terminalStationIndex <= i) {
               col.cells.push({
                 text: TABLE_MARK.blank,
                 color,
@@ -327,18 +308,15 @@ export default class TrainTimetableView extends View {
     if (!this.rendering) return;
     const viewArea = {
       x: Math.floor(this.element.scrollLeft / this.cellWidth),
-      w: Math.floor(
-        (this.element.offsetWidth - this.stationCellWidth) / this.cellWidth
-      ),
+      w: Math.floor((this.element.offsetWidth - this.stationCellWidth) / this.cellWidth),
     };
-    viewArea.x = Math.max(viewArea.x - 1, 0);
-    viewArea.w = Math.min(viewArea.w + 2, this.sheet.length - viewArea.x - 1);
+    viewArea.x = Math.max(viewArea.x - 2, 0);
+    viewArea.w = Math.min(viewArea.w + 4, this.sheet.length - viewArea.x - 1);
 
     // 再利用可能な(=画面外の)Column探し
     const reusableIndex: Set<number> = new Set();
     for (const key of this.columns.keys()) {
-      if (key < viewArea.x || viewArea.x + viewArea.w < key)
-        reusableIndex.add(key);
+      if (key < viewArea.x || viewArea.x + viewArea.w < key) reusableIndex.add(key);
     }
     // 新たに必要なColumn探し
     for (let i = viewArea.x; i < viewArea.x + viewArea.w; i++) {
@@ -402,8 +380,9 @@ export default class TrainTimetableView extends View {
       'div',
       {
         class: 'tt-row',
-        style: `transform: translateZ(0) translateX(${this.cellWidth *
-          colIndex}px);top:${this.headerHeight}px;width:${this.cellWidth}px;`,
+        style: `transform: translateZ(0) translateX(${this.cellWidth * colIndex}px);top:${this.headerHeight}px;width:${
+          this.cellWidth
+        }px;`,
         'data-col-id': colIndex,
       },
       bodyContent
@@ -413,9 +392,7 @@ export default class TrainTimetableView extends View {
       {
         class: 'tt-head-row',
         style: `transform: translateZ(0) translateX(${this.cellWidth *
-          colIndex}px);color: ${data.type.textColor.toHEXString()};width:${
-          this.cellWidth
-        }px;`,
+          colIndex}px);color: ${data.type.textColor.toHEXString()};width:${this.cellWidth}px;`,
         'data-col-id': colIndex,
       },
       [
@@ -432,31 +409,22 @@ export default class TrainTimetableView extends View {
     const oldData = this.sheet[oldIdx];
     const newData = this.sheet[newIdx];
     const oldCol = this.columns.get(oldIdx);
-    Array.from(oldCol.body.children).forEach(
-      (element: HTMLDivElement, i: number) => {
-        if (oldData.cells[i].text !== newData.cells[i].text || forceUpdate)
-          element.textContent = newData.cells[i].text;
-        if (oldData.cells[i].color !== newData.cells[i].color || forceUpdate)
-          element.style.color = newData.cells[i].color;
-      }
-    );
-    oldCol.body.style.transform =
-      'translateZ(0) translateX(' + this.cellWidth * newIdx + 'px)';
+    Array.from(oldCol.body.children).forEach((element: HTMLDivElement, i: number) => {
+      if (oldData.cells[i].text !== newData.cells[i].text || forceUpdate) element.textContent = newData.cells[i].text;
+      if (oldData.cells[i].color !== newData.cells[i].color || forceUpdate)
+        element.style.color = newData.cells[i].color;
+      if (oldData.cells[i].address !== newData.cells[i].address || forceUpdate)
+        element.dataset.address = newData.cells[i].address;
+    });
+    oldCol.body.style.transform = 'translateZ(0) translateX(' + this.cellWidth * newIdx + 'px)';
     oldCol.body.dataset.colId = String(newIdx);
-    if (oldData.number !== newData.number || forceUpdate)
-      oldCol.header.children[0].textContent = newData.number;
+    if (oldData.number !== newData.number || forceUpdate) oldCol.header.children[0].textContent = newData.number;
     if (oldData.type.abbrName !== newData.type.abbrName || forceUpdate)
       oldCol.header.children[1].textContent = newData.type.abbrName;
-    if (oldData.name !== newData.name || forceUpdate)
-      oldCol.header.children[2].textContent = newData.name;
-    if (
-      oldData.type.textColor.toHEXString() !==
-        newData.type.textColor.toHEXString() ||
-      forceUpdate
-    )
+    if (oldData.name !== newData.name || forceUpdate) oldCol.header.children[2].textContent = newData.name;
+    if (oldData.type.textColor.toHEXString() !== newData.type.textColor.toHEXString() || forceUpdate)
       oldCol.header.style.color = newData.type.textColor.toHEXString();
-    oldCol.header.style.transform =
-      'translateZ(0) translateX(' + this.cellWidth * newIdx + 'px)';
+    oldCol.header.style.transform = 'translateZ(0) translateX(' + this.cellWidth * newIdx + 'px)';
     oldCol.header.dataset.colId = String(newIdx);
     this.columns.delete(oldIdx);
     this.columns.set(newIdx, oldCol);
@@ -487,9 +455,7 @@ export default class TrainTimetableView extends View {
         cellType,
         selectType: 'train-station',
         stationIndex: Number(stationIndex),
-        train: this.app.data.railway.diagrams[this.diaIndex].trains[
-          this.direction
-        ][trainIndex],
+        train: this.app.data.railway.diagrams[this.diaIndex].trains[this.direction][trainIndex],
       },
     ];
   }
@@ -511,10 +477,24 @@ export default class TrainTimetableView extends View {
         row++;
         break;
     }
-    const target = document.querySelector(
-      `#tt-body>div>div[data-address="${col}-${row}"]`
-    ) as HTMLElement;
+    if (col < 0 || row < 0 || col >= this.sheet[0].cells.length || row >= this.sheet.length) return;
+    const target = document.querySelector(`#tt-body>div>div[data-address="${col}-${row}"]`) as HTMLElement;
     if (target === null) return;
+    const targetRect = target.getBoundingClientRect();
+    const containerRect = this.element.getBoundingClientRect();
+    let dx = 0;
+    let dy = 0;
+    if (targetRect.left < containerRect.left + this.stationCellWidth) {
+      dx = targetRect.left - this.stationCellWidth - containerRect.left;
+    } else if (targetRect.left + targetRect.width > containerRect.left + containerRect.width) {
+      dx = targetRect.left + targetRect.width - containerRect.left - containerRect.width;
+    }
+    if (targetRect.top < containerRect.top + this.headerHeight) {
+      dy = targetRect.top - this.headerHeight - containerRect.top;
+    } else if (targetRect.top + targetRect.height > containerRect.top + containerRect.height) {
+      dy = targetRect.top + targetRect.height - containerRect.top - containerRect.height;
+    }
+    this.element.scrollBy(dx, dy);
     this.selectCell(target);
   }
 }

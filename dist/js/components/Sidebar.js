@@ -4,6 +4,7 @@ export default class Sidebar {
         this.app = app;
         this.element = element;
         this.activeItem = null;
+        const logo = h('div', { id: 'header-logo' });
         const file = h('div', { id: 'sidebar-outbound' }, null, () => this.app.showFileSettingView(0));
         file.innerHTML = `<div id="sidebar-outbound"><svg viewBox="0 0 64 64" width="48" height="48">
     <path d="M12 8 l0 48 l40 0 l0 -36 l-12 -12z M40 8 l0 12 l12 0"/>
@@ -36,13 +37,13 @@ export default class Sidebar {
         diagram.innerHTML = `<div id="sidebar-diagram"><svg viewBox="0 0 64 64" width="48" height="48">
     <path d="M8 8 l10 12 l12 0 l26 36 M56 8 l-12 24 l-8 0 l-12 24 M8 30 l12 0l11 -22"/>
     </svg><span class="sidebar-label" style="transition-delay:0.15s">ダイヤグラム</span></div>`;
-        element.append(file, outbound, inbound, station, diagram);
+        element.append(logo, file, outbound, inbound, station, diagram);
     }
     set status(value) {
         if (this.activeItem !== null) {
             this.activeItem.classList.remove('active');
         }
-        const target = this.element.children[value];
+        const target = this.element.children[value + 1];
         if (!target)
             return;
         target.classList.add('active');

@@ -13,21 +13,17 @@ import DiagramParser from './DiagramParser.js';
 import { h } from './Util.js';
 export default class App {
     constructor(root) {
-        this.version = '0.2.0';
-        this.sidebarElm = h('div', { id: 'sidebar' }, null);
+        this.version = '0.2.1';
+        this.sidebarElm = h('aside', { id: 'sidebar' }, null);
         this.toolbarElm = h('div', { id: 'toolbar' }, null);
         this.tabbarElm = h('div', { id: 'tabbar' }, null);
         this.mainElm = h('div', { id: 'mainContainer' }, null);
         this.subElm = h('div', { id: 'subContainer' }, null);
         this.rootElm = h('div', { id: 'app' }, [
-            h('div', { id: 'header' }, [
-                h('div', { id: 'header-logo' }),
-                h('div', { id: 'header-container' }, [this.toolbarElm, this.tabbarElm]),
-            ]),
-            h('div', { id: 'bottom-container' }, [
-                this.sidebarElm,
-                this.mainElm,
-                this.subElm,
+            this.sidebarElm,
+            h('main', { id: 'main' }, [
+                h('div', { id: 'header' }, [h('div', { id: 'header-container' }, [this.toolbarElm, this.tabbarElm])]),
+                h('div', { id: 'bottom-container' }, [this.mainElm, this.subElm]),
             ]),
         ]);
         root.replaceWith(this.rootElm);
@@ -40,6 +36,7 @@ export default class App {
         this.data = null;
         this.currentDiaIndex = 0;
         this._selection = null;
+        this.updateLocalData();
     }
     /**
      * ファイルに関する設定(FileSettingView)の表示
@@ -182,6 +179,19 @@ export default class App {
             ...viewMenu,
         ];
         this.toolbar.setMenu(menu);
+    }
+    updateLocalData() {
+        try {
+            window.localStorage.setItem('test', 'storage test.');
+            window.localStorage.getItem('test');
+            const version = window.localStorage.getItem('version');
+            if (version === this.version)
+                return;
+            window.localStorage.setItem('version', this.version);
+        }
+        catch (err) {
+            console.log(err);
+        }
     }
 }
 //# sourceMappingURL=App.js.map

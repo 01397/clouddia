@@ -57,7 +57,13 @@ export default class StartView extends View {
                     document.createTextNode('ソースコード: '),
                     h('a', { href: 'https://github.com/01397/clouddia' }, 'GitHub'),
                 ]),
-                h('p', { class: 'start-readme-paragraph' }, 'バージョン: ' + this.app.version),
+                h('p', { class: 'start-readme-paragraph' }, [
+                    document.createTextNode('バージョン: ' + this.app.version + ' '),
+                    h('a', {
+                        href: 'https://github.com/01397/clouddia/releases',
+                        target: '_blank',
+                    }, '詳細'),
+                ]),
             ]),
         ]);
         this.element.appendChild(content);
