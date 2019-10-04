@@ -460,9 +460,9 @@ export default class TrainTimetableView extends View {
     ];
   }
   private moveCell(event: KeyboardEvent) {
-    event.preventDefault();
     let col = this.activeCell[0];
     let row = this.activeCell[1];
+    if (document.activeElement.tagName === 'INPUT') return;
     switch (event.keyCode) {
       case 37:
         col--;
@@ -476,7 +476,10 @@ export default class TrainTimetableView extends View {
       case 40:
         row++;
         break;
+      default:
+        return;
     }
+    event.preventDefault();
     if (col < 0 || row < 0 || col >= this.sheet[0].cells.length || row >= this.sheet.length) return;
     const target = document.querySelector(`#tt-body>div>div[data-address="${col}-${row}"]`) as HTMLElement;
     if (target === null) return;
