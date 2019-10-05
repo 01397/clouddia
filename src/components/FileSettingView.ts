@@ -47,10 +47,14 @@ export default class FileSettingView extends View {
         h('div', { class: 'form-label' }, label),
         createTextField(font.family, '書体', null, e => (font.family = (e.currentTarget as HTMLTextAreaElement).value)),
         createTextField(font.height + '', null, 'fs-number', e => (font.height = Number((e.currentTarget as HTMLTextAreaElement).value))),
-        h('div', { class: 'fs-text' }, '太字'),
-        createCheckbox(font.bold, null, e => (font.bold = (e.currentTarget as HTMLInputElement).checked)),
-        h('div', { class: 'fs-text' }, '斜体'),
-        createCheckbox(font.italic, null, e => (font.italic = (e.currentTarget as HTMLInputElement).checked)),
+        h('label', { class: 'fs-label' }, [
+          createCheckbox(font.bold, null, e => (font.bold = (e.currentTarget as HTMLInputElement).checked)),
+          h('div', { class: 'fs-text' }, '太字'),
+        ]),
+        h('label', { class: 'fs-label' }, [
+          createCheckbox(font.italic, null, e => (font.italic = (e.currentTarget as HTMLInputElement).checked)),
+          h('div', { class: 'fs-text' }, '斜体'),
+        ]),
       ]);
     };
     oudiaSettings.push(

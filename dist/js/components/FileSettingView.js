@@ -42,10 +42,14 @@ export default class FileSettingView extends View {
                 h('div', { class: 'form-label' }, label),
                 createTextField(font.family, '書体', null, e => (font.family = e.currentTarget.value)),
                 createTextField(font.height + '', null, 'fs-number', e => (font.height = Number(e.currentTarget.value))),
-                h('div', { class: 'fs-text' }, '太字'),
-                createCheckbox(font.bold, null, e => (font.bold = e.currentTarget.checked)),
-                h('div', { class: 'fs-text' }, '斜体'),
-                createCheckbox(font.italic, null, e => (font.italic = e.currentTarget.checked)),
+                h('label', { class: 'fs-label' }, [
+                    createCheckbox(font.bold, null, e => (font.bold = e.currentTarget.checked)),
+                    h('div', { class: 'fs-text' }, '太字'),
+                ]),
+                h('label', { class: 'fs-label' }, [
+                    createCheckbox(font.italic, null, e => (font.italic = e.currentTarget.checked)),
+                    h('div', { class: 'fs-text' }, '斜体'),
+                ]),
             ]);
         };
         oudiaSettings.push(...data.displayProperty.timetableFont.map((font, i) => createFontRow(font, '時刻表ビュー ' + (i + 1))), createFontRow(data.displayProperty.timetableVFont, '時刻表ビュー 縦書き'), createFontRow(data.displayProperty.diagramStationFont, 'ダイヤグラムビュー 駅名'), createFontRow(data.displayProperty.diagramTimeFont, 'ダイヤグラムビュー 時刻'), createFontRow(data.displayProperty.diagramTrainFont, 'ダイヤグラムビュー 列車'), createFontRow(data.displayProperty.commentFont, 'コメント'));
