@@ -269,7 +269,7 @@ export const numberToTimeString = (number, format) => {
         return Math.floor((number % 3600) / 60) + ':' + String(Math.floor((number % 3600) % 60)).padStart(2, '0');
     }
     if (format === 'H:MM') {
-        return (Math.floor((number % 86400) / 3600) + ':' + String(Math.floor(((number % 86400) % 3600) / 60)).padStart(2, '0'));
+        return Math.floor((number % 86400) / 3600) + ':' + String(Math.floor(((number % 86400) % 3600) / 60)).padStart(2, '0');
     }
     if (format === 'HH MM SS') {
         return (String(Math.floor(number / 3600)).padStart(2, '0') +
@@ -279,9 +279,7 @@ export const numberToTimeString = (number, format) => {
             String(number % 60).padStart(2, '0'));
     }
     if (format === 'HMMSS') {
-        return (Math.floor(number / 3600) +
-            String(Math.floor((number % 3600) / 60)).padStart(2, '0') +
-            String(number % 60).padStart(2, '0'));
+        return Math.floor(number / 3600) + String(Math.floor((number % 3600) / 60)).padStart(2, '0') + String(number % 60).padStart(2, '0');
     }
     return '';
 };
@@ -326,16 +324,43 @@ export class Color {
         return new this(r, g, b);
     }
     toHEXString() {
-        return ('#' +
-            this.r.toString(16).padStart(2, '0') +
-            this.g.toString(16).padStart(2, '0') +
-            this.b.toString(16).padStart(2, '0'));
+        return '#' + this.r.toString(16).padStart(2, '0') + this.g.toString(16).padStart(2, '0') + this.b.toString(16).padStart(2, '0');
     }
     toOudiaString() {
-        return ('00' +
-            this.b.toString(16).padStart(2, '0') +
-            this.g.toString(16).padStart(2, '0') +
-            this.r.toString(16).padStart(2, '0')).toUpperCase();
+        return ('00' + this.b.toString(16).padStart(2, '0') + this.g.toString(16).padStart(2, '0') + this.r.toString(16).padStart(2, '0')).toUpperCase();
+    }
+}
+export class Font {
+    constructor() {
+        this.height = 9;
+        this.family = 'MS ゴシック';
+        this.bold = false;
+        this.italic = false;
+    }
+    static from(oudstr) {
+        const result = new this();
+        const props = oudstr.split(';');
+        for (const prop of props) {
+            const [key, val] = prop.split('=');
+            switch (key) {
+                case 'PointTextHeight':
+                    result.height = Number(val);
+                    break;
+                case 'Facename':
+                    result.family = val;
+                    break;
+                case 'Bold':
+                    result.bold = val === '1';
+                    break;
+                case 'Italic':
+                    result.italic = val === '1';
+                    break;
+            }
+        }
+        return result;
+    }
+    toOudiaString() {
+        return 'PointTextHeight=' + this.height + ';Facename=' + this.family + (this.bold ? ';Bold=1' : '') + (this.italic ? ';Italic=1' : '');
     }
 }
 //# sourceMappingURL=Util.js.map

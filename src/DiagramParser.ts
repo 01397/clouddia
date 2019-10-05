@@ -1,4 +1,4 @@
-import { Color, numberToTimeString, timeStringToNumber } from './Util.js';
+import { Color, numberToTimeString, timeStringToNumber, Font } from './Util.js';
 
 export default class DiagramParser {
   /**
@@ -22,16 +22,7 @@ export class DiagramData {
   public static fromOudia(lines: string[], count = 0): [DiagramData, number] {
     const result = new this();
     const oudParams: { [x: string]: string | string[] } = {};
-    const enumerables = new Set([
-      'Eki',
-      'EkiTrack2',
-      'OuterTerminal',
-      'Ressyasyubetsu',
-      'Dia',
-      'Ressya',
-      'JikokuhyouFont',
-      'JikokuhyouBackColor',
-    ]);
+    const enumerables = new Set(['Eki', 'EkiTrack2', 'OuterTerminal', 'Ressyasyubetsu', 'Dia', 'Ressya', 'JikokuhyouFont', 'JikokuhyouBackColor']);
     let i: number;
     for (i = count; i < lines.length; i++) {
       if (lines[i].includes('=')) {
@@ -112,10 +103,7 @@ export class DiagramFile extends DiagramData {
   }
   public toOudiaString(): string {
     const result =
-      'FileType=OuDia.1.02\n' +
-      this.railway.toOudiaString() +
-      this.displayProperty.toOudiaString() +
-      'FileTypeAppComment=CloudDia Ver. 0.1.0';
+      'FileType=OuDia.1.02\n' + this.railway.toOudiaString() + this.displayProperty.toOudiaString() + 'FileTypeAppComment=CloudDia Ver. 0.1.0';
     return result;
   }
 }
@@ -134,14 +122,10 @@ export class Railway extends DiagramData {
   public fromOudiaParams(params) {
     this.name = params.hasOwnProperty('Rosenmei') ? params.Rosenmei : '新規路線';
     this.directionName = [];
-    this.directionName[0] =
-      params.hasOwnProperty('KudariDiaAlias') && params.KudariDiaAlias !== '' ? params.KudariDiaAlias : '下り';
-    this.directionName[1] =
-      params.hasOwnProperty('NoboriDiaAlias') && params.KudariDiaAlias !== '' ? params.NoboriDiaAlias : '上り';
+    this.directionName[0] = params.hasOwnProperty('KudariDiaAlias') && params.KudariDiaAlias !== '' ? params.KudariDiaAlias : '下り';
+    this.directionName[1] = params.hasOwnProperty('NoboriDiaAlias') && params.KudariDiaAlias !== '' ? params.NoboriDiaAlias : '上り';
     this.startTime = params.hasOwnProperty('KitenJikoku') ? timeStringToNumber(params.KitenJikoku) : 4 * 3600;
-    this.stationInterval = params.hasOwnProperty('DiagramDgrYZahyouKyoriDefault')
-      ? Number(params.DiagramDgrYZahyouKyoriDefault)
-      : 60;
+    this.stationInterval = params.hasOwnProperty('DiagramDgrYZahyouKyoriDefault') ? Number(params.DiagramDgrYZahyouKyoriDefault) : 60;
     this.enableOperation = params.hasOwnProperty('EnableOperation') ? params.EnableOperation === '1' : false;
     this.comment = params.hasOwnProperty('Comment') ? params.Comment.replace(/\\n/g, '\n') : '';
     this.stations = params.hasOwnProperty('Eki') ? params.Eki : [];
@@ -253,33 +237,19 @@ export class Station extends DiagramData {
     this.mainTrack[1] = params.hasOwnProperty('UpMain') ? Number(params.UpMain) : 1;
     this.tracks = params.hasOwnProperty('EkiTrack2Cont') ? params.EkiTrack2Cont.tracks : StationTrackList.defaultTracks;
     this.outerTerminal = params.hasOwnProperty('OuterTerminal') ? params.OuterTerminal : null;
-    this.brunchCoreStationIndex = params.hasOwnProperty('BrunchCoreEkiIndex')
-      ? Number(params.BrunchCoreEkiIndex)
-      : null;
+    this.brunchCoreStationIndex = params.hasOwnProperty('BrunchCoreEkiIndex') ? Number(params.BrunchCoreEkiIndex) : null;
     this.isBrunchOpposite = params.hasOwnProperty('BrunchOpposite') ? params.BrunchOpposite === '1' : false;
-    this.loopOriginStationIndex = params.hasOwnProperty('LoopOriginEkiIndex')
-      ? Number(params.LoopOriginEkiIndex)
-      : null;
+    this.loopOriginStationIndex = params.hasOwnProperty('LoopOriginEkiIndex') ? Number(params.LoopOriginEkiIndex) : null;
     this.isLoopOpposite = params.hasOwnProperty('LoopOpposite') ? params.LoopOpposite === '1' : false;
     this.visibleTimetableTrack = [];
-    this.visibleTimetableTrack[0] = params.hasOwnProperty('JikokuhyouTrackDisplayKudari')
-      ? params.JikokuhyouTrackDisplayKudari === '1'
-      : false;
-    this.visibleTimetableTrack[1] = params.hasOwnProperty('JikokuhyouTrackDisplayNobori')
-      ? params.JikokuhyouTrackDisplayNobori === '1'
-      : false;
-    this.visibleDiagramTrack = params.hasOwnProperty('DiagramTrackDisplay')
-      ? params.DiagramTrackDisplay === '1'
-      : false;
+    this.visibleTimetableTrack[0] = params.hasOwnProperty('JikokuhyouTrackDisplayKudari') ? params.JikokuhyouTrackDisplayKudari === '1' : false;
+    this.visibleTimetableTrack[1] = params.hasOwnProperty('JikokuhyouTrackDisplayNobori') ? params.JikokuhyouTrackDisplayNobori === '1' : false;
+    this.visibleDiagramTrack = params.hasOwnProperty('DiagramTrackDisplay') ? params.DiagramTrackDisplay === '1' : false;
     this.nextStaionDistance = params.hasOwnProperty('NextEkiDistance') ? Number(params.NextEkiDistance) : null;
     this.timetableTrackOmit = params.hasOwnProperty('JikokuhyouTrackOmit') ? params.JikokuhyouTrackOmit === '1' : false;
     this.operationLength = [];
-    this.operationLength[0] = params.hasOwnProperty('JikokuhyouOperationOrigin')
-      ? Number(params.JikokuhyouOperationOrigin)
-      : 0;
-    this.operationLength[1] = params.hasOwnProperty('JikokuhyouOperationTerminal')
-      ? Number(params.JikokuhyouOperationTerminal)
-      : 0;
+    this.operationLength[0] = params.hasOwnProperty('JikokuhyouOperationOrigin') ? Number(params.JikokuhyouOperationOrigin) : 0;
+    this.operationLength[1] = params.hasOwnProperty('JikokuhyouOperationTerminal') ? Number(params.JikokuhyouOperationTerminal) : 0;
     this.customTimetableStyle = {
       arrival: [false, false],
       departure: [true, true],
@@ -362,10 +332,8 @@ export class Station extends DiagramData {
     let name = '1番線';
     const abbrName = ['1', ''];
     if (m1 !== null && Number.isInteger(Number(m1[0]))) name = lName.replace(/\d+/, String(Number(m1[0]) + 1));
-    if (m2 !== null && Number.isInteger(Number(m2[0])))
-      abbrName[0] = lAbbrName[0].replace(/\d+/, String(Number(m2[0]) + 1));
-    if (m3 !== null && Number.isInteger(Number(m3[0])))
-      abbrName[1] = lAbbrName[1].replace(/\d+/, String(Number(m3[0]) + 1));
+    if (m2 !== null && Number.isInteger(Number(m2[0]))) abbrName[0] = lAbbrName[0].replace(/\d+/, String(Number(m2[0]) + 1));
+    if (m3 !== null && Number.isInteger(Number(m3[0]))) abbrName[1] = lAbbrName[1].replace(/\d+/, String(Number(m3[0]) + 1));
     this.tracks.push(new StationTrack({ name, abbrName }));
   }
 }
@@ -388,10 +356,7 @@ export class StationTrackList extends DiagramData {
     this.tracks = params.hasOwnProperty('EkiTrack2') ? params.EkiTrack2 : null;
   }
   static get defaultTracks() {
-    return [
-      new StationTrack({ name: '1番線', abbrName: ['1', ''] }),
-      new StationTrack({ name: '2番線', abbrName: ['2', ''] }),
-    ];
+    return [new StationTrack({ name: '1番線', abbrName: ['1', ''] }), new StationTrack({ name: '2番線', abbrName: ['2', ''] })];
   }
 }
 
@@ -422,23 +387,13 @@ export class TrainType extends DiagramData {
   public fromOudiaParams(params) {
     this.name = params.hasOwnProperty('Syubetsumei') ? params.Syubetsumei : '新規種別';
     this.abbrName = params.hasOwnProperty('Ryakusyou') ? params.Ryakusyou : '新種';
-    this.textColor = params.hasOwnProperty('JikokuhyouMojiColor')
-      ? Color.from(params.JikokuhyouMojiColor)
-      : new Color(0, 0, 0);
+    this.textColor = params.hasOwnProperty('JikokuhyouMojiColor') ? Color.from(params.JikokuhyouMojiColor) : new Color(0, 0, 0);
     this.fontIndex = params.hasOwnProperty('JikokuhyouFontIndex') ? Number(params.JikokuhyouFontIndex) : 0;
-    this.backgroundColor = params.hasOwnProperty('JikokuhyouBackColor')
-      ? Color.from(params.JikokuhyouBackColor[0])
-      : new Color(255, 255, 255); // DispPropの同名プロパティが列挙可能なせいでparams.JikokuhyouBackColorは配列になっちゃってる
-    this.strokeColor = params.hasOwnProperty('DiagramSenColor')
-      ? Color.from(params.DiagramSenColor)
-      : new Color(0, 0, 0);
-    this.lineStyle = params.hasOwnProperty('DiagramSenStyle')
-      ? params.DiagramSenStyle.replace('SenStyle_', '')
-      : 'Jissen';
+    this.backgroundColor = params.hasOwnProperty('JikokuhyouBackColor') ? Color.from(params.JikokuhyouBackColor[0]) : new Color(255, 255, 255); // DispPropの同名プロパティが列挙可能なせいでparams.JikokuhyouBackColorは配列になっちゃってる
+    this.strokeColor = params.hasOwnProperty('DiagramSenColor') ? Color.from(params.DiagramSenColor) : new Color(0, 0, 0);
+    this.lineStyle = params.hasOwnProperty('DiagramSenStyle') ? params.DiagramSenStyle.replace('SenStyle_', '') : 'Jissen';
     this.isBoldLine = params.hasOwnProperty('DiagramSenIsBold') ? params.DiagramSenIsBold === '1' : false;
-    this.stopMark = params.hasOwnProperty('StopMarkDrawType')
-      ? params.StopMarkDrawType === 'EStopMarkDrawType_DrawOnStop'
-      : false;
+    this.stopMark = params.hasOwnProperty('StopMarkDrawType') ? params.StopMarkDrawType === 'EStopMarkDrawType_DrawOnStop' : false;
     this.parentIndex = params.hasOwnProperty('ParentSyubetsuIndex') ? Number(params.ParentSyubetsuIndex) : null;
   }
   public toOudiaString() {
@@ -585,34 +540,18 @@ export class DisplayProperty extends DiagramData {
     this.commentFont = params.hasOwnProperty('CommentFont') ? Font.from(params.CommentFont) : new Font();
     this.diagramTrainFont = params.hasOwnProperty('DiaRessyaFont') ? Font.from(params.DiaRessyaFont) : new Font();
     this.diagramTrainFont = params.hasOwnProperty('DiaRessyaFont') ? Font.from(params.DiaRessyaFont) : new Font();
-    this.diagramTextColor = params.hasOwnProperty('DiaMojiColor')
-      ? Color.from(params.DiaMojiColor)
-      : new Color(0, 0, 0);
-    this.diagramBackgroundColor = params.hasOwnProperty('DiaHaikeiColor')
-      ? Color.from(params.DiaHaikeiColor)
-      : new Color(255, 255, 255);
-    this.diagramTrainColor = params.hasOwnProperty('DiaRessyaColor')
-      ? Color.from(params.DiaRessyaColor)
-      : new Color(0, 0, 0);
-    this.diagramAxisColor = params.hasOwnProperty('DiaJikuColor')
-      ? Color.from(params.DiaJikuColor)
-      : new Color(191, 191, 191);
-    this.stdOpeTimeLowerColor = params.hasOwnProperty('StdOpeTimeLowerColor')
-      ? Color.from(params.StdOpeTimeLowerColor)
-      : new Color(255, 191, 191);
-    this.stdOpeTimeHigherColor = params.hasOwnProperty('StdOpeTimeHigherColor')
-      ? Color.from(params.StdOpeTimeHigherColor)
-      : new Color(191, 191, 255);
-    this.stdOpeTimeUndefColor = params.hasOwnProperty('StdOpeTimeUndefColor')
-      ? Color.from(params.StdOpeTimeUndefColor)
-      : new Color(255, 255, 191);
+    this.diagramTextColor = params.hasOwnProperty('DiaMojiColor') ? Color.from(params.DiaMojiColor) : new Color(0, 0, 0);
+    this.diagramBackgroundColor = params.hasOwnProperty('DiaHaikeiColor') ? Color.from(params.DiaHaikeiColor) : new Color(255, 255, 255);
+    this.diagramTrainColor = params.hasOwnProperty('DiaRessyaColor') ? Color.from(params.DiaRessyaColor) : new Color(0, 0, 0);
+    this.diagramAxisColor = params.hasOwnProperty('DiaJikuColor') ? Color.from(params.DiaJikuColor) : new Color(191, 191, 191);
+    this.stdOpeTimeLowerColor = params.hasOwnProperty('StdOpeTimeLowerColor') ? Color.from(params.StdOpeTimeLowerColor) : new Color(255, 191, 191);
+    this.stdOpeTimeHigherColor = params.hasOwnProperty('StdOpeTimeHigherColor') ? Color.from(params.StdOpeTimeHigherColor) : new Color(191, 191, 255);
+    this.stdOpeTimeUndefColor = params.hasOwnProperty('StdOpeTimeUndefColor') ? Color.from(params.StdOpeTimeUndefColor) : new Color(255, 255, 191);
     this.stdOpeTimeIllegalColor = params.hasOwnProperty('StdOpeTimeIllegalColor')
       ? Color.from(params.StdOpeTimeIllegalColor)
       : new Color(191, 191, 191);
     this.stationNameLength = params.hasOwnProperty('EkimeiLength') ? Number(params.EkimeiLength) : 6;
-    this.timetableTrainWidth = params.hasOwnProperty('JikokuhyouRessyaWidth')
-      ? Number(params.JikokuhyouRessyaWidth)
-      : 5;
+    this.timetableTrainWidth = params.hasOwnProperty('JikokuhyouRessyaWidth') ? Number(params.JikokuhyouRessyaWidth) : 5;
     this.anySecondIncDec1 = params.hasOwnProperty('AnySecondIncDec1') ? Number(params.AnySecondIncDec1) : 5;
     this.anySecondIncDec2 = params.hasOwnProperty('AnySecondIncDec2') ? Number(params.AnySecondIncDec2) : 15;
     this.visibleTrainName = params.hasOwnProperty('DisplayRessyamei') ? params.DisplayRessyamei === '1' : true;
@@ -622,9 +561,7 @@ export class DisplayProperty extends DiagramData {
     this.visibleOuterTerminalTerminalSide = params.hasOwnProperty('DisplayOuterTerminalEkimeiTerminalSide')
       ? params.DisplayOuterTerminalEkimeiTerminalSide === '1'
       : false;
-    this.visibleOuterTerminal = params.hasOwnProperty('DiagramDisplayOuterTerminal')
-      ? params.DiagramDisplayOuterTerminal === '1'
-      : false;
+    this.visibleOuterTerminal = params.hasOwnProperty('DiagramDisplayOuterTerminal') ? params.DiagramDisplayOuterTerminal === '1' : false;
   }
   public toOudiaString(): string {
     return (
@@ -758,48 +695,3 @@ const DIAGRAM_CLASSES = {
   Rosen: Railway,
   DispProp: DisplayProperty,
 };
-
-class Font {
-  public static from(oudstr: string): Font {
-    const result = new this();
-    const props = oudstr.split(';');
-    for (const prop of props) {
-      const [key, val] = prop.split('=');
-      switch (key) {
-        case 'PointTextHeight':
-          result.height = Number(val);
-          break;
-        case 'Facename':
-          result.family = val;
-          break;
-        case 'Bold':
-          result.bold = val === '1';
-          break;
-        case 'Italic':
-          result.italic = val === '1';
-          break;
-      }
-    }
-    return result;
-  }
-  public height: number;
-  public family: string;
-  public bold: boolean;
-  public italic: boolean;
-  constructor() {
-    this.height = 9;
-    this.family = 'MS ゴシック';
-    this.bold = false;
-    this.italic = false;
-  }
-  public toOudiaString(): string {
-    return (
-      'PointTextHeight=' +
-      this.height +
-      ';Facename=' +
-      this.family +
-      (this.bold ? ';Bold=1' : '') +
-      (this.italic ? ';Italic=1' : '')
-    );
-  }
-}

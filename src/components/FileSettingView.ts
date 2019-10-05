@@ -1,5 +1,5 @@
 import App from '../App.js';
-import { createTimeField, h, numberToTimeString, timeStringToNumber, createTextField, createCheckbox } from '../Util.js';
+import { createTimeField, h, numberToTimeString, timeStringToNumber, createTextField, createCheckbox, Font } from '../Util.js';
 import View from './View.js';
 export default class FileSettingView extends View {
   constructor(app: App) {
@@ -42,17 +42,25 @@ export default class FileSettingView extends View {
       e => (data.railway.startTime = timeStringToNumber((e.currentTarget as HTMLTextAreaElement).value))
     );
     const oudiaSettings: Element[] = [];
-    for (let i = 0; i < 8; i++) {
-      const font = data.displayProperty.timetableFont[i];
-      oudiaSettings.push(
-        h('div', { class: 'form-row' }, [
-          createTextField(font.family, '書体', null, e => (font.family = (e.currentTarget as HTMLTextAreaElement).value)),
-          createTextField(font.height + '', null, null, e => (font.height = Number((e.currentTarget as HTMLTextAreaElement).value))),
-          createCheckbox(font.bold, null, e => (font.bold = (e.currentTarget as HTMLInputElement).checked)),
-          createCheckbox(font.italic, null, e => (font.italic = (e.currentTarget as HTMLInputElement).checked)),
-        ])
-      );
-    }
+    const createFontRow = (font: Font, label: string) => {
+      return h('div', { class: 'form-row' }, [
+        h('div', { class: 'form-label' }, label),
+        createTextField(font.family, '書体', null, e => (font.family = (e.currentTarget as HTMLTextAreaElement).value)),
+        createTextField(font.height + '', null, 'fs-number', e => (font.height = Number((e.currentTarget as HTMLTextAreaElement).value))),
+        h('div', { class: 'fs-text' }, '太字'),
+        createCheckbox(font.bold, null, e => (font.bold = (e.currentTarget as HTMLInputElement).checked)),
+        h('div', { class: 'fs-text' }, '斜体'),
+        createCheckbox(font.italic, null, e => (font.italic = (e.currentTarget as HTMLInputElement).checked)),
+      ]);
+    };
+    oudiaSettings.push(
+      ...data.displayProperty.timetableFont.map((font, i) => createFontRow(font, '時刻表ビュー ' + (i + 1))),
+      createFontRow(data.displayProperty.timetableVFont, '時刻表ビュー 縦書き'),
+      createFontRow(data.displayProperty.diagramStationFont, 'ダイヤグラムビュー 駅名'),
+      createFontRow(data.displayProperty.diagramTimeFont, 'ダイヤグラムビュー 時刻'),
+      createFontRow(data.displayProperty.diagramTrainFont, 'ダイヤグラムビュー 列車'),
+      createFontRow(data.displayProperty.commentFont, 'コメント')
+    );
 
     const content = h('div', { class: 'fs-1col-container' }, [
       h('div', { class: 'fs-section fs-label6' }, [
@@ -62,7 +70,7 @@ export default class FileSettingView extends View {
         h('div', { class: 'form-row' }, [h('div', { class: 'form-label' }, '路線方向名'), directionNameField0, directionNameField1]),
         h('div', { class: 'form-row' }, [h('div', { class: 'form-label' }, '1日の始まり'), startTimeField]),
       ]),
-      h('div', { class: 'fs-section fs-label6' }, [h('div', { class: 'fs-section-header' }, 'OuDiaの設定'), ...oudiaSettings]),
+      h('div', { class: 'fs-section fs-label12' }, [h('div', { class: 'fs-section-header' }, 'OuDiaの設定'), ...oudiaSettings]),
     ]);
     this.element.append(content);
   }

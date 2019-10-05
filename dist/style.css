@@ -776,12 +776,21 @@ html, body {
   margin-right: 8px;
 }
 
+.fs-section.fs-label12 .form-label {
+  min-width: 12em;
+}
+
 .fs-section.fs-label6 .form-label {
   min-width: 6em;
 }
 
 .fs-section.fs-label5 .form-label {
   min-width: 5em;
+}
+
+.fs-number{
+  width: 48px;
+  margin-right: 8px;
 }
 
 .fs-flex {

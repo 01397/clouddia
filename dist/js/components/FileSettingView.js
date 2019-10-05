@@ -37,15 +37,18 @@ export default class FileSettingView extends View {
         });
         const startTimeField = createTimeField(numberToTimeString(data.railway.startTime, 'HH MM SS'), null, e => (data.railway.startTime = timeStringToNumber(e.currentTarget.value)));
         const oudiaSettings = [];
-        for (let i = 0; i < 8; i++) {
-            const font = data.displayProperty.timetableFont[i];
-            oudiaSettings.push(h('div', { class: 'form-row' }, [
+        const createFontRow = (font, label) => {
+            return h('div', { class: 'form-row' }, [
+                h('div', { class: 'form-label' }, label),
                 createTextField(font.family, '書体', null, e => (font.family = e.currentTarget.value)),
-                createTextField(font.height + '', null, null, e => (font.height = Number(e.currentTarget.value))),
+                createTextField(font.height + '', null, 'fs-number', e => (font.height = Number(e.currentTarget.value))),
+                h('div', { class: 'fs-text' }, '太字'),
                 createCheckbox(font.bold, null, e => (font.bold = e.currentTarget.checked)),
+                h('div', { class: 'fs-text' }, '斜体'),
                 createCheckbox(font.italic, null, e => (font.italic = e.currentTarget.checked)),
-            ]));
-        }
+            ]);
+        };
+        oudiaSettings.push(...data.displayProperty.timetableFont.map((font, i) => createFontRow(font, '時刻表ビュー ' + (i + 1))), createFontRow(data.displayProperty.timetableVFont, '時刻表ビュー 縦書き'), createFontRow(data.displayProperty.diagramStationFont, 'ダイヤグラムビュー 駅名'), createFontRow(data.displayProperty.diagramTimeFont, 'ダイヤグラムビュー 時刻'), createFontRow(data.displayProperty.diagramTrainFont, 'ダイヤグラムビュー 列車'), createFontRow(data.displayProperty.commentFont, 'コメント'));
         const content = h('div', { class: 'fs-1col-container' }, [
             h('div', { class: 'fs-section fs-label6' }, [
                 h('div', { class: 'fs-section-header' }, 'ファイル'),
@@ -54,7 +57,7 @@ export default class FileSettingView extends View {
                 h('div', { class: 'form-row' }, [h('div', { class: 'form-label' }, '路線方向名'), directionNameField0, directionNameField1]),
                 h('div', { class: 'form-row' }, [h('div', { class: 'form-label' }, '1日の始まり'), startTimeField]),
             ]),
-            h('div', { class: 'fs-section fs-label6' }, [h('div', { class: 'fs-section-header' }, 'OuDiaの設定'), ...oudiaSettings]),
+            h('div', { class: 'fs-section fs-label12' }, [h('div', { class: 'fs-section-header' }, 'OuDiaの設定'), ...oudiaSettings]),
         ]);
         this.element.append(content);
     }

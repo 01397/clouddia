@@ -34,11 +34,7 @@ export const h = (
   return element;
 };
 
-export const createTimeField = (
-  value: string,
-  className?: string,
-  onchange: (e?: Event) => void = null
-): HTMLInputElement => {
+export const createTimeField = (value: string, className?: string, onchange: (e?: Event) => void = null): HTMLInputElement => {
   const field = h('input', {
     class: 'form-time ' + className,
     value,
@@ -84,11 +80,7 @@ export const createMultilineTextField = (
   return field;
 };
 
-export const createCheckbox = (
-  checked: boolean,
-  className?: string,
-  onchange: (e?: Event) => void = null
-): HTMLInputElement => {
+export const createCheckbox = (checked: boolean, className?: string, onchange: (e?: Event) => void = null): HTMLInputElement => {
   const checkbox = h('input', {
     class: 'form-checkbox ' + className,
     type: 'checkbox',
@@ -98,12 +90,7 @@ export const createCheckbox = (
   return checkbox;
 };
 
-export const createRadio = (
-  checked: boolean,
-  name?: string,
-  className?: string,
-  onchange: (e?: Event) => void = null
-): HTMLInputElement => {
+export const createRadio = (checked: boolean, name?: string, className?: string, onchange: (e?: Event) => void = null): HTMLInputElement => {
   const radio = h('input', {
     class: 'form-radio ' + className,
     type: 'radio',
@@ -114,19 +101,11 @@ export const createRadio = (
   return radio;
 };
 
-export const createButton = (
-  value: string,
-  className?: string,
-  onclick: (e?: Event) => void = null
-): HTMLInputElement => {
+export const createButton = (value: string, className?: string, onclick: (e?: Event) => void = null): HTMLInputElement => {
   return h('input', { class: 'form-button ' + className, type: 'button', value }, null, onclick) as HTMLInputElement;
 };
 
-export const createColorField = (
-  value: string,
-  className?: string,
-  onchange: (e?: Event) => void = null
-): HTMLLabelElement => {
+export const createColorField = (value: string, className?: string, onchange: (e?: Event) => void = null): HTMLLabelElement => {
   const colorField = h('input', { type: 'color', value }) as HTMLInputElement;
   const label = h('label', { class: 'form-color ' + className, tabindex: 0 }, colorField) as HTMLLabelElement;
   label.style.backgroundColor = value;
@@ -137,11 +116,7 @@ export const createColorField = (
   return label;
 };
 
-export const createLineStyleField = (
-  value: string,
-  className?: string,
-  onchange: (value: string) => void = null
-): HTMLDivElement => {
+export const createLineStyleField = (value: string, className?: string, onchange: (value: string) => void = null): HTMLDivElement => {
   const changeValue = newValue => {
     onchange(newValue);
     contentLine.style.strokeDasharray = DASH_ARRAY_STYLE[newValue];
@@ -288,17 +263,11 @@ const fieldKeydown = (field: HTMLInputElement, e: KeyboardEvent): void => {
   } else if (keyCode === 38) {
     // 時刻 +1分, +5秒
     e.preventDefault();
-    field.value = numberToTimeString(
-      (timeStringToNumber(field.value) + (e.shiftKey ? 5 : 60) + 86400) % 86400,
-      'HH MM SS'
-    );
+    field.value = numberToTimeString((timeStringToNumber(field.value) + (e.shiftKey ? 5 : 60) + 86400) % 86400, 'HH MM SS');
   } else if (keyCode === 40) {
     // 時刻 -1分, -5秒
     e.preventDefault();
-    field.value = numberToTimeString(
-      (timeStringToNumber(field.value) - (e.shiftKey ? 5 : 60) + 86400) % 86400,
-      'HH MM SS'
-    );
+    field.value = numberToTimeString((timeStringToNumber(field.value) - (e.shiftKey ? 5 : 60) + 86400) % 86400, 'HH MM SS');
   }
 };
 
@@ -372,9 +341,7 @@ export const numberToTimeString = (number: number, format: timeFormat): string =
     return Math.floor((number % 3600) / 60) + ':' + String(Math.floor((number % 3600) % 60)).padStart(2, '0');
   }
   if (format === 'H:MM') {
-    return (
-      Math.floor((number % 86400) / 3600) + ':' + String(Math.floor(((number % 86400) % 3600) / 60)).padStart(2, '0')
-    );
+    return Math.floor((number % 86400) / 3600) + ':' + String(Math.floor(((number % 86400) % 3600) / 60)).padStart(2, '0');
   }
   if (format === 'HH MM SS') {
     return (
@@ -386,11 +353,7 @@ export const numberToTimeString = (number: number, format: timeFormat): string =
     );
   }
   if (format === 'HMMSS') {
-    return (
-      Math.floor(number / 3600) +
-      String(Math.floor((number % 3600) / 60)).padStart(2, '0') +
-      String(number % 60).padStart(2, '0')
-    );
+    return Math.floor(number / 3600) + String(Math.floor((number % 3600) / 60)).padStart(2, '0') + String(number % 60).padStart(2, '0');
   }
   return '';
 };
@@ -436,19 +399,47 @@ export class Color {
     this.b = b;
   }
   public toHEXString() {
-    return (
-      '#' +
-      this.r.toString(16).padStart(2, '0') +
-      this.g.toString(16).padStart(2, '0') +
-      this.b.toString(16).padStart(2, '0')
-    );
+    return '#' + this.r.toString(16).padStart(2, '0') + this.g.toString(16).padStart(2, '0') + this.b.toString(16).padStart(2, '0');
   }
   public toOudiaString() {
-    return (
-      '00' +
-      this.b.toString(16).padStart(2, '0') +
-      this.g.toString(16).padStart(2, '0') +
-      this.r.toString(16).padStart(2, '0')
-    ).toUpperCase();
+    return ('00' + this.b.toString(16).padStart(2, '0') + this.g.toString(16).padStart(2, '0') + this.r.toString(16).padStart(2, '0')).toUpperCase();
+  }
+}
+
+export class Font {
+  public static from(oudstr: string): Font {
+    const result = new this();
+    const props = oudstr.split(';');
+    for (const prop of props) {
+      const [key, val] = prop.split('=');
+      switch (key) {
+        case 'PointTextHeight':
+          result.height = Number(val);
+          break;
+        case 'Facename':
+          result.family = val;
+          break;
+        case 'Bold':
+          result.bold = val === '1';
+          break;
+        case 'Italic':
+          result.italic = val === '1';
+          break;
+      }
+    }
+    return result;
+  }
+  public height: number;
+  public family: string;
+  public bold: boolean;
+  public italic: boolean;
+  constructor() {
+    this.height = 9;
+    this.family = 'MS ゴシック';
+    this.bold = false;
+    this.italic = false;
+  }
+  public toOudiaString(): string {
+    return 'PointTextHeight=' + this.height + ';Facename=' + this.family + (this.bold ? ';Bold=1' : '') + (this.italic ? ';Italic=1' : '');
   }
 }
