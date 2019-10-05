@@ -432,6 +432,10 @@ html, body {
   pointer-events: none;
 }
 
+.tt-weak-highlight {
+  background-color: rgba(168, 82, 255, 0.25);
+}
+
 /*----------------------------------------
 
     dg: Diagram

@@ -192,13 +192,10 @@ export default class StationTimetableView extends View {
             }, [
                 h('div', {
                     class: 'st-train-terminal',
-                }, val.terminalIndex !== data.topStation
-                    ? data.shortName[val.terminalIndex]
-                    : ''),
+                }, val.terminalIndex !== data.topStation ? data.shortName[val.terminalIndex] : ''),
                 h('div', {
                     class: 'st-train-minute',
-                    style: 'color: ' +
-                        this.app.data.railway.trainTypes[val.trainType].textColor.toHEXString(),
+                    style: 'color: ' + this.app.data.railway.trainTypes[val.trainType].textColor.toHEXString(),
                 }, min),
             ], () => (this.app.selection = [
                 {
@@ -229,8 +226,7 @@ export default class StationTimetableView extends View {
                 if (val !== true)
                     return;
                 result.push(h('span', {
-                    style: 'color: ' +
-                        this.app.data.railway.trainTypes[i].textColor.toHEXString(),
+                    style: 'color: ' + this.app.data.railway.trainTypes[i].textColor.toHEXString(),
                 }, this.app.data.railway.trainTypes[i].name + ' '));
             });
             return result;
@@ -261,10 +257,7 @@ export default class StationTimetableView extends View {
                 input.disabled = data.topStationList.size === 1;
                 input.dataset.index = String(val);
                 input.addEventListener('change', () => this.display(true));
-                directionContent.push(h('label', { class: 'st-tools-direction-item' }, [
-                    input,
-                    h('span', null, this.stations[key].name + '方面'),
-                ]));
+                directionContent.push(h('label', { class: 'st-tools-direction-item' }, [input, h('span', null, this.stations[key].name + '方面')]));
             }
             const oldDirectionDetail = document.getElementById('st-tools-direction-detail');
             const newDirectionDetail = h('div', { id: 'st-tools-direction-detail' }, directionContent);

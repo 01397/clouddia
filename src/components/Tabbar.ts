@@ -48,12 +48,7 @@ export default class Tabbar {
         '基本設定',
         this.tabClicked.bind(this)
       ),
-      h(
-        'div',
-        { class: 'tabbar-tab tabbar-setting-tab', 'data-tab-id': '1' },
-        '駅',
-        this.tabClicked.bind(this)
-      ),
+      h('div', { class: 'tabbar-tab tabbar-setting-tab', 'data-tab-id': '1' }, '駅', this.tabClicked.bind(this)),
       h(
         'div',
         { class: 'tabbar-tab tabbar-setting-tab', 'data-tab-id': '2' },

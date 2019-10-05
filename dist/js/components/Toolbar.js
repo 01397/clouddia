@@ -21,10 +21,12 @@ export default class Toolbar {
             return;
         const menuElement = h('div', { class: 'menu-container' }, this.menu[i].submenu.map(item => h('div', { class: 'menu-item' }, item.label, item.click)));
         menuElement.style.top = '16px';
-        menuElement.style.left =
-            this.element.children[i].offsetLeft + 'px';
+        menuElement.style.left = this.element.children[i].offsetLeft + 'px';
         document.body.appendChild(menuElement);
-        document.body.addEventListener('click', () => document.body.removeChild(menuElement), { once: true, capture: false });
+        document.body.addEventListener('click', () => document.body.removeChild(menuElement), {
+            once: true,
+            capture: false,
+        });
     }
 }
 //# sourceMappingURL=Toolbar.js.map

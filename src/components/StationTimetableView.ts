@@ -61,26 +61,14 @@ export default class StationTimetableView extends View {
       if (!this.stationList.hasOwnProperty(key)) continue;
       stationElements.push(h('option', { value: key }, key));
     }
-    this.stationSelectorElement = h(
-      'select',
-      { id: 'stationSelector' },
-      stationElements
-    ) as HTMLSelectElement;
-    this.stationSelectorElement.addEventListener(
-      'change',
-      () => this.display(),
-      false
-    );
+    this.stationSelectorElement = h('select', { id: 'stationSelector' }, stationElements) as HTMLSelectElement;
+    this.stationSelectorElement.addEventListener('change', () => this.display(), false);
     // 上り or 下り
     this.directionSelectorElement = h('input', {
       id: 'directionSelector',
       type: 'checkbox',
     }) as HTMLInputElement;
-    this.directionSelectorElement.addEventListener(
-      'change',
-      () => this.display(),
-      false
-    );
+    this.directionSelectorElement.addEventListener('change', () => this.display(), false);
     const tools = h('div', { id: 'st-tools-wrapper' }, [
       h('div', { id: 'st-tools' }, [
         h('div', { class: 'st-tools-container' }, [
@@ -115,23 +103,15 @@ export default class StationTimetableView extends View {
    * @param isInbound 上りか？
    * @param selectedIndexList 駅Indexたち
    */
-  public compile(
-    stationName: string,
-    isInbound = true,
-    selectedIndexList = new Set()
-  ) {
+  public compile(stationName: string, isInbound = true, selectedIndexList = new Set()) {
     const indexList = this.stationList[stationName].indexList;
     const trains = isInbound ? this.inboundTrains : this.outboundTrains;
     // 駅の出現回数(合計, 分岐ごと)
     const stationCount = new Array(this.stations.length).fill(0);
     const stationCount2: number[][] = [];
-    indexList.forEach(
-      val => (stationCount2[val] = new Array(this.stations.length).fill(0))
-    );
+    indexList.forEach(val => (stationCount2[val] = new Array(this.stations.length).fill(0)));
     // 種別の出現確認
-    const typeList = new Array(this.app.data.railway.trainTypes.length).fill(
-      false
-    );
+    const typeList = new Array(this.app.data.railway.trainTypes.length).fill(false);
     // これを作りたい
     const data: {
       stationName: string;
@@ -243,15 +223,9 @@ export default class StationTimetableView extends View {
    * @param {boolean} changeDetail 駅名と方向以外の変更か？
    */
   public display(changeDetail = false): void {
-    const checkboxes = document.querySelectorAll(
-      '.st-tools-direction-item>input:checked'
-    );
+    const checkboxes = document.querySelectorAll('.st-tools-direction-item>input:checked');
     const selectedIndexList = changeDetail
-      ? new Set(
-          Array.from(checkboxes).map((ele: HTMLElement) =>
-            Number(ele.dataset.index)
-          )
-        )
+      ? new Set(Array.from(checkboxes).map((ele: HTMLElement) => Number(ele.dataset.index)))
       : this.stationList[this.stationSelectorElement.value].indexList;
     const data = this.compile(
       this.stationSelectorElement.value,
@@ -279,19 +253,13 @@ export default class StationTimetableView extends View {
               {
                 class: 'st-train-terminal',
               },
-              val.terminalIndex !== data.topStation
-                ? data.shortName[val.terminalIndex]
-                : ''
+              val.terminalIndex !== data.topStation ? data.shortName[val.terminalIndex] : ''
             ),
             h(
               'div',
               {
                 class: 'st-train-minute',
-                style:
-                  'color: ' +
-                  this.app.data.railway.trainTypes[
-                    val.trainType
-                  ].textColor.toHEXString(),
+                style: 'color: ' + this.app.data.railway.trainTypes[val.trainType].textColor.toHEXString(),
               },
               min
             ),
@@ -345,9 +313,7 @@ export default class StationTimetableView extends View {
           h(
             'span',
             {
-              style:
-                'color: ' +
-                this.app.data.railway.trainTypes[i].textColor.toHEXString(),
+              style: 'color: ' + this.app.data.railway.trainTypes[i].textColor.toHEXString(),
             },
             this.app.data.railway.trainTypes[i].name + ' '
           )
@@ -389,20 +355,11 @@ export default class StationTimetableView extends View {
         input.dataset.index = String(val);
         input.addEventListener('change', () => this.display(true));
         directionContent.push(
-          h('label', { class: 'st-tools-direction-item' }, [
-            input,
-            h('span', null, this.stations[key].name + '方面'),
-          ])
+          h('label', { class: 'st-tools-direction-item' }, [input, h('span', null, this.stations[key].name + '方面')])
         );
       }
-      const oldDirectionDetail = document.getElementById(
-        'st-tools-direction-detail'
-      );
-      const newDirectionDetail = h(
-        'div',
-        { id: 'st-tools-direction-detail' },
-        directionContent
-      );
+      const oldDirectionDetail = document.getElementById('st-tools-direction-detail');
+      const newDirectionDetail = h('div', { id: 'st-tools-direction-detail' }, directionContent);
       oldDirectionDetail.replaceWith(newDirectionDetail);
     }
   }

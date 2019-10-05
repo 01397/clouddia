@@ -10,38 +10,17 @@ export default class StartView extends View {
       const target = e.currentTarget as HTMLInputElement;
       this.loadLocalFile(target.files[0]);
     });
-    const fileSelectLabel = h(
-      'div',
-      { class: 'form-button form-button-fill start-file-button' },
-      'ファイルを選ぶ'
-    );
-    const urlField = createTextField(
-      '',
-      'oudiaファイルのURL',
-      'start-drop-url-field'
-    );
-    const urlButton = createButton('開く', null, () =>
-      this.app.loadOnlineFile(urlField.value)
-    );
+    const fileSelectLabel = h('div', { class: 'form-button form-button-fill start-file-button' }, 'ファイルを選ぶ');
+    const urlField = createTextField('', 'oudiaファイルのURL', 'start-drop-url-field');
+    const urlButton = createButton('開く', null, () => this.app.loadOnlineFile(urlField.value));
     const dropArea = h('div', { class: 'start-drop' }, [
       h('h3', { class: 'start-drop-heading' }, '端末内のファイルを使う'),
-      h('label', { class: 'start-file-label' }, [
-        fileSelectLabel,
-        fileSelector,
-      ]),
-      h(
-        'div',
-        { class: 'start-drop-caption' },
-        '枠内にファイルをドロップしてもOKです'
-      ),
+      h('label', { class: 'start-file-label' }, [fileSelectLabel, fileSelector]),
+      h('div', { class: 'start-drop-caption' }, '枠内にファイルをドロップしてもOKです'),
       h('div', { class: 'start-drop-or' }, 'または'),
       h('h3', { class: 'start-drop-heading' }, 'Web上のファイルを使う'),
       h('div', { class: 'start-drop-url-wrapper' }, [urlField, urlButton]),
-      h(
-        'div',
-        { class: 'start-drop-caption' },
-        '直リンク禁止のファイルは、まず公開者に許可を取ることを推奨します'
-      ),
+      h('div', { class: 'start-drop-caption' }, '直リンク禁止のファイルは、まず公開者に許可を取ることを推奨します'),
     ]);
     dropArea.addEventListener('dragover', (evt: DragEvent) => {
       evt.preventDefault();
@@ -76,16 +55,8 @@ export default class StartView extends View {
           { class: 'start-readme-paragraph' },
           '編集・保存機能は作りかけなのに公開しちゃってます。動作に期待しないでください(涙)'
         ),
-        h(
-          'p',
-          { class: 'start-readme-paragraph' },
-          'Google Chromeからの閲覧を推奨します。'
-        ),
-        h(
-          'p',
-          { class: 'start-readme-paragraph' },
-          'スマホ対応は微妙です、そのうちちゃんとやります。'
-        ),
+        h('p', { class: 'start-readme-paragraph' }, 'Google Chromeからの閲覧を推奨します。'),
+        h('p', { class: 'start-readme-paragraph' }, 'スマホ対応は微妙です、そのうちちゃんとやります。'),
         h('p', { class: 'start-readme-paragraph' }, [
           document.createTextNode('Twitter: '),
           h('a', { href: 'https://twitter.com/01_397' }, '大井さかな(@01_397)'),
@@ -95,14 +66,14 @@ export default class StartView extends View {
           h('a', { href: 'https://github.com/01397/clouddia' }, 'GitHub'),
         ]),
         h('p', { class: 'start-readme-paragraph' }, [
-          document.createTextNode('バージョン: ' + this.app.version + ' '),
+          document.createTextNode('バージョン: v' + this.app.version + ' '),
           h(
             'a',
             {
               href: 'https://github.com/01397/clouddia/releases',
               target: '_blank',
             },
-            '詳細'
+            '更新履歴(GitHub)'
           ),
         ]),
       ]),
@@ -115,11 +86,7 @@ export default class StartView extends View {
   private loadLocalFile(file: File) {
     const name = file.name;
     const reader = new FileReader();
-    reader.addEventListener(
-      'load',
-      () => this.app.loadOudia(reader.result as string, name),
-      false
-    );
+    reader.addEventListener('load', () => this.app.loadOudia(reader.result as string, name), false);
     reader.readAsText(file, 'shift-jis');
   }
 }

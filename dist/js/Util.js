@@ -1,8 +1,6 @@
 // DOM生成。
 export const h = (tag, attr = null, body = null, onclick = null, ns = null) => {
-    const element = ns === null
-        ? document.createElement(tag)
-        : document.createElementNS(ns, tag);
+    const element = ns === null ? document.createElement(tag) : document.createElementNS(ns, tag);
     if (attr != null) {
         for (const key in attr) {
             if (attr.hasOwnProperty(key)) {
@@ -51,7 +49,7 @@ export const createTimeField = (value, className, onchange = null) => {
 };
 export const createTextField = (value, placeholder = '', className, onchange = null, oninput = null) => {
     const field = h('input', {
-        class: 'form-text ' + className,
+        class: 'form-text ' + (className !== null ? className : ''),
         value,
         type: 'text',
         placeholder,
@@ -155,8 +153,7 @@ const fieldInput = (field, e) => {
     // 空白を無視したキャレット位置
     let value = field.value;
     let selectionEnd = field.selectionEnd || 0;
-    selectionEnd = Math.max(selectionEnd -
-        (value.slice(0, selectionEnd).match(/ /g) || { length: 0 }).length, 0);
+    selectionEnd = Math.max(selectionEnd - (value.slice(0, selectionEnd).match(/ /g) || { length: 0 }).length, 0);
     // 空白を削除 -> 空白前の文字を削除
     const m1 = value.match(/\d{4}/);
     if (m1 !== null) {
@@ -195,8 +192,7 @@ const fieldKeydown = (field, e) => {
         const d = keyCode === 37 ? -1 : 1;
         if (!value[selectionEnd - 1 + d] || value[selectionEnd - 1 + d] !== ' ')
             return;
-        field.selectionStart = field.selectionEnd =
-            selectionEnd + (keyCode === 37 ? -1 : 1);
+        field.selectionStart = field.selectionEnd = selectionEnd + (keyCode === 37 ? -1 : 1);
     }
     else if (keyCode === 38) {
         // 時刻 +1分, +5秒
@@ -256,9 +252,7 @@ export const timeStringToNumber = (oudstr) => {
         return Number(oudstr.slice(0, -2)) * 3600 + Number(oudstr.slice(-2)) * 60;
     }
     else {
-        return (Number(oudstr.slice(0, -4)) * 3600 +
-            Number(oudstr.slice(-4, -2)) * 60 +
-            Number(oudstr.slice(-2)));
+        return Number(oudstr.slice(0, -4)) * 3600 + Number(oudstr.slice(-4, -2)) * 60 + Number(oudstr.slice(-2));
     }
 };
 export const numberToTimeString = (number, format) => {
@@ -269,18 +263,13 @@ export const numberToTimeString = (number, format) => {
         return hour + String(Math.floor((number % 3600) / 60)).padStart(2, '0');
     }
     if (format === 'HMM') {
-        return (Math.floor(number / 3600) +
-            String(Math.floor((number % 3600) / 60)).padStart(2, '0'));
+        return Math.floor(number / 3600) + String(Math.floor((number % 3600) / 60)).padStart(2, '0');
     }
     if (format === 'min_HH:MM') {
-        return (Math.floor((number % 3600) / 60) +
-            ':' +
-            String(Math.floor((number % 3600) % 60)).padStart(2, '0'));
+        return Math.floor((number % 3600) / 60) + ':' + String(Math.floor((number % 3600) % 60)).padStart(2, '0');
     }
     if (format === 'H:MM') {
-        return (Math.floor((number % 86400) / 3600) +
-            ':' +
-            String(Math.floor(((number % 86400) % 3600) / 60)).padStart(2, '0'));
+        return (Math.floor((number % 86400) / 3600) + ':' + String(Math.floor(((number % 86400) % 3600) / 60)).padStart(2, '0'));
     }
     if (format === 'HH MM SS') {
         return (String(Math.floor(number / 3600)).padStart(2, '0') +

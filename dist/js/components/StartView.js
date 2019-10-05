@@ -13,10 +13,7 @@ export default class StartView extends View {
         const urlButton = createButton('開く', null, () => this.app.loadOnlineFile(urlField.value));
         const dropArea = h('div', { class: 'start-drop' }, [
             h('h3', { class: 'start-drop-heading' }, '端末内のファイルを使う'),
-            h('label', { class: 'start-file-label' }, [
-                fileSelectLabel,
-                fileSelector,
-            ]),
+            h('label', { class: 'start-file-label' }, [fileSelectLabel, fileSelector]),
             h('div', { class: 'start-drop-caption' }, '枠内にファイルをドロップしてもOKです'),
             h('div', { class: 'start-drop-or' }, 'または'),
             h('h3', { class: 'start-drop-heading' }, 'Web上のファイルを使う'),
@@ -58,11 +55,11 @@ export default class StartView extends View {
                     h('a', { href: 'https://github.com/01397/clouddia' }, 'GitHub'),
                 ]),
                 h('p', { class: 'start-readme-paragraph' }, [
-                    document.createTextNode('バージョン: ' + this.app.version + ' '),
+                    document.createTextNode('バージョン: v' + this.app.version + ' '),
                     h('a', {
                         href: 'https://github.com/01397/clouddia/releases',
                         target: '_blank',
-                    }, '詳細'),
+                    }, '更新履歴(GitHub)'),
                 ]),
             ]),
         ]);

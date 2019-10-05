@@ -1,4 +1,4 @@
-import { createTimeField, h, numberToTimeString, timeStringToNumber, } from '../Util.js';
+import { createTimeField, h, numberToTimeString, timeStringToNumber, createTextField, createCheckbox } from '../Util.js';
 import View from './View.js';
 export default class FileSettingView extends View {
     constructor(app) {
@@ -22,8 +22,7 @@ export default class FileSettingView extends View {
         directionNameField0.addEventListener('change', e => {
             const value = e.currentTarget.value;
             data.railway.directionName[0] = value == '' ? '下り' : value;
-            document.getElementById('sidebar-label-inbound').textContent =
-                data.railway.directionName[0];
+            document.getElementById('sidebar-label-inbound').textContent = data.railway.directionName[0];
         });
         const directionNameField1 = h('input', {
             class: 'form-text fs-flex',
@@ -34,31 +33,28 @@ export default class FileSettingView extends View {
         directionNameField1.addEventListener('change', e => {
             const value = e.currentTarget.value;
             data.railway.directionName[1] = value == '' ? '上り' : value;
-            document.getElementById('sidebar-label-outbound').textContent =
-                data.railway.directionName[1];
+            document.getElementById('sidebar-label-outbound').textContent = data.railway.directionName[1];
         });
         const startTimeField = createTimeField(numberToTimeString(data.railway.startTime, 'HH MM SS'), null, e => (data.railway.startTime = timeStringToNumber(e.currentTarget.value)));
+        const oudiaSettings = [];
+        for (let i = 0; i < 8; i++) {
+            const font = data.displayProperty.timetableFont[i];
+            oudiaSettings.push(h('div', { class: 'form-row' }, [
+                createTextField(font.family, '書体', null, e => (font.family = e.currentTarget.value)),
+                createTextField(font.height + '', null, null, e => (font.height = Number(e.currentTarget.value))),
+                createCheckbox(font.bold, null, e => (font.bold = e.currentTarget.checked)),
+                createCheckbox(font.italic, null, e => (font.italic = e.currentTarget.checked)),
+            ]));
+        }
         const content = h('div', { class: 'fs-1col-container' }, [
             h('div', { class: 'fs-section fs-label6' }, [
                 h('div', { class: 'fs-section-header' }, 'ファイル'),
-                h('div', { class: 'form-row' }, [
-                    h('div', { class: 'form-label' }, '路線名'),
-                    railwayNameField,
-                ]),
-                h('div', { class: 'form-row' }, [
-                    h('div', { class: 'form-label' }, 'コメント'),
-                    railwayCommentField,
-                ]),
-                h('div', { class: 'form-row' }, [
-                    h('div', { class: 'form-label' }, '路線方向名'),
-                    directionNameField0,
-                    directionNameField1,
-                ]),
-                h('div', { class: 'form-row' }, [
-                    h('div', { class: 'form-label' }, '1日の始まり'),
-                    startTimeField,
-                ]),
+                h('div', { class: 'form-row' }, [h('div', { class: 'form-label' }, '路線名'), railwayNameField]),
+                h('div', { class: 'form-row' }, [h('div', { class: 'form-label' }, 'コメント'), railwayCommentField]),
+                h('div', { class: 'form-row' }, [h('div', { class: 'form-label' }, '路線方向名'), directionNameField0, directionNameField1]),
+                h('div', { class: 'form-row' }, [h('div', { class: 'form-label' }, '1日の始まり'), startTimeField]),
             ]),
+            h('div', { class: 'fs-section fs-label6' }, [h('div', { class: 'fs-section-header' }, 'OuDiaの設定'), ...oudiaSettings]),
         ]);
         this.element.append(content);
     }

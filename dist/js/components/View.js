@@ -14,5 +14,8 @@ export default class View {
         this.element = newDiv;
         app.setViewMenu(menu);
     }
+    keydown(e) {
+        return;
+    }
 }
 //# sourceMappingURL=View.js.map

@@ -6,10 +6,7 @@ export const h = (
   onclick: (e: Event) => void = null,
   ns: string = null
 ): Element => {
-  const element =
-    ns === null
-      ? document.createElement(tag)
-      : document.createElementNS(ns, tag);
+  const element = ns === null ? document.createElement(tag) : document.createElementNS(ns, tag);
   if (attr != null) {
     for (const key in attr) {
       if (attr.hasOwnProperty(key)) {
@@ -36,6 +33,7 @@ export const h = (
   }
   return element;
 };
+
 export const createTimeField = (
   value: string,
   className?: string,
@@ -55,6 +53,7 @@ export const createTimeField = (
   if (onchange !== null) field.addEventListener('change', onchange);
   return field;
 };
+
 export const createTextField = (
   value: string,
   placeholder = '',
@@ -63,7 +62,7 @@ export const createTextField = (
   oninput: (e?: Event) => void = null
 ): HTMLInputElement => {
   const field = h('input', {
-    class: 'form-text ' + className,
+    class: 'form-text ' + (className !== null ? className : ''),
     value,
     type: 'text',
     placeholder,
@@ -73,20 +72,18 @@ export const createTextField = (
   if (oninput !== null) field.addEventListener('input', oninput);
   return field;
 };
+
 export const createMultilineTextField = (
   value: string,
   placeholder = '',
   className?: string,
   onchange: (e?: Event) => void = null
 ): HTMLTextAreaElement => {
-  const field = h(
-    'textarea',
-    { class: 'form-text-multiline fs-flex', placeholder },
-    value
-  ) as HTMLTextAreaElement;
+  const field = h('textarea', { class: 'form-text-multiline fs-flex', placeholder }, value) as HTMLTextAreaElement;
   if (onchange !== null) field.addEventListener('change', onchange);
   return field;
 };
+
 export const createCheckbox = (
   checked: boolean,
   className?: string,
@@ -100,6 +97,7 @@ export const createCheckbox = (
   if (onchange !== null) checkbox.addEventListener('change', onchange);
   return checkbox;
 };
+
 export const createRadio = (
   checked: boolean,
   name?: string,
@@ -115,29 +113,22 @@ export const createRadio = (
   if (onchange !== null) radio.addEventListener('change', onchange);
   return radio;
 };
+
 export const createButton = (
   value: string,
   className?: string,
   onclick: (e?: Event) => void = null
 ): HTMLInputElement => {
-  return h(
-    'input',
-    { class: 'form-button ' + className, type: 'button', value },
-    null,
-    onclick
-  ) as HTMLInputElement;
+  return h('input', { class: 'form-button ' + className, type: 'button', value }, null, onclick) as HTMLInputElement;
 };
+
 export const createColorField = (
   value: string,
   className?: string,
   onchange: (e?: Event) => void = null
 ): HTMLLabelElement => {
   const colorField = h('input', { type: 'color', value }) as HTMLInputElement;
-  const label = h(
-    'label',
-    { class: 'form-color ' + className, tabindex: 0 },
-    colorField
-  ) as HTMLLabelElement;
+  const label = h('label', { class: 'form-color ' + className, tabindex: 0 }, colorField) as HTMLLabelElement;
   label.style.backgroundColor = value;
   colorField.addEventListener('change', onchange);
   colorField.addEventListener('input', () => {
@@ -145,6 +136,7 @@ export const createColorField = (
   });
   return label;
 };
+
 export const createLineStyleField = (
   value: string,
   className?: string,
@@ -169,13 +161,7 @@ export const createLineStyleField = (
     'http://www.w3.org/2000/svg'
   ) as SVGLineElement;
   const wrapper = h('div', { class: 'form-line ' + className, tabindex: 0 }, [
-    h(
-      'svg',
-      { class: 'form-line-content' },
-      contentLine,
-      null,
-      'http://www.w3.org/2000/svg'
-    ),
+    h('svg', { class: 'form-line-content' }, contentLine, null, 'http://www.w3.org/2000/svg'),
     h('div', { class: 'form-line-selector ' + className }, [
       h(
         'svg',
@@ -257,15 +243,12 @@ export const createLineStyleField = (
   ]) as HTMLDivElement;
   return wrapper;
 };
+
 const fieldInput = (field: HTMLInputElement, e: Event): void => {
   // 空白を無視したキャレット位置
   let value = field.value;
   let selectionEnd = field.selectionEnd || 0;
-  selectionEnd = Math.max(
-    selectionEnd -
-      (value.slice(0, selectionEnd).match(/ /g) || { length: 0 }).length,
-    0
-  );
+  selectionEnd = Math.max(selectionEnd - (value.slice(0, selectionEnd).match(/ /g) || { length: 0 }).length, 0);
   // 空白を削除 -> 空白前の文字を削除
   const m1 = value.match(/\d{4}/);
   if (m1 !== null) {
@@ -291,6 +274,7 @@ const fieldInput = (field: HTMLInputElement, e: Event): void => {
   // validation
   field.classList[!timeStringCheck(str) ? 'add' : 'remove']('invalid');
 };
+
 const fieldKeydown = (field: HTMLInputElement, e: KeyboardEvent): void => {
   // e.keyCode: 37← 38↑ 39→ 40↓
   const keyCode = e.keyCode;
@@ -299,10 +283,8 @@ const fieldKeydown = (field: HTMLInputElement, e: KeyboardEvent): void => {
     const value = field.value;
     const selectionEnd = field.selectionEnd;
     const d = keyCode === 37 ? -1 : 1;
-    if (!value[selectionEnd - 1 + d] || value[selectionEnd - 1 + d] !== ' ')
-      return;
-    field.selectionStart = field.selectionEnd =
-      selectionEnd + (keyCode === 37 ? -1 : 1);
+    if (!value[selectionEnd - 1 + d] || value[selectionEnd - 1 + d] !== ' ') return;
+    field.selectionStart = field.selectionEnd = selectionEnd + (keyCode === 37 ? -1 : 1);
   } else if (keyCode === 38) {
     // 時刻 +1分, +5秒
     e.preventDefault();
@@ -319,6 +301,7 @@ const fieldKeydown = (field: HTMLInputElement, e: KeyboardEvent): void => {
     );
   }
 };
+
 const fieldBlur = (field: HTMLInputElement, e: FocusEvent): void => {
   const value = field.value;
   if (timeStringCheck(value) && value.length < 7) {
@@ -366,51 +349,31 @@ export const timeStringToNumber = (oudstr: string): number => {
   if (oudstr.length <= 4) {
     return Number(oudstr.slice(0, -2)) * 3600 + Number(oudstr.slice(-2)) * 60;
   } else {
-    return (
-      Number(oudstr.slice(0, -4)) * 3600 +
-      Number(oudstr.slice(-4, -2)) * 60 +
-      Number(oudstr.slice(-2))
-    );
+    return Number(oudstr.slice(0, -4)) * 3600 + Number(oudstr.slice(-4, -2)) * 60 + Number(oudstr.slice(-2));
   }
 };
+
 /**
  * 文字列形式の時刻を秒を表す数字に変換
  * @param string HHMM, HHMMSSの形式。3~6文字。
  */
-export type timeFormat =
-  | 'HMM_space'
-  | 'HMM'
-  | 'min_HH:MM'
-  | 'H:MM'
-  | 'HH MM SS'
-  | 'HMMSS';
-export const numberToTimeString = (
-  number: number,
-  format: timeFormat
-): string => {
+export type timeFormat = 'HMM_space' | 'HMM' | 'min_HH:MM' | 'H:MM' | 'HH MM SS' | 'HMMSS';
+
+export const numberToTimeString = (number: number, format: timeFormat): string => {
   if (format === 'HMM_space') {
     let hour = String(Math.floor(number / 3600));
     if (hour.length === 1) hour = '\u2007' + hour;
     return hour + String(Math.floor((number % 3600) / 60)).padStart(2, '0');
   }
   if (format === 'HMM') {
-    return (
-      Math.floor(number / 3600) +
-      String(Math.floor((number % 3600) / 60)).padStart(2, '0')
-    );
+    return Math.floor(number / 3600) + String(Math.floor((number % 3600) / 60)).padStart(2, '0');
   }
   if (format === 'min_HH:MM') {
-    return (
-      Math.floor((number % 3600) / 60) +
-      ':' +
-      String(Math.floor((number % 3600) % 60)).padStart(2, '0')
-    );
+    return Math.floor((number % 3600) / 60) + ':' + String(Math.floor((number % 3600) % 60)).padStart(2, '0');
   }
   if (format === 'H:MM') {
     return (
-      Math.floor((number % 86400) / 3600) +
-      ':' +
-      String(Math.floor(((number % 86400) % 3600) / 60)).padStart(2, '0')
+      Math.floor((number % 86400) / 3600) + ':' + String(Math.floor(((number % 86400) % 3600) / 60)).padStart(2, '0')
     );
   }
   if (format === 'HH MM SS') {

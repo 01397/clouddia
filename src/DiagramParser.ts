@@ -134,8 +134,10 @@ export class Railway extends DiagramData {
   public fromOudiaParams(params) {
     this.name = params.hasOwnProperty('Rosenmei') ? params.Rosenmei : '新規路線';
     this.directionName = [];
-    this.directionName[0] = params.hasOwnProperty('KudariDiaAlias') ? params.KudariDiaAlias : '下り';
-    this.directionName[1] = params.hasOwnProperty('NoboriDiaAlias') ? params.NoboriDiaAlias : '上り';
+    this.directionName[0] =
+      params.hasOwnProperty('KudariDiaAlias') && params.KudariDiaAlias !== '' ? params.KudariDiaAlias : '下り';
+    this.directionName[1] =
+      params.hasOwnProperty('NoboriDiaAlias') && params.KudariDiaAlias !== '' ? params.NoboriDiaAlias : '上り';
     this.startTime = params.hasOwnProperty('KitenJikoku') ? timeStringToNumber(params.KitenJikoku) : 4 * 3600;
     this.stationInterval = params.hasOwnProperty('DiagramDgrYZahyouKyoriDefault')
       ? Number(params.DiagramDgrYZahyouKyoriDefault)

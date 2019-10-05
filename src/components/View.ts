@@ -1,21 +1,11 @@
 import App, { MenuItem } from '../App.js';
 import { h } from '../Util.js';
 
-export type viewTypeString =
-  | 'Start'
-  | 'StationTimetable'
-  | 'InboundTrainTimetable'
-  | 'OutboundTrainTimetable'
-  | 'Diagram'
-  | 'FileSetting';
+export type viewTypeString = 'Start' | 'StationTimetable' | 'InboundTrainTimetable' | 'OutboundTrainTimetable' | 'Diagram' | 'FileSetting';
 export default abstract class View {
   protected app: App;
   protected element: HTMLDivElement;
-  constructor(
-    app: App,
-    viewType: viewTypeString,
-    menu: MenuItem[] = [{ label: 'メニュー' }]
-  ) {
+  constructor(app: App, viewType: viewTypeString, menu: MenuItem[] = [{ label: 'メニュー' }]) {
     this.app = app;
     this.app.currentView = viewType;
 
@@ -33,4 +23,7 @@ export default abstract class View {
   }
 
   public abstract finish(): void;
+  public keydown(e: KeyboardEvent) {
+    return;
+  }
 }

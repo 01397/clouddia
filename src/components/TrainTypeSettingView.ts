@@ -18,36 +18,22 @@ export default class TrainTypeSettingView extends View {
   constructor(app: App) {
     super(app, 'FileSetting');
     this.hoverElement = null;
-    this.svgElement = h(
-      'svg',
-      { class: 'fs-typelist' },
-      null,
-      null,
-      'http://www.w3.org/2000/svg'
-    );
+    this.svgElement = h('svg', { class: 'fs-typelist' }, null, null, 'http://www.w3.org/2000/svg');
     this.svgElement.addEventListener('mousemove', (e: MouseEvent) => {
       const y = e.offsetY;
-      if (this.hoverElement !== null)
-        this.hoverElement.classList.remove('hover');
-      const target = this.svgElement.querySelectorAll('g.fs-typelist-item')[
-        Math.floor(y / 36)
-      ];
+      if (this.hoverElement !== null) this.hoverElement.classList.remove('hover');
+      const target = this.svgElement.querySelectorAll('g.fs-typelist-item')[Math.floor(y / 36)];
       if (!target) return;
       this.hoverElement = target;
       target.classList.add('hover');
     });
     this.svgElement.addEventListener('mouseout', (e: MouseEvent) => {
-      if (this.hoverElement !== null)
-        this.hoverElement.classList.remove('hover');
+      if (this.hoverElement !== null) this.hoverElement.classList.remove('hover');
     });
     this.svgElement.addEventListener('click', (e: MouseEvent) => {
       this.edit(Math.floor(e.offsetY / 36));
     });
-    this.rightContainer = h(
-      'div',
-      { class: 'fs-right-container' },
-      '列車種別が選択されていません'
-    );
+    this.rightContainer = h('div', { class: 'fs-right-container' }, '列車種別が選択されていません');
     this.element.appendChild(
       h('div', { class: 'fs-2cols-container' }, [
         h('div', { class: 'fs-left-container' }, this.svgElement),
@@ -125,9 +111,7 @@ export default class TrainTypeSettingView extends View {
           h('div', { class: 'form-label' }, '種別名'),
           createTextField(trainType.name, '', '', null, e => {
             const value = (e.currentTarget as HTMLInputElement).value;
-            this.svgElement.querySelectorAll('.fs-typelist-name')[
-              trainTypeIndex
-            ].textContent = value;
+            this.svgElement.querySelectorAll('.fs-typelist-name')[trainTypeIndex].textContent = value;
             trainType.name = value;
           }),
         ]),
@@ -135,31 +119,21 @@ export default class TrainTypeSettingView extends View {
           h('div', { class: 'form-label' }, '種別略称'),
           createTextField(trainType.abbrName, '', '', null, e => {
             const value = (e.currentTarget as HTMLInputElement).value;
-            this.svgElement.querySelectorAll('.fs-typelist-abbr')[
-              trainTypeIndex
-            ].textContent = value;
+            this.svgElement.querySelectorAll('.fs-typelist-abbr')[trainTypeIndex].textContent = value;
             trainType.abbrName = value;
           }),
         ]),
         h('div', { class: 'form-row' }, [
-          h(
-            'div',
-            { class: 'form-label', id: 'fs-traintype-color-text' },
-            '文字色'
-          ),
+          h('div', { class: 'form-label', id: 'fs-traintype-color-text' }, '文字色'),
           createColorField(trainType.textColor.toHEXString(), '', e => {
-            trainType.textColor = Color.from(
-              (e.currentTarget as HTMLInputElement).value
-            );
+            trainType.textColor = Color.from((e.currentTarget as HTMLInputElement).value);
             this.updateList();
           }),
         ]),
         h('div', { class: 'form-row' }, [
           h('div', { class: 'form-label' }, '線色'),
           createColorField(trainType.strokeColor.toHEXString(), '', e => {
-            trainType.strokeColor = Color.from(
-              (e.currentTarget as HTMLInputElement).value
-            );
+            trainType.strokeColor = Color.from((e.currentTarget as HTMLInputElement).value);
             this.updateList();
           }),
           createButton('文字色に揃える', '', () => {

@@ -78,19 +78,15 @@ export default class TrainTimetableView extends View {
     this.element.addEventListener('scroll', () => (this.rendering = true));
     this.element.addEventListener('click', event => {
       const target = event.target as HTMLElement;
-      const data = target.dataset.address.split('-');
-      this.activeCell = [Number(data[0]), Number(data[1])];
       this.selectCell(target);
     });
-    document.addEventListener('keydown', this.moveCell.bind(this), false);
     // 現在の表示領域
     this.lastArea = { x: 0, w: 0 };
     this.columns = new Map();
     this.tStation.style.width = this.stationCellWidth + 'px';
     this.rendering = true;
 
-    this.tHeader.style.width =
-      this.app.data.railway.diagrams[this.diaIndex].trains[this.direction].length * this.cellWidth + 'px';
+    this.tHeader.style.width = this.app.data.railway.diagrams[this.diaIndex].trains[this.direction].length * this.cellWidth + 'px';
     this.tHeader.style.paddingLeft = this.stationCellWidth + 'px';
 
     this.loadStations();
@@ -103,7 +99,6 @@ export default class TrainTimetableView extends View {
   }
 
   public finish() {
-    document.removeEventListener('keydown', this.moveCell, false);
     cancelAnimationFrame(this.reqId);
   }
   public update() {
@@ -143,8 +138,7 @@ export default class TrainTimetableView extends View {
         {
           class: 'tt-cell',
           style:
-            `height: ${(Number(style.arrival[this.direction]) + Number(style.departure[this.direction])) *
-              this.cellHeight}px;` +
+            `height: ${(Number(style.arrival[this.direction]) + Number(style.departure[this.direction])) * this.cellHeight}px;` +
             (stationAppearance.border ? `border-bottom: 1px solid #222222;` : '') +
             (station.isMain ? `font-weight: 500;` : ''),
         },
@@ -380,9 +374,7 @@ export default class TrainTimetableView extends View {
       'div',
       {
         class: 'tt-row',
-        style: `transform: translateZ(0) translateX(${this.cellWidth * colIndex}px);top:${this.headerHeight}px;width:${
-          this.cellWidth
-        }px;`,
+        style: `transform: translateZ(0) translateX(${this.cellWidth * colIndex}px);top:${this.headerHeight}px;width:${this.cellWidth}px;`,
         'data-col-id': colIndex,
       },
       bodyContent
@@ -391,15 +383,12 @@ export default class TrainTimetableView extends View {
       'div',
       {
         class: 'tt-head-row',
-        style: `transform: translateZ(0) translateX(${this.cellWidth *
-          colIndex}px);color: ${data.type.textColor.toHEXString()};width:${this.cellWidth}px;`,
+        style: `transform: translateZ(0) translateX(${this.cellWidth * colIndex}px);color: ${data.type.textColor.toHEXString()};width:${
+          this.cellWidth
+        }px;`,
         'data-col-id': colIndex,
       },
-      [
-        h('div', { class: 'tt-cell' }, data.number),
-        h('div', { class: 'tt-cell' }, data.type.abbrName),
-        h('div', { class: 'tt-cell' }, data.name),
-      ]
+      [h('div', { class: 'tt-cell' }, data.number), h('div', { class: 'tt-cell' }, data.type.abbrName), h('div', { class: 'tt-cell' }, data.name)]
     ) as HTMLDivElement;
     this.tHeader.appendChild(header);
     this.tBody.appendChild(body);
@@ -411,21 +400,19 @@ export default class TrainTimetableView extends View {
     const oldCol = this.columns.get(oldIdx);
     Array.from(oldCol.body.children).forEach((element: HTMLDivElement, i: number) => {
       if (oldData.cells[i].text !== newData.cells[i].text || forceUpdate) element.textContent = newData.cells[i].text;
-      if (oldData.cells[i].color !== newData.cells[i].color || forceUpdate)
-        element.style.color = newData.cells[i].color;
-      if (oldData.cells[i].address !== newData.cells[i].address || forceUpdate)
-        element.dataset.address = newData.cells[i].address;
+      if (oldData.cells[i].color !== newData.cells[i].color || forceUpdate) element.style.color = newData.cells[i].color;
+      if (oldData.cells[i].address !== newData.cells[i].address || forceUpdate) element.dataset.address = newData.cells[i].address;
     });
     oldCol.body.style.transform = 'translateZ(0) translateX(' + this.cellWidth * newIdx + 'px)';
     oldCol.body.dataset.colId = String(newIdx);
     if (oldData.number !== newData.number || forceUpdate) oldCol.header.children[0].textContent = newData.number;
-    if (oldData.type.abbrName !== newData.type.abbrName || forceUpdate)
-      oldCol.header.children[1].textContent = newData.type.abbrName;
+    if (oldData.type.abbrName !== newData.type.abbrName || forceUpdate) oldCol.header.children[1].textContent = newData.type.abbrName;
     if (oldData.name !== newData.name || forceUpdate) oldCol.header.children[2].textContent = newData.name;
     if (oldData.type.textColor.toHEXString() !== newData.type.textColor.toHEXString() || forceUpdate)
       oldCol.header.style.color = newData.type.textColor.toHEXString();
     oldCol.header.style.transform = 'translateZ(0) translateX(' + this.cellWidth * newIdx + 'px)';
     oldCol.header.dataset.colId = String(newIdx);
+    oldCol.header.classList[this.activeCell[0] == newIdx ? 'add' : 'remove']('tt-weak-highlight');
     this.columns.delete(oldIdx);
     this.columns.set(newIdx, oldCol);
   }
@@ -446,6 +433,14 @@ export default class TrainTimetableView extends View {
   private selectCell(target: HTMLElement) {
     const trainIndex = target.parentElement.dataset.colId;
     if (!('cellName' in target.dataset)) return;
+    if (this.columns.has(this.activeCell[0])) {
+      this.columns.get(this.activeCell[0]).header.classList.remove('tt-weak-highlight');
+    }
+    if (this.app.selection !== null) {
+      const i =
+        this.direction === 0 ? this.app.selection[0].stationIndex : this.app.data.railway.stations.length - this.app.selection[0].stationIndex - 1;
+      this.tStation.children[i].classList.remove('tt-weak-highlight');
+    }
     this.focus(target);
     const [stationIndex, cellType] = target.dataset.cellName.split('-');
     const [col, row] = target.dataset.address.split('-');
@@ -458,6 +453,13 @@ export default class TrainTimetableView extends View {
         train: this.app.data.railway.diagrams[this.diaIndex].trains[this.direction][trainIndex],
       },
     ];
+    this.columns.get(Number(col)).header.classList.add('tt-weak-highlight');
+    this.tStation.children[this.direction === 0 ? stationIndex : this.app.data.railway.stations.length - Number(stationIndex) - 1].classList.add(
+      'tt-weak-highlight'
+    );
+  }
+  public keydown(e: KeyboardEvent) {
+    this.moveCell(e);
   }
   private moveCell(event: KeyboardEvent) {
     let col = this.activeCell[0];

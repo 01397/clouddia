@@ -31,18 +31,14 @@ export default class Toolbar {
     const menuElement = h(
       'div',
       { class: 'menu-container' },
-      this.menu[i].submenu.map(item =>
-        h('div', { class: 'menu-item' }, item.label, item.click)
-      )
+      this.menu[i].submenu.map(item => h('div', { class: 'menu-item' }, item.label, item.click))
     ) as HTMLDivElement;
     menuElement.style.top = '16px';
-    menuElement.style.left =
-      (this.element.children[i] as HTMLElement).offsetLeft + 'px';
+    menuElement.style.left = (this.element.children[i] as HTMLElement).offsetLeft + 'px';
     document.body.appendChild(menuElement);
-    document.body.addEventListener(
-      'click',
-      () => document.body.removeChild(menuElement),
-      { once: true, capture: false }
-    );
+    document.body.addEventListener('click', () => document.body.removeChild(menuElement), {
+      once: true,
+      capture: false,
+    });
   }
 }

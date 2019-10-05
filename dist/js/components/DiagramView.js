@@ -1,4 +1,4 @@
-import { DASH_ARRAY_STYLE, getDistance2, h, numberToTimeString, } from '../Util.js';
+import { DASH_ARRAY_STYLE, getDistance2, h, numberToTimeString } from '../Util.js';
 import View from './View.js';
 // CanvasDiagramView.js (module)
 // ダイヤグラムを表示する。斜め線いっぱいのやつ。
@@ -241,13 +241,10 @@ export default class CanvasDiagramView extends View {
                 [
                     Math.max(this.minXScale, Math.min(this.maxXScale, (this.pinchStart.xScale * dx) / this.pinchStart.dx)),
                     Math.max(this.minYScale, Math.min(this.maxYScale, (this.pinchStart.yScale * dy) / this.pinchStart.dy)),
-                    Math.max(0, ((this.pinchStart.px + this.pinchStart.x0 - this.paddingLeft) *
-                        dx) /
-                        this.pinchStart.dx -
+                    Math.max(0, ((this.pinchStart.px + this.pinchStart.x0 - this.paddingLeft) * dx) / this.pinchStart.dx -
                         x0 +
                         this.paddingLeft),
-                    Math.max(0, ((this.pinchStart.py + this.pinchStart.y0 - this.paddingTop) * dy) /
-                        this.pinchStart.dy -
+                    Math.max(0, ((this.pinchStart.py + this.pinchStart.y0 - this.paddingTop) * dy) / this.pinchStart.dy -
                         y0 +
                         this.paddingTop),
                 ],
@@ -283,8 +280,7 @@ export default class CanvasDiagramView extends View {
                 const data = train.timetable.data;
                 for (let i = 0; i < len; i++) {
                     // 停車駅でない
-                    if (!(i in data) ||
-                        (data[i].arrival === null && data[i].departure === null)) {
+                    if (!(i in data) || (data[i].arrival === null && data[i].departure === null)) {
                         prevDep = null;
                         continue;
                     }
@@ -370,8 +366,7 @@ export default class CanvasDiagramView extends View {
                     pendingPoints.push([y, distance]);
                 }
                 // 経由なしを通って停車駅まできたら、控えておいた点を結ぶ
-                if (pendingPoints.length !== 0 &&
-                    (val.departure !== null || val.arrival !== null)) {
+                if (pendingPoints.length !== 0 && (val.departure !== null || val.arrival !== null)) {
                     const x = getRelativeTime(val.arrival !== null ? val.arrival : val.departure);
                     for (let k = 0; k < pendingPoints.length; k++) {
                         result.push(k % 2 === 0, ((x - lastX) * pendingPoints[k][1]) / distance + lastX, pendingPoints[k][0]);
@@ -430,10 +425,8 @@ export default class CanvasDiagramView extends View {
             result.push([
                 sx,
                 sy,
-                Math.max(0, ((this.lastPosition.x + this.lastPosition.w / 2) * sx) / xOrig -
-                    this.lastPosition.w / 2),
-                Math.max(0, ((this.lastPosition.y + this.lastPosition.h / 2) * sy) / yOrig -
-                    this.lastPosition.h / 2),
+                Math.max(0, ((this.lastPosition.x + this.lastPosition.w / 2) * sx) / xOrig - this.lastPosition.w / 2),
+                Math.max(0, ((this.lastPosition.y + this.lastPosition.h / 2) * sy) / yOrig - this.lastPosition.h / 2),
             ]);
         }
         return result;
@@ -494,9 +487,7 @@ export default class CanvasDiagramView extends View {
             x: this.dgViewWrapper.scrollLeft * this.devicePixelRatio,
             y: this.dgViewWrapper.scrollTop * this.devicePixelRatio,
         };
-        this.paddingLeft =
-            (position.w / this.devicePixelRatio < 600 ? 50 : 80) *
-                this.devicePixelRatio;
+        this.paddingLeft = (position.w / this.devicePixelRatio < 600 ? 50 : 80) * this.devicePixelRatio;
         if (position.w !== this.lastPosition.w)
             this.canvas.width = position.w;
         if (position.h !== this.lastPosition.h)
@@ -518,8 +509,7 @@ export default class CanvasDiagramView extends View {
                 position.x = rData[2];
                 position.y = rData[3];
                 // 更新
-                this.setWrapperSize(24 * 60 * this.xScale + this.paddingTop + 50, this.drawingData.totalDistance[this.drawingData.totalDistance.length - 1] *
-                    this.yScale +
+                this.setWrapperSize(24 * 60 * this.xScale + this.paddingTop + 50, this.drawingData.totalDistance[this.drawingData.totalDistance.length - 1] * this.yScale +
                     this.paddingLeft +
                     50);
                 this.dgViewWrapper.scrollLeft = position.x / this.devicePixelRatio;
@@ -532,10 +522,7 @@ export default class CanvasDiagramView extends View {
             // canvas初期化
             this.context.fillStyle = '#f0f0f0';
             this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
-            this.context.font =
-                '300 ' +
-                    Math.min(12 * this.devicePixelRatio, this.yScale) +
-                    'px "Noto Sans JP"';
+            this.context.font = '300 ' + Math.min(12 * this.devicePixelRatio, this.yScale) + 'px "Noto Sans JP"';
             this.context.fillStyle = '#444444';
             this.context.lineWidth = 1;
             // お絵かきターイム(^_^)/
@@ -546,8 +533,7 @@ export default class CanvasDiagramView extends View {
             // 次回、位置が動いたか確認できるように記録
             this.lastPosition = position;
             this.forceDraw = false;
-            this.element.style.cursor =
-                this.selectedTrain !== null ? 'pointer' : 'default';
+            this.element.style.cursor = this.selectedTrain !== null ? 'pointer' : 'default';
         }
         this.reqId = requestAnimationFrame(this.draw.bind(this));
     }
@@ -561,10 +547,7 @@ export default class CanvasDiagramView extends View {
         this.context.textBaseline = 'bottom';
         const stationLen = this.drawingData.totalDistance.length;
         const mainStations = new Set();
-        this.context.font =
-            '300 ' +
-                Math.min(12 * this.devicePixelRatio, this.yScale) +
-                'px "Noto Sans JP"';
+        this.context.font = '300 ' + Math.min(12 * this.devicePixelRatio, this.yScale) + 'px "Noto Sans JP"';
         for (let i = 0; i < stationLen; i++) {
             const y = this.drawingData.totalDistance[i] * this.yScale;
             if (y + this.paddingTop - position.y < 0)
@@ -581,10 +564,7 @@ export default class CanvasDiagramView extends View {
         }
         this.context.stroke();
         this.context.beginPath();
-        this.context.font =
-            '500 ' +
-                Math.min(12 * this.devicePixelRatio, this.yScale) +
-                'px "Noto Sans JP"';
+        this.context.font = '500 ' + Math.min(12 * this.devicePixelRatio, this.yScale) + 'px "Noto Sans JP"';
         this.context.strokeStyle = '#bbbbbb';
         for (const station of mainStations) {
             this.context.moveTo(0, Math.floor(station.y - position.y + this.paddingTop) + 0.5);
@@ -623,10 +603,7 @@ export default class CanvasDiagramView extends View {
         // 書式設定
         this.context.textAlign = 'center';
         this.context.textBaseline = 'bottom';
-        this.context.font =
-            '300 ' +
-                Math.min(12 * this.devicePixelRatio, this.yScale) +
-                'px "Noto Sans JP"';
+        this.context.font = '300 ' + Math.min(12 * this.devicePixelRatio, this.yScale) + 'px "Noto Sans JP"';
         // stroke数を減らすために、d1,d2は最後にまとめて描画。d3は初回なので変数に入れる必要ない。
         const d1x = new Set();
         const d2x = new Set();
@@ -723,8 +700,7 @@ export default class CanvasDiagramView extends View {
                 continue;
             const [color, selected, bold, strokeStyle] = style.split(' ');
             this.context.beginPath();
-            const newLineWidth = this.devicePixelRatio *
-                ((bold === 't' ? 3 : 1) + (selected === 't' ? 1 : 0));
+            const newLineWidth = this.devicePixelRatio * ((bold === 't' ? 3 : 1) + (selected === 't' ? 1 : 0));
             if (lineWidth !== newLineWidth) {
                 lineWidth = newLineWidth;
                 this.context.lineWidth = newLineWidth;
@@ -740,9 +716,7 @@ export default class CanvasDiagramView extends View {
                 if (this.visibleTrainNumber || this.visibleTrainName) {
                     this.context.save();
                     this.context.translate(val.path[1] * this.xScale + xl, val.path[2] * this.yScale + yt);
-                    this.context.rotate(Math.atan(((val.path[5] - val.path[2]) * this.yScale) /
-                        (val.path[4] - val.path[1]) /
-                        this.xScale));
+                    this.context.rotate(Math.atan(((val.path[5] - val.path[2]) * this.yScale) / (val.path[4] - val.path[1]) / this.xScale));
                     this.context.fillText((this.visibleTrainNumber === true ? val.trainNumber + ' ' : '') +
                         (this.visibleTrainName === true ? val.trainName : ''), 0, 0);
                     this.context.restore();

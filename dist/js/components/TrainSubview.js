@@ -1,4 +1,4 @@
-import { createMultilineTextField, createTextField, createTimeField, h, numberToTimeString, timeStringCheck, timeStringToNumber, } from '../Util.js';
+import { createMultilineTextField, createTextField, createTimeField, h, numberToTimeString, timeStringCheck, timeStringToNumber } from '../Util.js';
 import Subview from './Subview.js';
 import TrainTimetableView from './TrainTimetableView.js';
 export default class TrainSubview extends Subview {
@@ -40,11 +40,7 @@ export default class TrainSubview extends Subview {
             const tab = h('div', { class: 'sub-tab-container' }, tabList);
             if (this.tabId === 0) {
                 // 液タブ ...じゃなかった、駅タブ
-                const stationIndex = selection[0].train.direction === 0
-                    ? selection[0].stationIndex
-                    : this.app.data.railway.stations.length -
-                        selection[0].stationIndex -
-                        1;
+                const stationIndex = selection[0].train.direction === 0 ? selection[0].stationIndex : this.app.data.railway.stations.length - selection[0].stationIndex - 1;
                 const station = this.app.data.railway.stations[selection[0].stationIndex];
                 const stationName = station.name;
                 const ttd = selection[0].train.timetable.data[stationIndex];
@@ -122,27 +118,15 @@ export default class TrainSubview extends Subview {
                         return;
                     ttd.track = Number(e.currentTarget.value);
                 });
-                const arrival = stopType !== 2 && ttd.arrival !== null
-                    ? numberToTimeString(ttd.arrival, 'HH MM SS')
-                    : '';
-                const departure = stopType !== 2 && ttd.departure !== null
-                    ? numberToTimeString(ttd.departure, 'HH MM SS')
-                    : '';
-                const delta = stopType !== 2 && ttd.arrival !== null && ttd.departure !== null
-                    ? numberToTimeString(ttd.departure - ttd.arrival, 'HH MM SS')
-                    : '';
+                const arrival = stopType !== 2 && ttd.arrival !== null ? numberToTimeString(ttd.arrival, 'HH MM SS') : '';
+                const departure = stopType !== 2 && ttd.departure !== null ? numberToTimeString(ttd.departure, 'HH MM SS') : '';
+                const delta = stopType !== 2 && ttd.arrival !== null && ttd.departure !== null ? numberToTimeString(ttd.departure - ttd.arrival, 'HH MM SS') : '';
                 content = [
                     h('div', { class: 'sub-section' }, [
                         h('div', { class: 'sub-header' }, stationName),
                         h('div', { class: 'sub-list-container' }, [
-                            h('div', { class: 'form-row' }, [
-                                h('div', { class: 'form-label' }, '駅扱い'),
-                                buttonset,
-                            ]),
-                            h('div', { class: 'form-row' }, [
-                                h('div', { class: 'form-label' }, '発着番線'),
-                                trackSelector,
-                            ]),
+                            h('div', { class: 'form-row' }, [h('div', { class: 'form-label' }, '駅扱い'), buttonset]),
+                            h('div', { class: 'form-row' }, [h('div', { class: 'form-label' }, '発着番線'), trackSelector]),
                             h('div', { class: 'form-row sub-stationTime-container' }, [
                                 h('div', { class: 'sub-stationTime-left' }, [
                                     h('div', { class: 'form-row' }, [
@@ -185,10 +169,7 @@ export default class TrainSubview extends Subview {
                     h('div', { class: 'sub-section' }, [
                         h('div', { class: 'sub-header' }, '列車'),
                         h('div', { class: 'sub-list-container' }, [
-                            h('div', { class: 'form-row' }, [
-                                h('div', { class: 'form-label' }, '種別'),
-                                trainTypeSelector,
-                            ]),
+                            h('div', { class: 'form-row' }, [h('div', { class: 'form-label' }, '種別'), trainTypeSelector]),
                             h('div', { class: 'form-row' }, [
                                 h('div', { class: 'form-label' }, '列車番号'),
                                 createTextField(selection[0].train.number, '', '', e => {
@@ -237,9 +218,15 @@ export default class TrainSubview extends Subview {
         const departure = this.element.querySelector('.ts-departure');
         const delta = this.element.querySelector('.ts-delta');
         const selection = this.app.selection[0];
-        const stationIndex = selection.train.direction === 0
-            ? selection.stationIndex
-            : this.app.data.railway.stations.length - selection.stationIndex - 1;
+        const stationIndex = selection.train.direction === 0 ? selection.stationIndex : this.app.data.railway.stations.length - selection.stationIndex - 1;
+        if (!selection.train.timetable.data[stationIndex] && (arrival.value !== '' || departure.value !== '')) {
+            selection.train.timetable.data[stationIndex] = {
+                stopType: 1,
+                arrival: null,
+                departure: null,
+                track: 1,
+            };
+        }
         const ttd = selection.train.timetable.data[stationIndex];
         if (type === 'arrival') {
             if (arrival.value === '') {
@@ -259,24 +246,15 @@ export default class TrainSubview extends Subview {
         }
         else if (type === 'delta') {
             if (ttd.arrival !== null) {
-                ttd.departure =
-                    timeStringToNumber(arrival.value) + timeStringToNumber(delta.value);
+                ttd.departure = timeStringToNumber(arrival.value) + timeStringToNumber(delta.value);
             }
             else if (ttd.arrival !== null) {
-                ttd.arrival =
-                    timeStringToNumber(departure.value) - timeStringToNumber(delta.value);
+                ttd.arrival = timeStringToNumber(departure.value) - timeStringToNumber(delta.value);
             }
         }
-        arrival.value =
-            ttd.arrival !== null ? numberToTimeString(ttd.arrival, 'HH MM SS') : '';
-        departure.value =
-            ttd.departure !== null
-                ? numberToTimeString(ttd.departure, 'HH MM SS')
-                : '';
-        delta.value =
-            ttd.arrival !== null && ttd.departure !== null
-                ? numberToTimeString(ttd.departure - ttd.arrival, 'HH MM SS')
-                : '';
+        arrival.value = ttd.arrival !== null ? numberToTimeString(ttd.arrival, 'HH MM SS') : '';
+        departure.value = ttd.departure !== null ? numberToTimeString(ttd.departure, 'HH MM SS') : '';
+        delta.value = ttd.arrival !== null && ttd.departure !== null ? numberToTimeString(ttd.departure - ttd.arrival, 'HH MM SS') : '';
         if (this.app.main instanceof TrainTimetableView) {
             this.app.main.update();
         }

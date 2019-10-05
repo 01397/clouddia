@@ -13,7 +13,7 @@ import DiagramParser from './DiagramParser.js';
 import { h } from './Util.js';
 export default class App {
     constructor(root) {
-        this.version = '0.2.1';
+        this.version = '0.2.3';
         this.sidebarElm = h('aside', { id: 'sidebar' }, null);
         this.toolbarElm = h('div', { id: 'toolbar' }, null);
         this.tabbarElm = h('div', { id: 'tabbar' }, null);
@@ -37,6 +37,7 @@ export default class App {
         this.currentDiaIndex = 0;
         this._selection = null;
         this.updateLocalData();
+        document.addEventListener('keydown', e => this.main.keydown(e), false);
     }
     /**
      * ファイルに関する設定(FileSettingView)の表示
