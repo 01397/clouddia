@@ -2,6 +2,7 @@ import App from '../App.js';
 import { Station, Train } from '../DiagramParser.js';
 import { h } from '../Util.js';
 import View from './View.js';
+import TrainSubview from './TrainSubview.js';
 
 export default class StationTimetableView extends View {
   /**
@@ -71,10 +72,7 @@ export default class StationTimetableView extends View {
     this.directionSelectorElement.addEventListener('change', () => this.display(), false);
     const tools = h('div', { id: 'st-tools-wrapper' }, [
       h('div', { id: 'st-tools' }, [
-        h('div', { class: 'st-tools-container' }, [
-          h('div', { class: 'st-tools-title' }, '駅名'),
-          this.stationSelectorElement,
-        ]),
+        h('div', { class: 'st-tools-container' }, [h('div', { class: 'st-tools-title' }, '駅名'), this.stationSelectorElement]),
         h('div', { class: 'st-tools-container' }, [
           h('div', { class: 'st-tools-title' }, '方向'),
           h('label', null, [
@@ -144,9 +142,7 @@ export default class StationTimetableView extends View {
     trains.forEach((train, index) => {
       for (const i of indexList) {
         const stationIndex = isInbound ? stationLength - i - 1 : i;
-        const terminalStationIndex = isInbound
-          ? stationLength - train.timetable.terminalStationIndex - 1
-          : train.timetable.terminalStationIndex;
+        const terminalStationIndex = isInbound ? stationLength - train.timetable.terminalStationIndex - 1 : train.timetable.terminalStationIndex;
         if (
           !(stationIndex in train.timetable.data) ||
           train.timetable.data[stationIndex].departure === null ||
@@ -227,11 +223,7 @@ export default class StationTimetableView extends View {
     const selectedIndexList = changeDetail
       ? new Set(Array.from(checkboxes).map((ele: HTMLElement) => Number(ele.dataset.index)))
       : this.stationList[this.stationSelectorElement.value].indexList;
-    const data = this.compile(
-      this.stationSelectorElement.value,
-      this.directionSelectorElement.checked,
-      selectedIndexList
-    );
+    const data = this.compile(this.stationSelectorElement.value, this.directionSelectorElement.checked, selectedIndexList);
 
     const startHour = 4;
     // 時刻のElementを時間帯別に格納する2次元配列。
@@ -244,9 +236,7 @@ export default class StationTimetableView extends View {
       times[hour].push(
         h(
           'div',
-          {
-            class: 'st-train',
-          },
+          { class: 'st-train' },
           [
             h(
               'div',
@@ -264,15 +254,14 @@ export default class StationTimetableView extends View {
               min
             ),
           ],
-          () =>
-            (this.app.selection = [
-              {
-                cellType: null,
-                selectType: 'stationTimetable',
-                stationIndex: null,
-                train: val.train,
-              },
-            ])
+          () => {
+            if (!(this.app.sub instanceof TrainSubview)) return;
+            this.app.sub.showStationTime({
+              stationIndex: this.stationList[this.stationSelectorElement.value].indexList.values().next().value,
+              direction: val.train.direction,
+              train: val.train,
+            });
+          }
         )
       );
     });
@@ -354,9 +343,7 @@ export default class StationTimetableView extends View {
         input.disabled = data.topStationList.size === 1;
         input.dataset.index = String(val);
         input.addEventListener('change', () => this.display(true));
-        directionContent.push(
-          h('label', { class: 'st-tools-direction-item' }, [input, h('span', null, this.stations[key].name + '方面')])
-        );
+        directionContent.push(h('label', { class: 'st-tools-direction-item' }, [input, h('span', null, this.stations[key].name + '方面')]));
       }
       const oldDirectionDetail = document.getElementById('st-tools-direction-detail');
       const newDirectionDetail = h('div', { id: 'st-tools-direction-detail' }, directionContent);

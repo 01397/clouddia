@@ -90,7 +90,6 @@ export default class App {
   public tabbar: Tabbar;
   public toolbar: Toolbar;
   public currentDiaIndex: number;
-  public _selection: SelectionObject[];
 
   constructor(root: Element) {
     this.version = '0.2.3';
@@ -117,7 +116,6 @@ export default class App {
 
     this.data = null;
     this.currentDiaIndex = 0;
-    this._selection = null;
 
     this.updateLocalData();
 
@@ -179,15 +177,6 @@ export default class App {
     this.sidebar.status = 4;
     this.sub.show();
     this.tabbar.status = 'diagram';
-  }
-  set selection(selection: SelectionObject[]) {
-    this._selection = selection;
-    if (this.sub instanceof TrainSubview) {
-      this.sub.update(selection);
-    }
-  }
-  get selection() {
-    return this._selection;
   }
   public save() {
     //const bom = new Uint8Array([0xef, 0xbb, 0xbf]);

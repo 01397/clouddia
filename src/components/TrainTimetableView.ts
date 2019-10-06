@@ -50,15 +50,15 @@ export default class TrainTimetableView extends View {
   private rendering: boolean;
   private reqId: number;
   private focusElement: HTMLElement;
-  private activeCell: [number, number];
+  private selectedCell: Array<{ col: number; row: number; cellType: string; stationIndex: number }>;
 
   constructor(app: App, diaIndex: number, direction: number) {
     super(app, direction === 0 ? 'OutboundTrainTimetable' : 'InboundTrainTimetable', [
       {
         label: '列車',
         submenu: [
-          { label: '左に列車を挿入', accelerator: 'Alt+Left', click: () => this.insertTrain(this.activeCell[0]) },
-          { label: '右に列車を挿入', accelerator: 'Alt+Right', click: () => this.insertTrain(this.activeCell[0] + 1) },
+          { label: '左に列車を挿入', accelerator: 'Alt+Left', click: () => this.insertTrain(this.getActiveCell[0]) },
+          { label: '右に列車を挿入', accelerator: 'Alt+Right', click: () => this.insertTrain(this.getActiveCell[0] + 1) },
         ],
       },
     ]);
@@ -82,12 +82,11 @@ export default class TrainTimetableView extends View {
       style: `height:${this.headerHeight}px`,
     }) as HTMLElement;
     this.tStation = h('div', { id: 'tt-station' }) as HTMLElement;
-    this.activeCell = [0, 0];
     this.element.append(this.tBody, this.tHeader, this.tStation);
     this.element.addEventListener('scroll', () => (this.rendering = true));
     this.element.addEventListener('click', event => {
       const target = event.target as HTMLElement;
-      this.selectCell(target);
+      this.selectCell(...(target.dataset.address.split('-').map(value => Number(value)) as [number, number]));
     });
     // 現在の表示領域
     this.lastArea = { x: 0, w: 0 };
@@ -110,6 +109,7 @@ export default class TrainTimetableView extends View {
   public finish() {
     cancelAnimationFrame(this.reqId);
   }
+
   public update() {
     this.loadTrains();
     this.tHeader.style.width = this.app.data.railway.diagrams[this.diaIndex].trains[this.direction].length * this.cellWidth + 'px';
@@ -308,7 +308,10 @@ export default class TrainTimetableView extends View {
       colIndex++;
     });
   }
-
+  /**
+   * 描画部分。主にrequestAnimationFrameを通して呼ばれる。
+   * スクロール量に応じて、列の更新処理を行う
+   */
   private render() {
     if (!this.rendering) return;
     const viewArea = {
@@ -405,6 +408,7 @@ export default class TrainTimetableView extends View {
     this.tBody.appendChild(body);
     this.columns.set(colIndex, { header, body });
   }
+
   private reuseColumn(oldIdx: number, newIdx: number, forceUpdate: boolean) {
     const oldData = this.sheet[oldIdx];
     const newData = this.sheet[newIdx];
@@ -423,62 +427,27 @@ export default class TrainTimetableView extends View {
       oldCol.header.style.color = newData.type.textColor.toHEXString();
     oldCol.header.style.transform = 'translateZ(0) translateX(' + this.cellWidth * newIdx + 'px)';
     oldCol.header.dataset.colId = String(newIdx);
-    oldCol.header.classList[this.activeCell[0] == newIdx ? 'add' : 'remove']('tt-weak-highlight');
+    oldCol.header.classList[this.selectedCell.some(value => value.col === newIdx) ? 'add' : 'remove']('tt-weak-highlight');
     this.columns.delete(oldIdx);
     this.columns.set(newIdx, oldCol);
   }
+
   private deleteColumn(colIndex: number) {
     const { header, body } = this.columns.get(colIndex);
     this.tHeader.removeChild(header);
     this.tBody.removeChild(body);
     this.columns.delete(colIndex);
   }
-  private focus(element: HTMLElement) {
-    const rect = element.getBoundingClientRect();
-    const rect2 = this.tBody.getBoundingClientRect();
-    this.focusElement.style.left = rect.left - rect2.left - 2 + 'px';
-    this.focusElement.style.top = rect.top - rect2.top - 2 + 'px';
-    this.focusElement.style.width = rect.width - rect2.width + 'px';
-    this.focusElement.style.height = rect.height - rect2.height + 'px';
-  }
-  private selectCell(target: HTMLElement) {
-    const trainIndex = target.parentElement.dataset.colId;
-    if (!('cellName' in target.dataset)) return;
-    if (this.columns.has(this.activeCell[0])) {
-      this.columns.get(this.activeCell[0]).header.classList.remove('tt-weak-highlight');
-    }
-    if (this.app.selection !== null) {
-      const i =
-        this.direction === 0 ? this.app.selection[0].stationIndex : this.app.data.railway.stations.length - this.app.selection[0].stationIndex - 1;
-      this.tStation.children[i].classList.remove('tt-weak-highlight');
-    }
-    this.focus(target);
-    const [stationIndex, cellType] = target.dataset.cellName.split('-');
-    const [col, row] = target.dataset.address.split('-');
-    this.activeCell = [Number(col), Number(row)];
-    this.app.selection = [
-      {
-        cellType,
-        selectType: 'train-station',
-        stationIndex: Number(stationIndex),
-        train: this.app.data.railway.diagrams[this.diaIndex].trains[this.direction][trainIndex],
-      },
-    ];
-    this.columns.get(Number(col)).header.classList.add('tt-weak-highlight');
-    this.tStation.children[this.direction === 0 ? stationIndex : this.app.data.railway.stations.length - Number(stationIndex) - 1].classList.add(
-      'tt-weak-highlight'
-    );
-  }
+
   public keydown(e: KeyboardEvent) {
     if (37 <= e.keyCode && e.keyCode <= 40) {
       this.moveCell(e);
     } else if (e.keyCode === 13 && this.app.sub instanceof TrainSubview) {
-      this.app.sub.focusField(this.app.selection[0].cellType);
+      this.app.sub.focusField(this.getActiveCell().cellType);
     }
   }
   private moveCell(event: KeyboardEvent) {
-    let col = this.activeCell[0];
-    let row = this.activeCell[1];
+    let { col, row } = this.getActiveCell();
     switch (event.keyCode) {
       case 37:
         col--;
@@ -522,7 +491,7 @@ export default class TrainTimetableView extends View {
       dy = targetRect.top + targetRect.height - containerRect.top - containerRect.height;
     }
     this.element.scrollBy(dx, dy);
-    this.selectCell(target);
+    this.selectCell(col, row);
   }
   private appendTrain() {
     const trainList = this.app.data.railway.diagrams[this.diaIndex].trains[this.direction];
@@ -533,5 +502,41 @@ export default class TrainTimetableView extends View {
     const trainList = this.app.data.railway.diagrams[this.diaIndex].trains[this.direction];
     trainList.splice(index, 0, new Train());
     this.update();
+  }
+  private selectCell(col, row, additional = false) {
+    const target = document.querySelector(`[data-address="${col}-${row}"]`) as HTMLElement;
+    const [stationIndexString, cellType] = target.dataset.cellName.split('-');
+    const stationIndex = Number(stationIndexString);
+    if (!additional) {
+      this.selectedCell = [{ col, row, stationIndex, cellType }];
+    } else if (!this.selectedCell.some(value => value[0] === col && value[1] === row)) {
+      this.selectedCell.push({ col, row, stationIndex, cellType });
+    } else {
+      return;
+    }
+    this.columns.forEach(({ header }, key) => {
+      header.classList[this.selectedCell.some(value => value.col === key) ? 'add' : 'remove']('tt-weak-highlight');
+    });
+    Array.from(this.tStation.children).forEach((element, i) => {
+      element.classList[
+        i == (this.direction === 0 ? stationIndex : this.app.data.railway.stations.length - Number(stationIndex) - 1) ? 'add' : 'remove'
+      ]('tt-weak-highlight');
+    });
+    const rect = target.getBoundingClientRect();
+    const rect2 = this.tBody.getBoundingClientRect();
+    this.focusElement.style.left = rect.left - rect2.left - 2 + 'px';
+    this.focusElement.style.top = rect.top - rect2.top - 2 + 'px';
+    this.focusElement.style.width = rect.width - rect2.width + 'px';
+    this.focusElement.style.height = rect.height - rect2.height + 'px';
+    if (this.selectedCell.length === 1 && this.app.sub instanceof TrainSubview)
+      this.app.sub.showStationTime({
+        stationIndex,
+        direction: this.direction,
+        train: this.app.data.railway.diagrams[this.diaIndex].trains[this.direction][col],
+      });
+  }
+  private getActiveCell() {
+    const cell = this.selectedCell[this.selectedCell.length - 1];
+    return cell || { col: 0, row: 0, cellType: 'departure', stationIndex: 0 };
   }
 }

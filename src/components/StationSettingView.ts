@@ -21,8 +21,7 @@ export default class StationSettingView extends View {
       if (this.hoverElement !== null) this.hoverElement.classList.remove('hover');
       if (y % this.rowHeight < 28) {
         this.hoverElement = null;
-        this.insertButton.style.transform =
-          'translateY(' + (Math.floor(y / this.rowHeight) * this.rowHeight + 12) + 'px)';
+        this.insertButton.style.transform = 'translateY(' + (Math.floor(y / this.rowHeight) * this.rowHeight + 12) + 'px)';
         this.insertButton.style.display = 'inline';
       } else {
         const target = this.svgElement.querySelectorAll('g')[Math.floor(y / this.rowHeight)];
@@ -46,10 +45,7 @@ export default class StationSettingView extends View {
     });
     this.rightContainer = h('div', { class: 'fs-right-container' }, '駅が選択されていません');
     this.element.appendChild(
-      h('div', { class: 'fs-2cols-container' }, [
-        h('div', { class: 'fs-left-container' }, this.svgElement),
-        this.rightContainer,
-      ])
+      h('div', { class: 'fs-2cols-container' }, [h('div', { class: 'fs-left-container' }, this.svgElement), this.rightContainer])
     );
     this.updateRailmap();
   }
@@ -86,9 +82,7 @@ export default class StationSettingView extends View {
             createCheckbox(station.isMain, null, e => {
               const value = (e.currentTarget as HTMLInputElement).checked;
               station.isMain = value;
-              this.svgElement
-                .querySelectorAll('g')
-                [stationIndex].classList[value ? 'add' : 'remove']('fs-railmap-main');
+              this.svgElement.querySelectorAll('g')[stationIndex].classList[value ? 'add' : 'remove']('fs-railmap-main');
             }),
             h('div', { class: 'fs-text' }, '主要駅'),
           ]),
@@ -145,12 +139,7 @@ export default class StationSettingView extends View {
                     (e.currentTarget as HTMLInputElement).value = track.name;
                   }
                 }),
-                createTextField(
-                  track.abbrName[0],
-                  '',
-                  '',
-                  e => (track.abbrName[0] = (e.currentTarget as HTMLInputElement).value)
-                ),
+                createTextField(track.abbrName[0], '', '', e => (track.abbrName[0] = (e.currentTarget as HTMLInputElement).value)),
                 createTextField(track.abbrName[1] === '' ? track.abbrName[0] : track.abbrName[1], '', '', e => {
                   const value = (e.currentTarget as HTMLInputElement).value;
                   track.abbrName[1] = track.abbrName[0] === value ? '' : value;
@@ -298,9 +287,7 @@ export default class StationSettingView extends View {
         );
       }
 
-      layer1.push(
-        h('g', { class: stations[i].isMain ? 'fs-railmap-main' : '' }, content, null, 'http://www.w3.org/2000/svg')
-      );
+      layer1.push(h('g', { class: stations[i].isMain ? 'fs-railmap-main' : '' }, content, null, 'http://www.w3.org/2000/svg'));
 
       // 駅間
       if (
@@ -329,13 +316,7 @@ export default class StationSettingView extends View {
       'g',
       { class: 'fs-railmap-insert' },
       [
-        h(
-          'line',
-          { x1: 0, x2: 300, y1: 0.5, y2: 0, 'stroke-dasharray': '2 1' },
-          null,
-          null,
-          'http://www.w3.org/2000/svg'
-        ),
+        h('line', { x1: 0, x2: 300, y1: 0.5, y2: 0, 'stroke-dasharray': '2 1' }, null, null, 'http://www.w3.org/2000/svg'),
         h('circle', { cx: 44, cy: 0, r: 8 }, null, null, 'http://www.w3.org/2000/svg'),
         h('path', { d: 'M44 -4 l0 8m-4 -4l 8 0' }, null, null, 'http://www.w3.org/2000/svg'),
       ],

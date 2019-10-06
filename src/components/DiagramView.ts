@@ -149,24 +149,14 @@ export default class CanvasDiagramView extends View {
     // 右下(ボタン群)
     const toolContainer = h('div', { id: 'dg-tools' }, [
       h('div', { id: 'dg-tools-container1', class: 'dg-tools-container' }, [
-        h(
-          'div',
-          { id: 'dg-tools-zoomin', class: 'dg-tools-button' },
-          h('img', { class: 'dg-tools-svgicon', src: 'img/plus.svg' }),
-          e => {
-            e.stopPropagation();
-            this.scale(this.xScale * 1.5, this.yScale * 1.5, true);
-          }
-        ),
-        h(
-          'div',
-          { id: 'dg-tools-zoomout', class: 'dg-tools-button' },
-          h('img', { class: 'dg-tools-svgicon', src: 'img/minus.svg' }),
-          e => {
-            e.stopPropagation();
-            this.scale(this.xScale / 1.5, this.yScale / 1.5, true);
-          }
-        ),
+        h('div', { id: 'dg-tools-zoomin', class: 'dg-tools-button' }, h('img', { class: 'dg-tools-svgicon', src: 'img/plus.svg' }), e => {
+          e.stopPropagation();
+          this.scale(this.xScale * 1.5, this.yScale * 1.5, true);
+        }),
+        h('div', { id: 'dg-tools-zoomout', class: 'dg-tools-button' }, h('img', { class: 'dg-tools-svgicon', src: 'img/minus.svg' }), e => {
+          e.stopPropagation();
+          this.scale(this.xScale / 1.5, this.yScale / 1.5, true);
+        }),
       ]),
       h('div', { id: 'dg-tools-container3', class: 'dg-tools-container' }, [
         h('label', { class: 'dg-tools-button' }, [
@@ -243,24 +233,14 @@ export default class CanvasDiagramView extends View {
             this.forceDraw = true;
           }
         ),
-        h(
-          'div',
-          { id: 'dg-tools-narrow', class: 'dg-tools-button' },
-          h('img', { class: 'dg-tools-svgicon', src: 'img/narrow.svg' }),
-          e => {
-            e.stopPropagation();
-            this.scale(this.xScale / 1.25, this.yScale, true);
-          }
-        ),
-        h(
-          'div',
-          { id: 'dg-tools-widen', class: 'dg-tools-button' },
-          h('img', { class: 'dg-tools-svgicon', src: 'img/widen.svg' }),
-          e => {
-            e.stopPropagation();
-            this.scale(this.xScale * 1.25, this.yScale, true);
-          }
-        ),
+        h('div', { id: 'dg-tools-narrow', class: 'dg-tools-button' }, h('img', { class: 'dg-tools-svgicon', src: 'img/narrow.svg' }), e => {
+          e.stopPropagation();
+          this.scale(this.xScale / 1.25, this.yScale, true);
+        }),
+        h('div', { id: 'dg-tools-widen', class: 'dg-tools-button' }, h('img', { class: 'dg-tools-svgicon', src: 'img/widen.svg' }), e => {
+          e.stopPropagation();
+          this.scale(this.xScale * 1.25, this.yScale, true);
+        }),
       ]),
     ]);
     this.canvasWrapper = h('div', { id: 'dg-canvasWrapper' }) as HTMLDivElement;
@@ -294,13 +274,7 @@ export default class CanvasDiagramView extends View {
         const res = this.getTrainByCoordinate({ x: e.offsetX, y: e.offsetY });
         if (res === null) return;
         const { direction, trainIndex, stationIndex } = res;
-        this.app.selection = [
-          {
-            selectType: 'diagram',
-            stationIndex: Number(stationIndex),
-            train: this.app.data.railway.diagrams[this.diaIndex].trains[direction][trainIndex],
-          },
-        ];
+        // TODO: 列車情報を表示したいね
       });
     }
     this.dgViewWrapper = h('div', { id: 'dg-wrapper' }, this.canvasWrapper) as HTMLElement;
@@ -377,18 +351,8 @@ export default class CanvasDiagramView extends View {
         [
           Math.max(this.minXScale, Math.min(this.maxXScale, (this.pinchStart.xScale * dx) / this.pinchStart.dx)), // x scale
           Math.max(this.minYScale, Math.min(this.maxYScale, (this.pinchStart.yScale * dy) / this.pinchStart.dy)), // y scale
-          Math.max(
-            0,
-            ((this.pinchStart.px + this.pinchStart.x0 - this.paddingLeft) * dx) / this.pinchStart.dx -
-              x0 +
-              this.paddingLeft
-          ), // left
-          Math.max(
-            0,
-            ((this.pinchStart.py + this.pinchStart.y0 - this.paddingTop) * dy) / this.pinchStart.dy -
-              y0 +
-              this.paddingTop
-          ), // top
+          Math.max(0, ((this.pinchStart.px + this.pinchStart.x0 - this.paddingLeft) * dx) / this.pinchStart.dx - x0 + this.paddingLeft), // left
+          Math.max(0, ((this.pinchStart.py + this.pinchStart.y0 - this.paddingTop) * dy) / this.pinchStart.dy - y0 + this.paddingTop), // top
         ],
       ];
     }
@@ -433,10 +397,7 @@ export default class CanvasDiagramView extends View {
           if (prevDep !== null) {
             let delta = (data[i].arrival || data[i].departure) - prevDep;
             if (delta < 0) delta += 24 * 3600;
-            result[isOutbound ? i - 1 : len - i - 1] = Math.max(
-              minimum,
-              Math.min(delta / 60, result[isOutbound ? i - 1 : len - i - 1])
-            );
+            result[isOutbound ? i - 1 : len - i - 1] = Math.max(minimum, Math.min(delta / 60, result[isOutbound ? i - 1 : len - i - 1]));
           }
           // 発車時刻を記録
           prevDep = data[i].departure;
@@ -566,13 +527,7 @@ export default class CanvasDiagramView extends View {
    * @param {number} frames アニメーション所要フレーム数
    * @return {number[]} [拡大率x, 拡大率y, スクロール位置x, スクロール位置y]
    */
-  private getEaseAnimScales(
-    xOrig: number,
-    yOrig: number,
-    xNew: number,
-    yNew: number,
-    frames: number
-  ): Array<[number, number, number, number]> {
+  private getEaseAnimScales(xOrig: number, yOrig: number, xNew: number, yNew: number, frames: number): Array<[number, number, number, number]> {
     const result = [];
     for (let i = 0; i < frames; i++) {
       const t = i / frames;
@@ -685,9 +640,7 @@ export default class CanvasDiagramView extends View {
         // 更新
         this.setWrapperSize(
           24 * 60 * this.xScale + this.paddingTop + 50,
-          this.drawingData.totalDistance[this.drawingData.totalDistance.length - 1] * this.yScale +
-            this.paddingLeft +
-            50
+          this.drawingData.totalDistance[this.drawingData.totalDistance.length - 1] * this.yScale + this.paddingLeft + 50
         );
         this.dgViewWrapper.scrollLeft = position.x / this.devicePixelRatio;
         this.dgViewWrapper.scrollTop = position.y / this.devicePixelRatio;
@@ -741,16 +694,8 @@ export default class CanvasDiagramView extends View {
         continue;
       }
       this.context.moveTo(0, Math.floor(y - position.y + this.paddingTop) + 0.5);
-      this.context.lineTo(
-        y - position.y < 0 ? this.paddingLeft : position.w,
-        Math.floor(y - position.y + this.paddingTop) + 0.5
-      );
-      this.context.fillText(
-        this.stations[i].name,
-        this.paddingLeft,
-        y - position.y + this.paddingTop,
-        this.paddingLeft
-      );
+      this.context.lineTo(y - position.y < 0 ? this.paddingLeft : position.w, Math.floor(y - position.y + this.paddingTop) + 0.5);
+      this.context.fillText(this.stations[i].name, this.paddingLeft, y - position.y + this.paddingTop, this.paddingLeft);
     }
     this.context.stroke();
     this.context.beginPath();
@@ -758,10 +703,7 @@ export default class CanvasDiagramView extends View {
     this.context.strokeStyle = '#bbbbbb';
     for (const station of mainStations) {
       this.context.moveTo(0, Math.floor(station.y - position.y + this.paddingTop) + 0.5);
-      this.context.lineTo(
-        station.y - position.y < 0 ? this.paddingLeft : position.w,
-        Math.floor(station.y - position.y + this.paddingTop) + 0.5
-      );
+      this.context.lineTo(station.y - position.y < 0 ? this.paddingLeft : position.w, Math.floor(station.y - position.y + this.paddingTop) + 0.5);
       this.context.fillText(station.name, this.paddingLeft, station.y - position.y + this.paddingTop, this.paddingLeft);
     }
     this.context.stroke();
@@ -800,11 +742,7 @@ export default class CanvasDiagramView extends View {
     this.context.beginPath();
     this.context.setLineDash([3, 1.5]);
     this.context.strokeStyle = '#dddddd';
-    for (
-      let x = Math.ceil((position.x - this.paddingLeft) / this.xScale / d3) * d3;
-      x * this.xScale < position.x + position.w;
-      x += d3
-    ) {
+    for (let x = Math.ceil((position.x - this.paddingLeft) / this.xScale / d3) * d3; x * this.xScale < position.x + position.w; x += d3) {
       if (x % d1 === 0) {
         this.context.fillText(
           numberToTimeString(x + this.startTime / 60, 'min_HH:MM'),
@@ -846,12 +784,7 @@ export default class CanvasDiagramView extends View {
   private drawTrains(position: { x: number; y: number; w: number; h: number }) {
     // 描画範囲を限定
     this.context.save();
-    this.context.rect(
-      this.paddingLeft,
-      this.paddingTop,
-      this.canvas.width - this.paddingLeft,
-      this.canvas.height - this.paddingTop
-    );
+    this.context.rect(this.paddingLeft, this.paddingTop, this.canvas.width - this.paddingLeft, this.canvas.height - this.paddingTop);
     this.context.clip();
     this.context.lineWidth = this.devicePixelRatio;
 
@@ -870,19 +803,10 @@ export default class CanvasDiagramView extends View {
       for (let i = 0; i < len; i++) {
         const val = trains[i];
         // 画面外は描かないよ
-        if (
-          position.w < (val.path[1] as number) * this.xScale + xl ||
-          (val.path[val.path.length - 2] as number) * this.xScale + xl < 0
-        )
-          continue;
+        if (position.w < (val.path[1] as number) * this.xScale + xl || (val.path[val.path.length - 2] as number) * this.xScale + xl < 0) continue;
         // 色ごとに分類するよ
         const color = val.color;
-        const selected =
-          this.selectedTrain !== null &&
-          this.selectedTrain.direction === direction &&
-          this.selectedTrain.trainIndex === i
-            ? 't'
-            : 'f';
+        const selected = this.selectedTrain !== null && this.selectedTrain.direction === direction && this.selectedTrain.trainIndex === i ? 't' : 'f';
         const bold = val.bold ? 't' : 'f';
         const strokeStyle = val.strokeStyle;
         const style = color + ' ' + selected + ' ' + bold + ' ' + strokeStyle;
@@ -918,12 +842,9 @@ export default class CanvasDiagramView extends View {
         if (this.visibleTrainNumber || this.visibleTrainName) {
           this.context.save();
           this.context.translate(val.path[1] * this.xScale + xl, val.path[2] * this.yScale + yt);
-          this.context.rotate(
-            Math.atan(((val.path[5] - val.path[2]) * this.yScale) / (val.path[4] - val.path[1]) / this.xScale)
-          );
+          this.context.rotate(Math.atan(((val.path[5] - val.path[2]) * this.yScale) / (val.path[4] - val.path[1]) / this.xScale));
           this.context.fillText(
-            (this.visibleTrainNumber === true ? val.trainNumber + ' ' : '') +
-              (this.visibleTrainName === true ? val.trainName : ''),
+            (this.visibleTrainNumber === true ? val.trainNumber + ' ' : '') + (this.visibleTrainName === true ? val.trainName : ''),
             0,
             0
           );

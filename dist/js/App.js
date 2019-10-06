@@ -35,7 +35,6 @@ export default class App {
         this.sub = null;
         this.data = null;
         this.currentDiaIndex = 0;
-        this._selection = null;
         this.updateLocalData();
         document.addEventListener('keydown', e => this.main.keydown(e), false);
     }
@@ -101,15 +100,6 @@ export default class App {
         this.sidebar.status = 4;
         this.sub.show();
         this.tabbar.status = 'diagram';
-    }
-    set selection(selection) {
-        this._selection = selection;
-        if (this.sub instanceof TrainSubview) {
-            this.sub.update(selection);
-        }
-    }
-    get selection() {
-        return this._selection;
     }
     save() {
         //const bom = new Uint8Array([0xef, 0xbb, 0xbf]);
