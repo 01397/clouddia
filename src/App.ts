@@ -93,7 +93,7 @@ export default class App {
   public _selection: SelectionObject[];
 
   constructor(root: Element) {
-    this.version = '0.2.3';
+    this.version = '0.2.4';
     this.sidebarElm = h('aside', { id: 'sidebar' }, null);
     this.toolbarElm = h('div', { id: 'toolbar' }, null);
     this.tabbarElm = h('div', { id: 'tabbar' }, null);
