@@ -203,7 +203,7 @@ export default class App {
     const shiftJISuInt8 = new Uint8Array(shiftJISArray);
     const anchor = h('a', {
       href: URL.createObjectURL(new Blob([shiftJISuInt8], { type: 'text/plain' })),
-      download: 'test.oud',
+      download: this.data.railway.name + '.oud',
       style: 'display: none',
     }) as HTMLAnchorElement;
     document.body.appendChild(anchor);
