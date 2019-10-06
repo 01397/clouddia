@@ -226,6 +226,7 @@ export default class TrainSubview extends Subview {
                 departure: null,
                 track: 1,
             };
+            document.querySelector('input.form-buttonset-radio').checked = true;
         }
         const ttd = selection.train.timetable.data[stationIndex];
         if (type === 'arrival') {
@@ -258,6 +259,20 @@ export default class TrainSubview extends Subview {
         if (this.app.main instanceof TrainTimetableView) {
             this.app.main.update();
         }
+    }
+    focusField(type) {
+        let field = null;
+        switch (type) {
+            case 'arrival':
+                field = this.element.querySelector('.ts-arrival');
+                break;
+            case 'departure':
+                field = this.element.querySelector('.ts-departure');
+                break;
+            default:
+                return;
+        }
+        field.focus();
     }
 }
 //# sourceMappingURL=TrainSubview.js.map

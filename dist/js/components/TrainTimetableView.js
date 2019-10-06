@@ -1,6 +1,7 @@
 import { Train } from '../DiagramParser.js';
 import { h, numberToTimeString } from '../Util.js';
 import View from './View.js';
+import TrainSubview from './TrainSubview.js';
 // TrainTimetableView.js (module)
 // 列車時刻表を表示する。
 const TABLE_MARK = {
@@ -61,7 +62,7 @@ export default class TrainTimetableView extends View {
     update() {
         this.loadTrains();
         this.tHeader.style.width = this.app.data.railway.diagrams[this.diaIndex].trains[this.direction].length * this.cellWidth + 'px';
-        for (let i = this.lastArea.x; i < this.lastArea.x + this.lastArea.w; i++) {
+        for (let i = this.lastArea.x; i <= this.lastArea.x + this.lastArea.w; i++) {
             this.reuseColumn(i, i, true);
         }
     }
@@ -398,13 +399,17 @@ export default class TrainTimetableView extends View {
         this.tStation.children[this.direction === 0 ? stationIndex : this.app.data.railway.stations.length - Number(stationIndex) - 1].classList.add('tt-weak-highlight');
     }
     keydown(e) {
-        this.moveCell(e);
+        if (37 <= e.keyCode && e.keyCode <= 40) {
+            this.moveCell(e);
+        }
+        else if (e.keyCode === 13 && this.app.sub instanceof TrainSubview) {
+            this.app.sub.focusField(this.app.selection[0].cellType);
+        }
     }
     moveCell(event) {
         let col = this.activeCell[0];
         let row = this.activeCell[1];
-        if (document.activeElement.tagName === 'INPUT')
-            return;
+        //if (document.activeElement.tagName === 'INPUT') return;
         switch (event.keyCode) {
             case 37:
                 col--;

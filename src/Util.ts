@@ -254,21 +254,34 @@ const fieldKeydown = (field: HTMLInputElement, e: KeyboardEvent): void => {
   // e.keyCode: 37← 38↑ 39→ 40↓
   const keyCode = e.keyCode;
   // キャレット移動
-  if (keyCode === 37 || keyCode === 39) {
-    const value = field.value;
-    const selectionEnd = field.selectionEnd;
-    const d = keyCode === 37 ? -1 : 1;
-    if (!value[selectionEnd - 1 + d] || value[selectionEnd - 1 + d] !== ' ') return;
-    field.selectionStart = field.selectionEnd = selectionEnd + (keyCode === 37 ? -1 : 1);
-  } else if (keyCode === 38) {
-    // 時刻 +1分, +5秒
-    e.preventDefault();
-    field.value = numberToTimeString((timeStringToNumber(field.value) + (e.shiftKey ? 5 : 60) + 86400) % 86400, 'HH MM SS');
-  } else if (keyCode === 40) {
-    // 時刻 -1分, -5秒
-    e.preventDefault();
-    field.value = numberToTimeString((timeStringToNumber(field.value) - (e.shiftKey ? 5 : 60) + 86400) % 86400, 'HH MM SS');
+  switch (e.keyCode) {
+    case 37:
+    case 39:
+      {
+        const value = field.value;
+        const selectionEnd = field.selectionEnd;
+        const d = keyCode === 37 ? -1 : 1;
+        if (!value[selectionEnd - 1 + d] || value[selectionEnd - 1 + d] !== ' ') return;
+        field.selectionStart = field.selectionEnd = selectionEnd + (keyCode === 37 ? -1 : 1);
+      }
+      break;
+    case 38:
+      // 時刻 +1分, +5秒
+      e.preventDefault();
+      field.value = numberToTimeString((timeStringToNumber(field.value) + (e.shiftKey ? 5 : 60) + 86400) % 86400, 'HH MM SS');
+      break;
+    case 40:
+      // 時刻 -1分, -5秒
+      e.preventDefault();
+      field.value = numberToTimeString((timeStringToNumber(field.value) - (e.shiftKey ? 5 : 60) + 86400) % 86400, 'HH MM SS');
+      break;
+    case 13:
+      field.blur();
+      break;
+    default:
+      return;
   }
+  e.stopPropagation();
 };
 
 const fieldBlur = (field: HTMLInputElement, e: FocusEvent): void => {
