@@ -121,6 +121,7 @@ html, body {
   min-width: 128px;
   border: 1px solid rgba(255, 255, 255, 0.3);
   padding: 4px 0;
+  z-index: 101;
 }
 
 .menu-item {
@@ -368,7 +369,7 @@ html, body {
 }
 
 .tt-cell-bg {
-  background-color: #f0f0f0;
+  background-color: #f8f8f8;
 }
 
 #tt-station {
@@ -396,6 +397,10 @@ html, body {
   z-index: 2;
 }
 
+.tt-head-row .tt-cell{
+  height: 12px;
+}
+
 .tt-head-row {
   position: absolute;
 }
@@ -417,10 +422,10 @@ html, body {
 }
 
 #tt-body>.tt-row>.tt-cell {
-  background-image: linear-gradient(to right, transparent calc(100% - 1px), #fff calc(100% - 1px));
   font-weight: 500;
   letter-spacing: 0.75px;
   will-change: color, border-bottom;
+  border-left: 1px solid #e0e0e0;
 }
 
 #tt-focus {

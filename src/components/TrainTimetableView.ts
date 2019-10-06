@@ -54,7 +54,13 @@ export default class TrainTimetableView extends View {
 
   constructor(app: App, diaIndex: number, direction: number) {
     super(app, direction === 0 ? 'OutboundTrainTimetable' : 'InboundTrainTimetable', [
-      { label: '列車', submenu: [{ label: '追加', accelerator: 'CmdOrCtrl+N', click: () => this.appendTrain() }] },
+      {
+        label: '列車',
+        submenu: [
+          { label: '左に列車を挿入', accelerator: 'Alt+Left', click: () => this.insertTrain(this.activeCell[0]) },
+          { label: '右に列車を挿入', accelerator: 'Alt+Right', click: () => this.insertTrain(this.activeCell[0] + 1) },
+        ],
+      },
     ]);
 
     // 表示設定
@@ -491,8 +497,16 @@ export default class TrainTimetableView extends View {
     }
     event.preventDefault();
     if (col < 0 || row < 0 || col >= this.sheet.length || row >= this.sheet[0].cells.length) return;
-    const target = document.querySelector(`#tt-body>div>div[data-address="${col}-${row}"]`) as HTMLElement;
-    if (target === null) return;
+    let target = document.querySelector(`#tt-body>div>div[data-address="${col}-${row}"]`) as HTMLElement;
+    if (target === null) {
+      // セルが画面外にあって描画されていないとき
+      if (col * this.cellWidth < this.element.scrollLeft) this.element.scrollLeft = col * this.cellWidth;
+      if (this.element.scrollLeft + this.element.offsetWidth < col * this.cellWidth)
+        this.element.scrollLeft = (col + 1) * this.cellWidth - this.element.offsetWidth;
+      this.rendering = true;
+      this.render();
+      target = document.querySelector(`#tt-body>div>div[data-address="${col}-${row}"]`) as HTMLElement;
+    }
     const targetRect = target.getBoundingClientRect();
     const containerRect = this.element.getBoundingClientRect();
     let dx = 0;
@@ -513,6 +527,11 @@ export default class TrainTimetableView extends View {
   private appendTrain() {
     const trainList = this.app.data.railway.diagrams[this.diaIndex].trains[this.direction];
     trainList.push(new Train());
+    this.update();
+  }
+  private insertTrain(index: number) {
+    const trainList = this.app.data.railway.diagrams[this.diaIndex].trains[this.direction];
+    trainList.splice(index, 0, new Train());
     this.update();
   }
 }

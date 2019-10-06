@@ -261,7 +261,7 @@ const fieldKeydown = (field: HTMLInputElement, e: KeyboardEvent): void => {
         const value = field.value;
         const selectionEnd = field.selectionEnd;
         const d = keyCode === 37 ? -1 : 1;
-        if (!value[selectionEnd - 1 + d] || value[selectionEnd - 1 + d] !== ' ') return;
+        if (!value[selectionEnd - 1 + d] || value[selectionEnd - 1 + d] !== ' ') break;
         field.selectionStart = field.selectionEnd = selectionEnd + (keyCode === 37 ? -1 : 1);
       }
       break;

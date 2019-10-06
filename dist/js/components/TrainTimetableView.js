@@ -13,7 +13,13 @@ const TABLE_MARK = {
 export default class TrainTimetableView extends View {
     constructor(app, diaIndex, direction) {
         super(app, direction === 0 ? 'OutboundTrainTimetable' : 'InboundTrainTimetable', [
-            { label: '列車', submenu: [{ label: '追加', accelerator: 'CmdOrCtrl+N', click: () => this.appendTrain() }] },
+            {
+                label: '列車',
+                submenu: [
+                    { label: '左に列車を挿入', accelerator: 'Alt+Left', click: () => this.insertTrain(this.activeCell[0]) },
+                    { label: '右に列車を挿入', accelerator: 'Alt+Right', click: () => this.insertTrain(this.activeCell[0] + 1) },
+                ],
+            },
         ]);
         // 表示設定
         this.diaIndex = diaIndex;
@@ -409,7 +415,6 @@ export default class TrainTimetableView extends View {
     moveCell(event) {
         let col = this.activeCell[0];
         let row = this.activeCell[1];
-        //if (document.activeElement.tagName === 'INPUT') return;
         switch (event.keyCode) {
             case 37:
                 col--;
@@ -429,9 +434,17 @@ export default class TrainTimetableView extends View {
         event.preventDefault();
         if (col < 0 || row < 0 || col >= this.sheet.length || row >= this.sheet[0].cells.length)
             return;
-        const target = document.querySelector(`#tt-body>div>div[data-address="${col}-${row}"]`);
-        if (target === null)
-            return;
+        let target = document.querySelector(`#tt-body>div>div[data-address="${col}-${row}"]`);
+        if (target === null) {
+            // セルが画面外にあって描画されていないとき
+            if (col * this.cellWidth < this.element.scrollLeft)
+                this.element.scrollLeft = col * this.cellWidth;
+            if (this.element.scrollLeft + this.element.offsetWidth < col * this.cellWidth)
+                this.element.scrollLeft = (col + 1) * this.cellWidth - this.element.offsetWidth;
+            this.rendering = true;
+            this.render();
+            target = document.querySelector(`#tt-body>div>div[data-address="${col}-${row}"]`);
+        }
         const targetRect = target.getBoundingClientRect();
         const containerRect = this.element.getBoundingClientRect();
         let dx = 0;
@@ -454,6 +467,11 @@ export default class TrainTimetableView extends View {
     appendTrain() {
         const trainList = this.app.data.railway.diagrams[this.diaIndex].trains[this.direction];
         trainList.push(new Train());
+        this.update();
+    }
+    insertTrain(index) {
+        const trainList = this.app.data.railway.diagrams[this.diaIndex].trains[this.direction];
+        trainList.splice(index, 0, new Train());
         this.update();
     }
 }

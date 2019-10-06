@@ -59,6 +59,9 @@ export default class TrainSubview extends Subview {
           const value = Number((e.currentTarget as HTMLInputElement).value);
           if (value === 2) {
             delete selection[0].train.timetable.data[stationIndex];
+            (this.element.querySelector('.ts-arrival') as HTMLInputElement).value = '';
+            (this.element.querySelector('.ts-delta') as HTMLInputElement).value = '';
+            (this.element.querySelector('.ts-departure') as HTMLInputElement).value = '';
           } else if (ttd) {
             ttd.stopType = value + 1;
           } else {
@@ -227,7 +230,8 @@ export default class TrainSubview extends Subview {
     const selection = this.app.selection[0];
     const stationIndex =
       selection.train.direction === 0 ? selection.stationIndex : this.app.data.railway.stations.length - selection.stationIndex - 1;
-    if (!selection.train.timetable.data[stationIndex] && (arrival.value !== '' || departure.value !== '')) {
+    if (!selection.train.timetable.data[stationIndex]) {
+      if (arrival.value !== '' || departure.value !== '') return;
       selection.train.timetable.data[stationIndex] = {
         stopType: 1,
         arrival: null,
