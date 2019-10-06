@@ -1,3 +1,4 @@
+import { Train } from '../DiagramParser.js';
 import { h, numberToTimeString } from '../Util.js';
 import View from './View.js';
 // TrainTimetableView.js (module)
@@ -10,7 +11,9 @@ const TABLE_MARK = {
 };
 export default class TrainTimetableView extends View {
     constructor(app, diaIndex, direction) {
-        super(app, direction === 0 ? 'OutboundTrainTimetable' : 'InboundTrainTimetable');
+        super(app, direction === 0 ? 'OutboundTrainTimetable' : 'InboundTrainTimetable', [
+            { label: '列車', submenu: [{ label: '追加', accelerator: 'CmdOrCtrl+N', click: () => this.appendTrain() }] },
+        ]);
         // 表示設定
         this.diaIndex = diaIndex;
         this.direction = direction;
@@ -57,6 +60,7 @@ export default class TrainTimetableView extends View {
     }
     update() {
         this.loadTrains();
+        this.tHeader.style.width = this.app.data.railway.diagrams[this.diaIndex].trains[this.direction].length * this.cellWidth + 'px';
         for (let i = this.lastArea.x; i < this.lastArea.x + this.lastArea.w; i++) {
             this.reuseColumn(i, i, true);
         }
@@ -262,7 +266,7 @@ export default class TrainTimetableView extends View {
             return;
         const viewArea = {
             x: Math.floor(this.element.scrollLeft / this.cellWidth),
-            w: Math.floor((this.element.offsetWidth - this.stationCellWidth) / this.cellWidth),
+            w: Math.ceil((this.element.offsetWidth - this.stationCellWidth) / this.cellWidth),
         };
         viewArea.x = Math.max(viewArea.x - 2, 0);
         viewArea.w = Math.min(viewArea.w + 4, this.sheet.length - viewArea.x - 1);
@@ -273,7 +277,7 @@ export default class TrainTimetableView extends View {
                 reusableIndex.add(key);
         }
         // 新たに必要なColumn探し
-        for (let i = viewArea.x; i < viewArea.x + viewArea.w; i++) {
+        for (let i = viewArea.x; i <= viewArea.x + viewArea.w; i++) {
             if (this.columns.has(i))
                 continue;
             if (reusableIndex.size !== 0) {
@@ -441,6 +445,11 @@ export default class TrainTimetableView extends View {
         }
         this.element.scrollBy(dx, dy);
         this.selectCell(target);
+    }
+    appendTrain() {
+        const trainList = this.app.data.railway.diagrams[this.diaIndex].trains[this.direction];
+        trainList.push(new Train());
+        this.update();
     }
 }
 //# sourceMappingURL=TrainTimetableView.js.map

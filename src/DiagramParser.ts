@@ -481,7 +481,7 @@ export class Train extends DiagramData {
     this.number = params.hasOwnProperty('Ressyabangou') ? params.Ressyabangou : '';
     this.name = params.hasOwnProperty('Ressyamei') ? params.Ressyamei : '';
     this.count = params.hasOwnProperty('Gousuu') ? params.Gousuu : '';
-    this.timetable = params.hasOwnProperty('EkiJikoku') ? StationTime.from(params.EkiJikoku) : null;
+    this.timetable = params.hasOwnProperty('EkiJikoku') ? StationTime.from(params.EkiJikoku) : new StationTime();
     this.note = params.hasOwnProperty('Bikou') ? params.Bikou : null;
     this.operations = params.hasOwnProperty('Operation') ? params.Operation : null;
   }
@@ -614,6 +614,11 @@ export class DisplayProperty extends DiagramData {
 
 // EkiJikoku
 export class StationTime {
+  constructor() {
+    this.firstStationIndex = null;
+    this.terminalStationIndex = null;
+    this._data = [];
+  }
   get data() {
     return this._data;
   }

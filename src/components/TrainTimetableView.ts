@@ -52,7 +52,9 @@ export default class TrainTimetableView extends View {
   private activeCell: [number, number];
 
   constructor(app: App, diaIndex: number, direction: number) {
-    super(app, direction === 0 ? 'OutboundTrainTimetable' : 'InboundTrainTimetable');
+    super(app, direction === 0 ? 'OutboundTrainTimetable' : 'InboundTrainTimetable', [
+      { label: '列車', submenu: [{ label: '追加', accelerator: 'CmdOrCtrl+N', click: () => this.appendTrain() }] },
+    ]);
 
     // 表示設定
     this.diaIndex = diaIndex;
@@ -103,6 +105,7 @@ export default class TrainTimetableView extends View {
   }
   public update() {
     this.loadTrains();
+    this.tHeader.style.width = this.app.data.railway.diagrams[this.diaIndex].trains[this.direction].length * this.cellWidth + 'px';
     for (let i = this.lastArea.x; i < this.lastArea.x + this.lastArea.w; i++) {
       this.reuseColumn(i, i, true);
     }
@@ -298,11 +301,12 @@ export default class TrainTimetableView extends View {
       colIndex++;
     });
   }
+
   private render() {
     if (!this.rendering) return;
     const viewArea = {
       x: Math.floor(this.element.scrollLeft / this.cellWidth),
-      w: Math.floor((this.element.offsetWidth - this.stationCellWidth) / this.cellWidth),
+      w: Math.ceil((this.element.offsetWidth - this.stationCellWidth) / this.cellWidth),
     };
     viewArea.x = Math.max(viewArea.x - 2, 0);
     viewArea.w = Math.min(viewArea.w + 4, this.sheet.length - viewArea.x - 1);
@@ -313,7 +317,7 @@ export default class TrainTimetableView extends View {
       if (key < viewArea.x || viewArea.x + viewArea.w < key) reusableIndex.add(key);
     }
     // 新たに必要なColumn探し
-    for (let i = viewArea.x; i < viewArea.x + viewArea.w; i++) {
+    for (let i = viewArea.x; i <= viewArea.x + viewArea.w; i++) {
       if (this.columns.has(i)) continue;
       if (reusableIndex.size !== 0) {
         const oldIndex = reusableIndex.values().next().value;
@@ -501,5 +505,10 @@ export default class TrainTimetableView extends View {
     }
     this.element.scrollBy(dx, dy);
     this.selectCell(target);
+  }
+  private appendTrain() {
+    const trainList = this.app.data.railway.diagrams[this.diaIndex].trains[this.direction];
+    trainList.push(new Train());
+    this.update();
   }
 }
