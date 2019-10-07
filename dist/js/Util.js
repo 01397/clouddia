@@ -199,14 +199,19 @@ const fieldKeydown = (field, e) => {
             }
             break;
         case 38:
-            // 時刻 +1分, +5秒
-            e.preventDefault();
-            field.value = numberToTimeString((timeStringToNumber(field.value) + (e.shiftKey ? 5 : 60) + 86400) % 86400, 'HH MM SS');
-            break;
         case 40:
-            // 時刻 -1分, -5秒
-            e.preventDefault();
-            field.value = numberToTimeString((timeStringToNumber(field.value) - (e.shiftKey ? 5 : 60) + 86400) % 86400, 'HH MM SS');
+            {
+                let d = 60;
+                if (e.shiftKey)
+                    d = 3600;
+                if (e.altKey)
+                    d = 5;
+                if (e.keyCode == 40)
+                    d *= -1;
+                // 時刻 -1分, -5秒
+                e.preventDefault();
+                field.value = numberToTimeString((timeStringToNumber(field.value) + d + 86400) % 86400, 'HH MM SS');
+            }
             break;
         case 13:
             field.blur();
