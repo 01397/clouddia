@@ -2,6 +2,7 @@ import App from '../App.js';
 import { Station, Train } from '../DiagramParser.js';
 import { DASH_ARRAY_STYLE, getDistance2, h, numberToTimeString } from '../Util.js';
 import View from './View.js';
+import TrainSubview from './TrainSubview.js';
 type drawingDataItem = Array<{
   path: Array<number | boolean>;
   color: string;
@@ -274,7 +275,13 @@ export default class CanvasDiagramView extends View {
         const res = this.getTrainByCoordinate({ x: e.offsetX, y: e.offsetY });
         if (res === null) return;
         const { direction, trainIndex, stationIndex } = res;
-        // TODO: 列車情報を表示したいね
+        if (this.app.sub instanceof TrainSubview) {
+          this.app.sub.showStationTime({
+            stationIndex,
+            direction,
+            train: this.app.data.railway.diagrams[this.diaIndex].trains[direction][trainIndex],
+          });
+        }
       });
     }
     this.dgViewWrapper = h('div', { id: 'dg-wrapper' }, this.canvasWrapper) as HTMLElement;
@@ -603,6 +610,11 @@ export default class CanvasDiagramView extends View {
     if (this.visibleOutbound) func(this.drawingData.outbound, 0);
     if (this.visibleInbound) func(this.drawingData.inbound, 1);
     if (minDistance >= dMax) return null;
+    const ya = y0 / this.yScale;
+    let stationIndex = this.drawingData.totalDistance.findIndex(value => ya < value);
+    if (stationIndex !== 0 && (this.drawingData.totalDistance[stationIndex - 1] + this.drawingData.totalDistance[stationIndex]) / 2 > ya)
+      stationIndex--;
+    result.stationIndex = stationIndex;
     return result;
   }
   /**

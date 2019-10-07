@@ -1,5 +1,6 @@
 import { DASH_ARRAY_STYLE, getDistance2, h, numberToTimeString } from '../Util.js';
 import View from './View.js';
+import TrainSubview from './TrainSubview.js';
 // CanvasDiagramView.js (module)
 // ダイヤグラムを表示する。斜め線いっぱいのやつ。
 // より高速化を目指しCanvasで書き直します！1から？いいえ0から！
@@ -155,7 +156,13 @@ export default class CanvasDiagramView extends View {
                 if (res === null)
                     return;
                 const { direction, trainIndex, stationIndex } = res;
-                // TODO: 列車情報を表示したいね
+                if (this.app.sub instanceof TrainSubview) {
+                    this.app.sub.showStationTime({
+                        stationIndex,
+                        direction,
+                        train: this.app.data.railway.diagrams[this.diaIndex].trains[direction][trainIndex],
+                    });
+                }
             });
         }
         this.dgViewWrapper = h('div', { id: 'dg-wrapper' }, this.canvasWrapper);
@@ -465,6 +472,11 @@ export default class CanvasDiagramView extends View {
             func(this.drawingData.inbound, 1);
         if (minDistance >= dMax)
             return null;
+        const ya = y0 / this.yScale;
+        let stationIndex = this.drawingData.totalDistance.findIndex(value => ya < value);
+        if (stationIndex !== 0 && (this.drawingData.totalDistance[stationIndex - 1] + this.drawingData.totalDistance[stationIndex]) / 2 > ya)
+            stationIndex--;
+        result.stationIndex = stationIndex;
         return result;
     }
     /**
