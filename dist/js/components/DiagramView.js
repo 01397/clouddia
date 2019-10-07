@@ -28,7 +28,7 @@ export default class CanvasDiagramView extends View {
         this.visibleInbound = true;
         this.visibleOutbound = true;
         this.visibleTrainNumber = true;
-        this.visibleTrainName = true;
+        this.visibleTrainName = false;
         this.selectedTrain = null;
         this.forceDraw = false;
         this.pinchStart = null;
@@ -63,7 +63,7 @@ export default class CanvasDiagramView extends View {
                     h('img', { class: 'dg-tools-svgicon', src: 'img/trainNumber.svg' }),
                 ]),
                 h('label', { class: 'dg-tools-button dg-tools-button-rightMargin' }, [
-                    h('input', { class: 'dg-tools-input', type: 'checkbox', checked: 'checked' }, null, e => {
+                    h('input', { class: 'dg-tools-input', type: 'checkbox' }, null, e => {
                         e.stopPropagation();
                         this.visibleTrainName = !this.visibleTrainName;
                         this.forceDraw = true;
@@ -75,7 +75,6 @@ export default class CanvasDiagramView extends View {
                         class: 'dg-tools-input',
                         name: 'dg-tools-direction',
                         type: 'radio',
-                        checked: 'checked',
                     }),
                     h('img', { class: 'dg-tools-svgicon', src: 'img/inbound.svg' }),
                 ], e => {
@@ -89,6 +88,7 @@ export default class CanvasDiagramView extends View {
                         class: 'dg-tools-input',
                         name: 'dg-tools-direction',
                         type: 'radio',
+                        checked: 'checked',
                     }),
                     h('img', {
                         class: 'dg-tools-svgicon',

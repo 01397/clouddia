@@ -44,11 +44,14 @@ export default class TrainTimetableView extends View {
         this.element.addEventListener('scroll', () => (this.rendering = true));
         this.element.addEventListener('click', event => {
             const target = event.target;
-            this.selectCell(...target.dataset.address.split('-').map(value => Number(value)));
+            // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+            // @ts-ignore
+            this.selectCell(...target.dataset.address.split('-').map(value => Number(value)), event.shiftKey);
         });
         // 現在の表示領域
         this.lastArea = { x: 0, w: 0 };
         this.columns = new Map();
+        this.selectedCell = [];
         this.tStation.style.width = this.stationCellWidth + 'px';
         this.rendering = true;
         this.tHeader.style.width = this.app.data.railway.diagrams[this.diaIndex].trains[this.direction].length * this.cellWidth + 'px';
@@ -459,13 +462,15 @@ export default class TrainTimetableView extends View {
             header.classList[this.selectedCell.some(value => value.col === key) ? 'add' : 'remove']('tt-weak-highlight');
         });
         Array.from(this.tStation.children).forEach((element, i) => {
-            element.classList[i == (this.direction === 0 ? stationIndex : this.app.data.railway.stations.length - Number(stationIndex) - 1) ? 'add' : 'remove']('tt-weak-highlight');
+            element.classList[this.selectedCell.some(value => i == (this.direction === 0 ? value.stationIndex : this.app.data.railway.stations.length - Number(value.stationIndex) - 1))
+                ? 'add'
+                : 'remove']('tt-weak-highlight');
         });
         const rect = target.getBoundingClientRect();
         const rect2 = this.tBody.getBoundingClientRect();
-        this.focusElement.style.left = rect.left - rect2.left - 2 + 'px';
+        this.focusElement.style.left = rect.left - rect2.left - 1 + 'px';
         this.focusElement.style.top = rect.top - rect2.top - 2 + 'px';
-        this.focusElement.style.width = rect.width - rect2.width + 'px';
+        this.focusElement.style.width = rect.width - rect2.width - 1 + 'px';
         this.focusElement.style.height = rect.height - rect2.height + 'px';
         if (this.selectedCell.length === 1 && this.app.sub instanceof TrainSubview)
             this.app.sub.showStationTime({

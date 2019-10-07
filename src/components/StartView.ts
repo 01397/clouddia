@@ -50,11 +50,7 @@ export default class StartView extends View {
           'ブラウザ上で時刻表ファイルを見れたらいいなぁ〜という気持ちを込めて開発中の作品。OuDia, OuDiaSecondのファイルを表示することが多分できます。web上のファイルは"http://onemu.starfree.jp/clouddia/?url=[時刻表ファイルのURL]"で開くこともできます。'
         ),
         h('h1', { class: 'start-readme-heading' }, '注意事項'),
-        h(
-          'p',
-          { class: 'start-readme-paragraph' },
-          '編集・保存機能は作りかけなのに公開しちゃってます。動作に期待しないでください(涙)'
-        ),
+        h('p', { class: 'start-readme-paragraph' }, '編集・保存機能は作りかけなのに公開しちゃってます。動作に期待しないでください(涙)'),
         h('p', { class: 'start-readme-paragraph' }, 'Google Chromeからの閲覧を推奨します。'),
         h('p', { class: 'start-readme-paragraph' }, 'スマホ対応は微妙です、そのうちちゃんとやります。'),
         h('p', { class: 'start-readme-paragraph' }, [

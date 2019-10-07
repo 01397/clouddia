@@ -430,9 +430,8 @@ html, body {
 
 #tt-focus {
   position: absolute;
-  /*TrainTimetableView.ts の focus() でborder-widthを考慮している*/
   border: 2px solid rgba(168, 82, 255, 0.75);
-  border-radius: 3px;
+  background-color: rgba(168, 82, 255, 0.25);
   z-index: 2;
   pointer-events: none;
 }
