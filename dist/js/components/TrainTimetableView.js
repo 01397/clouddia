@@ -40,10 +40,13 @@ export default class TrainTimetableView extends View {
             style: `height:${this.headerHeight}px`,
         });
         this.tStation = h('div', { id: 'tt-station' });
-        this.element.append(this.tBody, this.tHeader, this.tStation);
+        this.noTrainDialog = h('div', { id: 'tt-noTrain' }, '列車無し');
+        this.element.append(this.tBody, this.tHeader, this.tStation, this.noTrainDialog);
         this.element.addEventListener('scroll', () => (this.rendering = true));
         this.element.addEventListener('click', event => {
             const target = event.target;
+            if (!target.classList.contains('tt-cell'))
+                return;
             // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
             // @ts-ignore
             this.selectCell(...target.dataset.address.split('-').map(value => Number(value)), event.shiftKey);
@@ -69,7 +72,8 @@ export default class TrainTimetableView extends View {
     }
     update() {
         this.loadTrains();
-        this.tHeader.style.width = this.app.data.railway.diagrams[this.diaIndex].trains[this.direction].length * this.cellWidth + 'px';
+        const trains = this.app.data.railway.diagrams[this.diaIndex].trains[this.direction];
+        this.tHeader.style.width = trains.length * this.cellWidth + 'px';
         for (let i = this.lastArea.x; i <= this.lastArea.x + this.lastArea.w; i++) {
             this.reuseColumn(i, i, true);
         }
@@ -116,6 +120,7 @@ export default class TrainTimetableView extends View {
     }
     /**
      * 列車の種別,行先,時刻を読み込む。表示はまだ。
+     * 「列車無し」の表じだけ更新
      */
     loadTrains() {
         const trainList = this.app.data.railway.diagrams[this.diaIndex].trains[this.direction];
@@ -123,6 +128,7 @@ export default class TrainTimetableView extends View {
         const stationLen = stations.length;
         this.sheet = [];
         let colIndex = 0;
+        this.noTrainDialog.classList[trainList.length === 0 ? 'add' : 'remove']('show');
         trainList.forEach((train) => {
             const col = {
                 number: train.number,
