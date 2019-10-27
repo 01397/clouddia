@@ -1,4 +1,5 @@
 import { h } from '../Util.js';
+import { Diagram } from '../DiagramParser.js';
 export default class Tabbar {
     constructor(app, element) {
         this.app = app;
@@ -20,10 +21,13 @@ export default class Tabbar {
         }
     }
     showDiagramTabs() {
-        const elements = this.app.data.railway.diagrams.map((diagram, i) => h('div', {
-            class: 'tabbar-tab' + (i === 0 ? ' active' : ''),
-            'data-tab-id': i,
-        }, diagram.name, this.tabClicked.bind(this)));
+        const elements = [
+            ...this.app.data.railway.diagrams.map((diagram, i) => h('div', {
+                class: 'tabbar-tab' + (i === 0 ? ' active' : ''),
+                'data-tab-id': i,
+            }, diagram.name, this.tabClicked.bind(this))),
+            h('div', { class: 'tabbar-tab' }, '＋', this.addDiagram.bind(this)),
+        ];
         this.selectedTab = elements[0];
         this.element.innerHTML = '';
         this.element.append(...elements);
@@ -38,6 +42,10 @@ export default class Tabbar {
         this.selectedTab = elements[0];
         this.element.innerHTML = '';
         this.element.append(...elements);
+    }
+    addDiagram() {
+        this.app.data.railway.diagrams.push(new Diagram());
+        this.showDiagramTabs();
     }
     tabClicked(e) {
         this.changeTab(Number(e.currentTarget.dataset.tabId));

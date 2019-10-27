@@ -1,5 +1,6 @@
 import App from '../App.js';
 import { h } from '../Util.js';
+import { Diagram } from '../DiagramParser.js';
 export default class Tabbar {
   private element: Element;
   private selectedTab: Element;
@@ -24,30 +25,28 @@ export default class Tabbar {
     }
   }
   private showDiagramTabs() {
-    const elements = this.app.data.railway.diagrams.map(
-      (diagram, i): Element =>
-        h(
-          'div',
-          {
-            class: 'tabbar-tab' + (i === 0 ? ' active' : ''),
-            'data-tab-id': i,
-          },
-          diagram.name,
-          this.tabClicked.bind(this)
-        )
-    );
+    const elements = [
+      ...this.app.data.railway.diagrams.map(
+        (diagram, i): Element =>
+          h(
+            'div',
+            {
+              class: 'tabbar-tab' + (i === 0 ? ' active' : ''),
+              'data-tab-id': i,
+            },
+            diagram.name,
+            this.tabClicked.bind(this)
+          )
+      ),
+      h('div', { class: 'tabbar-tab' }, '＋', this.addDiagram.bind(this)),
+    ];
     this.selectedTab = elements[0];
     this.element.innerHTML = '';
     this.element.append(...elements);
   }
   private showSettingTabs() {
     const elements = [
-      h(
-        'div',
-        { class: 'tabbar-tab tabbar-setting-tab active', 'data-tab-id': '0' },
-        '基本設定',
-        this.tabClicked.bind(this)
-      ),
+      h('div', { class: 'tabbar-tab tabbar-setting-tab active', 'data-tab-id': '0' }, '基本設定', this.tabClicked.bind(this)),
       h('div', { class: 'tabbar-tab tabbar-setting-tab', 'data-tab-id': '1' }, '駅', this.tabClicked.bind(this)),
       h(
         'div',
@@ -60,6 +59,10 @@ export default class Tabbar {
     this.selectedTab = elements[0];
     this.element.innerHTML = '';
     this.element.append(...elements);
+  }
+  private addDiagram() {
+    this.app.data.railway.diagrams.push(new Diagram());
+    this.showDiagramTabs();
   }
   private tabClicked(e: Event) {
     this.changeTab(Number((e.currentTarget as HTMLElement).dataset.tabId));
