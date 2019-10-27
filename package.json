@@ -1,6 +1,6 @@
 {
   "name": "clouddia",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "description": "Online Diagram Editor",
   "main": "src/main.ts",
   "repository": "git@github.com:01397/clouddia.git",
