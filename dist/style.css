@@ -264,7 +264,6 @@ html, body {
   border-radius: 8px;
   padding: 16px 8px;
   position: relative;
-  text-align: center;
 }
 
 .start-drop.drag:after {
@@ -283,11 +282,6 @@ html, body {
   color: #fff;
 }
 
-.start-drop-heading {
-  font-size: 16px;
-  margin: 4px 0;
-}
-
 .start-file {
   display: none;
 }
@@ -300,18 +294,18 @@ html, body {
   justify-content: center;
   align-items: center;
   box-sizing: border-box;
+  margin-bottom: 24px;
 }
 
 .start-drop-caption {
   font-size: 10px;
   color: #888;
   margin-top: 4px;
+  width: 60%;
+  min-width: 20em;
+  margin: 8px auto 0;
 }
 
-.start-drop-or {
-  margin: 16px 0;
-  color: #444;
-}
 
 .start-drop-url-field {
   flex: 1;

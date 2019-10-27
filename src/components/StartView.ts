@@ -11,17 +11,17 @@ export default class StartView extends View {
       const target = e.currentTarget as HTMLInputElement;
       this.loadLocalFile(target.files[0]);
     });
+    const createNewButton = createButton('新規作成', 'form-button-fill start-file-button', () => this.app.initialize(new DiagramFile()));
     const fileSelectLabel = h('div', { class: 'form-button form-button-fill start-file-button' }, 'ファイルを選ぶ');
     const urlField = createTextField('', 'oudiaファイルのURL', 'start-drop-url-field');
     const urlButton = createButton('開く', null, () => this.app.loadOnlineFile(urlField.value));
     const dropArea = h('div', { class: 'start-drop' }, [
-      h('h3', { class: 'start-drop-heading' }, '端末内のファイルを使う'),
+      h('div', { class: 'start-drop-caption' }, '新しいダイヤグラムを作ります'),
+      h('label', { class: 'start-file-label' }, createNewButton),
+      h('div', { class: 'start-drop-caption' }, '枠内へファイルをドロップしても読み込めます'),
       h('label', { class: 'start-file-label' }, [fileSelectLabel, fileSelector]),
-      h('div', { class: 'start-drop-caption' }, '枠内にファイルをドロップしてもOKです'),
-      h('div', { class: 'start-drop-or' }, 'または'),
-      h('h3', { class: 'start-drop-heading' }, 'Web上のファイルを使う'),
+      h('div', { class: 'start-drop-caption' }, '直リンク禁止ファイルの閲覧は推奨しません'),
       h('div', { class: 'start-drop-url-wrapper' }, [urlField, urlButton]),
-      h('div', { class: 'start-drop-caption' }, '直リンク禁止のファイルは、まず公開者に許可を取ることを推奨します'),
     ]);
     dropArea.addEventListener('dragover', (evt: DragEvent) => {
       evt.preventDefault();
@@ -35,9 +35,6 @@ export default class StartView extends View {
       dropArea.classList.remove('drag');
       this.loadLocalFile(evt.dataTransfer.files[0]);
     });
-    const createNewButton = h('input', { class: 'start-newFile', type: 'button', value: '新規作成(β)' }, null, () => {
-      this.app.initialize(new DiagramFile());
-    });
 
     const content = h('div', { class: 'start-container' }, [
       h('img', {
@@ -46,7 +43,6 @@ export default class StartView extends View {
         alt: 'CloudDia',
       }),
       dropArea,
-      createNewButton,
       h('div', { class: 'start-readme' }, [
         h('h1', { class: 'start-readme-heading' }, 'これは？'),
         h(
