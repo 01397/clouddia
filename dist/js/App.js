@@ -101,6 +101,13 @@ export default class App {
         this.sub.show();
         this.tabbar.status = 'diagram';
     }
+    /**
+     * StartViewの表示
+     */
+    showStartView() {
+        this.main = new StartView(this);
+        this.sidebar.status = -1;
+    }
     save() {
         //const bom = new Uint8Array([0xef, 0xbb, 0xbf]);
         const unicodeArray = [];
@@ -127,7 +134,7 @@ export default class App {
         console.log('loading: ' + fileName);
         parser
             .parse(oudstring)
-            .then(this.initialize)
+            .then((diagram) => this.initialize(diagram))
             .catch((e) => {
             // tslint:disable-next-line: no-console
             console.error('parse error.', e);

@@ -35,7 +35,7 @@ export default class StartView extends View {
       dropArea.classList.remove('drag');
       this.loadLocalFile(evt.dataTransfer.files[0]);
     });
-    const createNewButton = h('div', { class: 'start-newFile' }, 'create new', () => {
+    const createNewButton = h('input', { class: 'start-newFile', type: 'button', value: '新規作成(β)' }, null, () => {
       this.app.initialize(new DiagramFile());
     });
 
