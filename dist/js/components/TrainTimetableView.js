@@ -49,7 +49,7 @@ export default class TrainTimetableView extends View {
                 return;
             // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
             // @ts-ignore
-            this.selectCell(...target.dataset.address.split('-').map(value => Number(value)), event.shiftKey);
+            this.selectCell(...target.dataset.address.split('-').map(value => Number(value)), event.shiftKey ? 'toggle' : 'select');
         });
         // 現在の表示領域
         this.lastArea = { x: 0, w: 0 };

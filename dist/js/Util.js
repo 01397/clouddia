@@ -54,7 +54,7 @@ export const createTextField = (value, placeholder = '', className, onchange = n
         type: 'text',
         placeholder,
     });
-    field.addEventListener('focus', () => field.focus());
+    field.addEventListener('focus', () => field.select());
     if (onchange !== null)
         field.addEventListener('change', onchange);
     if (oninput !== null)
@@ -344,6 +344,9 @@ export class Color {
     }
     toOudiaString() {
         return ('00' + this.b.toString(16).padStart(2, '0') + this.g.toString(16).padStart(2, '0') + this.r.toString(16).padStart(2, '0')).toUpperCase();
+    }
+    clone() {
+        return new Color(this.r, this.g, this.b);
     }
 }
 export class Font {

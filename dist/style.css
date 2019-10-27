@@ -960,6 +960,14 @@ html, body {
   transform: translate(4px, 0px);
 }
 
+.fs-typelist-add {
+  text-align: center;
+  width: 40%;
+  margin: auto;
+  line-height: 32px;
+  min-width: 4.5em;
+}
+
 /*---------------------------------------
 
     ts: TrainSubView
@@ -1145,7 +1153,7 @@ html, body {
   resize: none;
 }
 
-.form-color+.form-button, .form-text+.form-text {
+.form-button+.form-button, .form-color+.form-button, .form-text+.form-text {
   margin-left: 8px;
 }
 

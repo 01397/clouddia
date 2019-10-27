@@ -63,7 +63,7 @@ export const createTextField = (
     type: 'text',
     placeholder,
   }) as HTMLInputElement;
-  field.addEventListener('focus', () => field.focus());
+  field.addEventListener('focus', () => field.select());
   if (onchange !== null) field.addEventListener('change', onchange);
   if (oninput !== null) field.addEventListener('input', oninput);
   return field;
@@ -383,6 +383,14 @@ export const getDistance2 = ({ x, y, x1, y1, x2, y2 }) => {
 };
 
 export class Color {
+  private r: number;
+  private g: number;
+  private b: number;
+  constructor(r: number, g: number, b: number) {
+    this.r = r;
+    this.g = g;
+    this.b = b;
+  }
   public static from(str: string): Color {
     let r = 0;
     let g = 0;
@@ -405,19 +413,14 @@ export class Color {
     }
     return new this(r, g, b);
   }
-  private r: number;
-  private g: number;
-  private b: number;
-  constructor(r: number, g: number, b: number) {
-    this.r = r;
-    this.g = g;
-    this.b = b;
-  }
   public toHEXString() {
     return '#' + this.r.toString(16).padStart(2, '0') + this.g.toString(16).padStart(2, '0') + this.b.toString(16).padStart(2, '0');
   }
   public toOudiaString() {
     return ('00' + this.b.toString(16).padStart(2, '0') + this.g.toString(16).padStart(2, '0') + this.r.toString(16).padStart(2, '0')).toUpperCase();
+  }
+  public clone() {
+    return new Color(this.r, this.g, this.b);
   }
 }
 

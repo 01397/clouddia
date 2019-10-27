@@ -203,7 +203,7 @@ export default class StationSettingView extends View {
     const stations = this.app.data.railway.stations;
     const layer1 = [];
     const layer2 = [];
-    this.svgElement.setAttribute('height', String(stations.length * this.rowHeight));
+    this.svgElement.setAttribute('height', String((stations.length + 0.5) * this.rowHeight));
     for (let i = 0; i < stations.length; i++) {
       const content = [];
       const y = this.rowHeight * i + 24;

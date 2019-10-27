@@ -91,7 +91,7 @@ export default class TrainTimetableView extends View {
       if (!target.classList.contains('tt-cell')) return;
       // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
       // @ts-ignore
-      this.selectCell(...(target.dataset.address.split('-').map(value => Number(value)) as [number, number]), event.shiftKey);
+      this.selectCell(...(target.dataset.address.split('-').map(value => Number(value)) as [number, number]), event.shiftKey ? 'toggle' : 'select');
     });
     // 現在の表示領域
     this.lastArea = { x: 0, w: 0 };

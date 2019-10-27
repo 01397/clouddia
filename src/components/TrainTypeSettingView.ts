@@ -1,15 +1,7 @@
 import App from '../App.js';
-import {
-  Color,
-  createButton,
-  createCheckbox,
-  createColorField,
-  createLineStyleField,
-  createTextField,
-  DASH_ARRAY_STYLE,
-  h,
-} from '../Util.js';
+import { Color, createButton, createCheckbox, createColorField, createLineStyleField, createTextField, DASH_ARRAY_STYLE, h } from '../Util.js';
 import View from './View.js';
+import { TrainType } from '../DiagramParser.js';
 
 export default class TrainTypeSettingView extends View {
   private rightContainer: Element;
@@ -34,11 +26,9 @@ export default class TrainTypeSettingView extends View {
       this.edit(Math.floor(e.offsetY / 36));
     });
     this.rightContainer = h('div', { class: 'fs-right-container' }, '列車種別が選択されていません');
+    const addButton = h('div', { class: 'fs-typelist-add form-button form-button-fill' }, '＋種別追加', () => this.append());
     this.element.appendChild(
-      h('div', { class: 'fs-2cols-container' }, [
-        h('div', { class: 'fs-left-container' }, this.svgElement),
-        this.rightContainer,
-      ])
+      h('div', { class: 'fs-2cols-container' }, [h('div', { class: 'fs-left-container' }, [this.svgElement, addButton]), this.rightContainer])
     );
     this.updateList();
   }
@@ -156,9 +146,35 @@ export default class TrainTypeSettingView extends View {
             this.updateList();
           }),
         ]),
+        h('div', { class: 'form-row' }, [
+          createButton('複製', null, () => {
+            this.copy(trainTypeIndex);
+          }),
+          createButton('削除', 'form-button-red', () => {
+            this.remove(trainTypeIndex);
+          }),
+        ]),
       ]),
     ];
     this.rightContainer.innerHTML = '';
     this.rightContainer.append(...content);
+  }
+  private append() {
+    const trainTypeList = this.app.data.railway.trainTypes;
+    trainTypeList.push(new TrainType());
+    this.updateList();
+    this.edit(trainTypeList.length - 1);
+  }
+  private copy(index: number) {
+    const trainTypeList = this.app.data.railway.trainTypes;
+    trainTypeList.splice(index, 0, trainTypeList[index].clone());
+    this.updateList();
+    this.edit(index);
+  }
+  private remove(index: number) {
+    const trainTypeList = this.app.data.railway.trainTypes;
+    trainTypeList.splice(index, 1);
+    this.updateList();
+    this.edit(index);
   }
 }

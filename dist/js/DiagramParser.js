@@ -327,7 +327,7 @@ export class OuterTerminal extends DiagramData {
 export class TrainType extends DiagramData {
     fromOudiaParams(params) {
         this.name = params.hasOwnProperty('Syubetsumei') ? params.Syubetsumei : '新規種別';
-        this.abbrName = params.hasOwnProperty('Ryakusyou') ? params.Ryakusyou : '新種';
+        this.abbrName = params.hasOwnProperty('Ryakusyou') ? params.Ryakusyou : '新規';
         this.textColor = params.hasOwnProperty('JikokuhyouMojiColor') ? Color.from(params.JikokuhyouMojiColor) : new Color(0, 0, 0);
         this.fontIndex = params.hasOwnProperty('JikokuhyouFontIndex') ? Number(params.JikokuhyouFontIndex) : 0;
         this.backgroundColor = params.hasOwnProperty('JikokuhyouBackColor') ? Color.from(params.JikokuhyouBackColor[0]) : new Color(255, 255, 255); // DispPropの同名プロパティが列挙可能なせいでparams.JikokuhyouBackColorは配列になっちゃってる
@@ -360,6 +360,9 @@ export class TrainType extends DiagramData {
             (this.isBoldLine ? 'DiagramSenIsBold=1\n' : '') +
             (this.stopMark ? 'StopMarkDrawType=EStopMarkDrawType_DrawOnStop\n' : '') +
             '.\n');
+    }
+    clone() {
+        return Object.assign(new TrainType(), this);
     }
 }
 // Diaに相当
