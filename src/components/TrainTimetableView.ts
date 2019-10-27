@@ -506,16 +506,20 @@ export default class TrainTimetableView extends View {
     trainList.splice(index, 0, new Train());
     this.update();
   }
-  private selectCell(col, row, additional = false) {
+  private selectCell(col: number, row: number, mode: 'select' | 'toggle' | 'adding' | 'deleting' = 'select') {
     const target = document.querySelector(`[data-address="${col}-${row}"]`) as HTMLElement;
     const [stationIndexString, cellType] = target.dataset.cellName.split('-');
     const stationIndex = Number(stationIndexString);
-    if (!additional) {
+    const isExist = this.selectedCell.some(value => value[0] === col && value[1] === row);
+    if (mode === 'select') {
       this.selectedCell = [{ col, row, stationIndex, cellType }];
-    } else if (!this.selectedCell.some(value => value[0] === col && value[1] === row)) {
+    } else if (mode === 'adding' || (mode === 'toggle' && !isExist)) {
       this.selectedCell.push({ col, row, stationIndex, cellType });
-    } else {
-      return;
+    } else if (mode === 'deleting' || (mode === 'toggle' && isExist)) {
+      //elseだけでいいような...
+      this.selectedCell = this.selectedCell.filter(
+        obj => obj.col !== col || obj.row !== row || obj.stationIndex !== stationIndex || obj.cellType !== cellType
+      );
     }
     this.columns.forEach(({ header }, key) => {
       header.classList[this.selectedCell.some(value => value.col === key) ? 'add' : 'remove']('tt-weak-highlight');
@@ -529,12 +533,11 @@ export default class TrainTimetableView extends View {
           : 'remove'
       ]('tt-weak-highlight');
     });
-    const rect = target.getBoundingClientRect();
-    const rect2 = this.tBody.getBoundingClientRect();
-    this.focusElement.style.left = rect.left - rect2.left - 1 + 'px';
-    this.focusElement.style.top = rect.top - rect2.top - 2 + 'px';
-    this.focusElement.style.width = rect.width - rect2.width - 1 + 'px';
-    this.focusElement.style.height = rect.height - rect2.height + 'px';
+    const rect = this.tBody.getBoundingClientRect();
+    this.focusElement.style.left = col * this.cellWidth - 1 + 'px';
+    this.focusElement.style.top = this.headerHeight + row * this.cellHeight - 2 + 'px';
+    this.focusElement.style.width = this.cellWidth - rect.width - 1 + 'px';
+    this.focusElement.style.height = this.cellHeight - rect.height + 'px';
     if (this.selectedCell.length === 1 && this.app.sub instanceof TrainSubview)
       this.app.sub.showStationTime({
         stationIndex,
