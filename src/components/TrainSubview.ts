@@ -81,6 +81,7 @@ export default class TrainSubview extends Subview {
               track: null,
             };
           }
+          this.cellInfo.train.timetable.update();
           this.updateMainView();
         };
         const radio = new Array(3).fill(0).map((v, i) => {
@@ -227,7 +228,7 @@ export default class TrainSubview extends Subview {
     const stationIndex =
       this.cellInfo.train.direction === 0 ? this.cellInfo.stationIndex : this.app.data.railway.stations.length - this.cellInfo.stationIndex - 1;
     if (!this.cellInfo.train.timetable.data[stationIndex]) {
-      if (arrival.value !== '' || departure.value !== '') return;
+      //if (arrival.value !== '' || departure.value !== '') return;
       this.cellInfo.train.timetable.data[stationIndex] = {
         stopType: 1,
         arrival: null,
@@ -260,6 +261,7 @@ export default class TrainSubview extends Subview {
     departure.value = ttd.departure !== null ? numberToTimeString(ttd.departure, 'HH MM SS') : '';
     delta.value = ttd.arrival !== null && ttd.departure !== null ? numberToTimeString(ttd.departure - ttd.arrival, 'HH MM SS') : '';
     this.updateMainView();
+    this.cellInfo.train.timetable.update();
   }
   public focusField(type: string) {
     let field = null;

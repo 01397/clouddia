@@ -652,6 +652,19 @@ export class StationTime {
     result.firstStationIndex = result._data.findIndex(v => v);
     return result;
   }
+  public update() {
+    const data = this._data;
+    let s: number = null,
+      e: number;
+    for (let i = 0; i < data.length; i++) {
+      if (!(i in data)) continue;
+      if (s === null) s = i;
+      if (data[i].stopType === 3) delete data[i];
+      e = i;
+    }
+    this.firstStationIndex = s;
+    this.terminalStationIndex = e;
+  }
   /**
    * 始発駅番号(方向別！！)
    */

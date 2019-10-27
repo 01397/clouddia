@@ -16,8 +16,8 @@ export default class TrainTimetableView extends View {
             {
                 label: '列車',
                 submenu: [
-                    { label: '左に列車を挿入', accelerator: 'Alt+Left', click: () => this.insertTrain(this.getActiveCell[0]) },
-                    { label: '右に列車を挿入', accelerator: 'Alt+Right', click: () => this.insertTrain(this.getActiveCell[0] + 1) },
+                    { label: '左に列車を挿入', accelerator: 'Alt+Left', click: () => this.insertTrain(this.getActiveCell().col) },
+                    { label: '右に列車を挿入', accelerator: 'Alt+Right', click: () => this.insertTrain(this.getActiveCell().col + 1) },
                 ],
             },
         ]);
@@ -448,7 +448,9 @@ export default class TrainTimetableView extends View {
     }
     insertTrain(index) {
         const trainList = this.app.data.railway.diagrams[this.diaIndex].trains[this.direction];
-        trainList.splice(index, 0, new Train());
+        const train = new Train();
+        train.direction = this.direction;
+        trainList.splice(index, 0, train);
         this.update();
     }
     selectCell(col, row, mode = 'select') {
