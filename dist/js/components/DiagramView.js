@@ -16,6 +16,10 @@ export default class CanvasDiagramView extends View {
         this.stations = this.app.data.railway.stations;
         this.outboundTrains = this.app.data.railway.diagrams[diaIndex].trains[0];
         this.inboundTrains = this.app.data.railway.diagrams[diaIndex].trains[1];
+        if (this.stations.length === 0) {
+            this.showNoData();
+            return;
+        }
         // 表示設定
         this.xScale = 10 * this.devicePixelRatio;
         this.yScale = 20 * this.devicePixelRatio;
@@ -753,6 +757,10 @@ export default class CanvasDiagramView extends View {
         this.context.moveTo(0.5 + this.paddingLeft, 0.5 + this.paddingTop + 2);
         this.context.lineTo(0.5 + this.canvas.width, 0.5 + this.paddingTop + 2);
         this.context.stroke();
+    }
+    showNoData() {
+        const noDataDialog = h('div', { class: 'dg-noData' }, '駅がありません');
+        this.element.appendChild(noDataDialog);
     }
 }
 //# sourceMappingURL=DiagramView.js.map

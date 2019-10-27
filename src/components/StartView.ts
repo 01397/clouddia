@@ -1,6 +1,7 @@
 import App from '../App.js';
 import { createButton, createTextField, h } from '../Util.js';
 import View from './View.js';
+import { DiagramFile } from '../DiagramParser.js';
 
 export default class StartView extends View {
   constructor(app: App) {
@@ -34,6 +35,9 @@ export default class StartView extends View {
       dropArea.classList.remove('drag');
       this.loadLocalFile(evt.dataTransfer.files[0]);
     });
+    const createNewButton = h('div', { class: 'start-newFile' }, 'create new', () => {
+      this.app.initialize(new DiagramFile());
+    });
 
     const content = h('div', { class: 'start-container' }, [
       h('img', {
@@ -42,6 +46,7 @@ export default class StartView extends View {
         alt: 'CloudDia',
       }),
       dropArea,
+      createNewButton,
       h('div', { class: 'start-readme' }, [
         h('h1', { class: 'start-readme-heading' }, 'これは？'),
         h(

@@ -13,7 +13,7 @@ import DiagramParser from './DiagramParser.js';
 import { h } from './Util.js';
 export default class App {
     constructor(root) {
-        this.version = '0.2.4';
+        this.version = '0.2.5';
         this.sidebarElm = h('aside', { id: 'sidebar' }, null);
         this.toolbarElm = h('div', { id: 'toolbar' }, null);
         this.tabbarElm = h('div', { id: 'tabbar' }, null);
@@ -104,7 +104,7 @@ export default class App {
     save() {
         //const bom = new Uint8Array([0xef, 0xbb, 0xbf]);
         const unicodeArray = [];
-        const oudiaString = this.data.toOudiaString();
+        const oudiaString = this.data.saveAsOud('CloudDia v' + this.version);
         for (let i = 0; i < oudiaString.length; i++) {
             unicodeArray.push(oudiaString.charCodeAt(i));
         }
@@ -127,20 +127,21 @@ export default class App {
         console.log('loading: ' + fileName);
         parser
             .parse(oudstring)
-            .then(result => {
-            console.log('loaded.');
-            // tslint:disable-next-line: no-console
-            console.log(result);
-            this.data = result;
-            this.sidebar = new Sidebar(this, this.sidebarElm);
-            this.tabbar = new Tabbar(this, this.tabbarElm);
-            this.sub = new TrainSubview(this, 0);
-            this.showTrainTimetableView(0, 0);
-        })
+            .then(this.initialize)
             .catch((e) => {
             // tslint:disable-next-line: no-console
             console.error('parse error.', e);
         });
+    }
+    initialize(diagram) {
+        console.log('loaded.');
+        // tslint:disable-next-line: no-console
+        console.log(diagram);
+        this.data = diagram;
+        this.sidebar = new Sidebar(this, this.sidebarElm);
+        this.tabbar = new Tabbar(this, this.tabbarElm);
+        this.sub = new TrainSubview(this, 0);
+        this.showTrainTimetableView(0, 0);
     }
     loadOnlineFile(fileURL) {
         const url = 'http://soasa.starfree.jp/fileRequest.php?url=' + fileURL;

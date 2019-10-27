@@ -83,7 +83,7 @@ export default class TrainTimetableView extends View {
       style: `height:${this.headerHeight}px`,
     }) as HTMLElement;
     this.tStation = h('div', { id: 'tt-station' }) as HTMLElement;
-    this.noTrainDialog = h('div', { id: 'tt-noTrain' }, '列車無し') as HTMLDivElement;
+    this.noTrainDialog = h('div', { id: 'tt-noTrain' }, '列車がありません') as HTMLDivElement;
     this.element.append(this.tBody, this.tHeader, this.tStation, this.noTrainDialog);
     this.element.addEventListener('scroll', () => (this.rendering = true));
     this.element.addEventListener('click', event => {

@@ -97,13 +97,12 @@ export class DiagramFile extends DiagramData {
   public railway: Railway;
   public fromOudiaParams(params) {
     this.fileType = params.hasOwnProperty('FileType') ? params.FileType : 'OuDia.1.07';
-    this.fileTypeAppComment = params.hasOwnProperty('FileTypeAppComment') ? params.FileTypeAppComment : 'CloudDia 1.0';
-    this.displayProperty = params.DispProp;
-    this.railway = params.Rosen;
+    this.fileTypeAppComment = params.hasOwnProperty('FileTypeAppComment') ? params.FileTypeAppComment : 'CloudDia 1.0'; //仮の値
+    this.displayProperty = params.hasOwnProperty('DispProp') ? params.DispProp : new DisplayProperty();
+    this.railway = params.hasOwnProperty('Rosen') ? params.Rosen : new Railway();
   }
-  public toOudiaString(): string {
-    const result =
-      'FileType=OuDia.1.02\n' + this.railway.toOudiaString() + this.displayProperty.toOudiaString() + 'FileTypeAppComment=CloudDia Ver. 0.1.0';
+  public saveAsOud(fileTypeAppComment: string): string {
+    const result = `FileType=OuDia.1.02\n${this.railway.toOudiaString()}${this.displayProperty.toOudiaString()}FileTypeAppComment=${fileTypeAppComment}\n`;
     return result;
   }
 }
@@ -129,8 +128,8 @@ export class Railway extends DiagramData {
     this.enableOperation = params.hasOwnProperty('EnableOperation') ? params.EnableOperation === '1' : false;
     this.comment = params.hasOwnProperty('Comment') ? params.Comment.replace(/\\n/g, '\n') : '';
     this.stations = params.hasOwnProperty('Eki') ? params.Eki : [];
-    this.trainTypes = params.hasOwnProperty('Ressyasyubetsu') ? params.Ressyasyubetsu : [];
-    this.diagrams = params.hasOwnProperty('Dia') ? params.Dia : [];
+    this.trainTypes = params.hasOwnProperty('Ressyasyubetsu') ? params.Ressyasyubetsu : [new TrainType()];
+    this.diagrams = params.hasOwnProperty('Dia') ? params.Dia : [new Diagram()];
   }
   public toOudiaString(): string {
     return (

@@ -1,5 +1,6 @@
 import { createButton, createTextField, h } from '../Util.js';
 import View from './View.js';
+import { DiagramFile } from '../DiagramParser.js';
 export default class StartView extends View {
     constructor(app) {
         super(app, 'Start');
@@ -32,6 +33,9 @@ export default class StartView extends View {
             dropArea.classList.remove('drag');
             this.loadLocalFile(evt.dataTransfer.files[0]);
         });
+        const createNewButton = h('div', { class: 'start-newFile' }, 'create new', () => {
+            this.app.initialize(new DiagramFile());
+        });
         const content = h('div', { class: 'start-container' }, [
             h('img', {
                 class: 'start-logo',
@@ -39,6 +43,7 @@ export default class StartView extends View {
                 alt: 'CloudDia',
             }),
             dropArea,
+            createNewButton,
             h('div', { class: 'start-readme' }, [
                 h('h1', { class: 'start-readme-heading' }, 'これは？'),
                 h('p', { class: 'start-readme-paragraph' }, 'ブラウザ上で時刻表ファイルを見れたらいいなぁ〜という気持ちを込めて開発中の作品。OuDia, OuDiaSecondのファイルを表示することが多分できます。web上のファイルは"http://onemu.starfree.jp/clouddia/?url=[時刻表ファイルのURL]"で開くこともできます。'),

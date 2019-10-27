@@ -39,6 +39,10 @@ export default class StationTimetableView extends View {
     super(app, 'StationTimetable');
     this.diaIndex = diaIndex;
     this.stations = this.app.data.railway.stations;
+    if (this.stations.length === 0) {
+      this.showNoData();
+      return;
+    }
     this.diagramTitle = this.app.data.railway.diagrams[diaIndex].name;
     this.outboundTrains = this.app.data.railway.diagrams[diaIndex].trains[0];
     this.inboundTrains = this.app.data.railway.diagrams[diaIndex].trains[1];
@@ -349,5 +353,9 @@ export default class StationTimetableView extends View {
       const newDirectionDetail = h('div', { id: 'st-tools-direction-detail' }, directionContent);
       oldDirectionDetail.replaceWith(newDirectionDetail);
     }
+  }
+  private showNoData() {
+    const noDataDialog = h('div', { class: 'st-noData' }, '駅がありません');
+    this.element.appendChild(noDataDialog);
   }
 }
