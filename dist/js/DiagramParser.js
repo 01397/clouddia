@@ -370,8 +370,9 @@ export class Diagram extends DiagramData {
         this.subBackgroundColorIndex = params.hasOwnProperty('SubBackColorIndex') ? Number(params.SubBackColorIndex) : 0;
         this.backgroundPatternIndex = params.hasOwnProperty('BackPatternIndex') ? Number(params.BackPatternIndex) : 0;
         this.trains = [null, null];
-        this.trains[0] = params.hasOwnProperty('Kudari') ? params.Kudari.trains : [];
-        this.trains[1] = params.hasOwnProperty('Nobori') ? params.Nobori.trains : [];
+        debugger;
+        this.trains[0] = params.hasOwnProperty('Kudari') ? params.Kudari.trains || [] : [];
+        this.trains[1] = params.hasOwnProperty('Nobori') ? params.Nobori.trains || [] : [];
     }
     toOudiaString() {
         return ('Dia.\n' +
