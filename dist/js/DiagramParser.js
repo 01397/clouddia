@@ -5,6 +5,7 @@ export default class DiagramParser {
      * @param oudString oudia形式の文字列
      */
     parse(oudString) {
+        // shift-jisのダメ文字問題(https://sites.google.com/site/fudist/Home/grep/sjis-damemoji-jp)
         const reg = /([\\―ソЫⅨ噂浬欺圭構.蚕十申曾箪貼能表暴予禄兔喀媾彌拿杤歃濬畚秉綵臀藹觸軆鐔饅鷭偆砡纊犾])\\/gm;
         return new Promise((resolve) => {
             const lines = oudString.replace(reg, '$1').split(/\r\n|\r|\n/);

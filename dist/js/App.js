@@ -180,6 +180,14 @@ export default class App {
         this.toolbar.setMenu(menu);
     }
     updateLocalData() {
+        /*const dialog = new Dialog({
+          title: 'ご利用にあたって',
+          message:
+            'CloudDiaでは、利用状況を調査するためにGoogleアナリティクスを利用しています。Googleアナリティクスは、クッキーを利用して利用者の情報を収集します。CloudDia内の設定によりこれらを無効にすることもできます。',
+          buttons: ['詳しく', 'OK'],
+          defaultId: 1,
+        });
+        dialog.show();*/
         try {
             window.localStorage.setItem('test', 'storage test.');
             window.localStorage.getItem('test');

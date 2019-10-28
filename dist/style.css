@@ -7,6 +7,7 @@
   fs: FileSetting
   sub: SubView
   form: fields
+  dialog: Dialog
 ----------------------------------------*/
 
 /*----------------------------------------
@@ -306,7 +307,6 @@ html, body {
   margin: 8px auto 0;
 }
 
-
 .start-drop-url-field {
   flex: 1;
   margin-right: 8px;
@@ -452,7 +452,8 @@ html, body {
   font-weight: bold;
   color: rgba(0, 0, 0, .25);
 }
-#tt-noTrain{
+
+#tt-noTrain {
   left: 80px;
   display: none;
 }
@@ -1324,6 +1325,76 @@ html, body {
 
 .form-line-item:hover {
   background-color: #dddddd;
+}
+
+/*----------------------------------------
+
+    dialog: Dialog
+
+----------------------------------------*/
+
+.dialog-wrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  opacity: 0;
+  background-color: rgba(0, 0, 0, 0.0);
+  backdrop-filter: blur(0px);
+  transition: opacity 0.3s linear, background-color 0.3s linear;
+  pointer-events: none;
+}
+
+.dialog-wrapper.show {
+  opacity: 1;
+  background-color: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(2px);
+  pointer-events: all;
+  animation: dialog-appear .2s linear 0s 1;
+}
+@keyframes dialog-appear {
+  from {
+    opacity: 0;
+    background-color: rgba(0, 0, 0, 0.0);
+  }
+  to {
+    opacity: 1;
+    background-color: rgba(0, 0, 0, 0.6);
+  }
+}
+
+.dialog {
+  background-color: #ffffff;
+  border: 1px solid #cccccc;
+  border-radius: 4px;
+  width: 90%;
+  max-width: 500px;
+  margin: 32px auto;
+  box-shadow: 2px 2px 4px -1px rgba(0, 0, 0, 0.3);
+}
+
+.dialog-title {
+  font-size: 2em;
+  border-bottom: 1px solid #cccccc;
+  padding: 8px;
+  font-weight: bold;
+  color: #666666;
+}
+
+.dialog-body {
+  padding: 8px;
+  color: #222;
+}
+
+.dialog-buttons {
+  padding: 0 8px 8px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.dialog-button {
+  min-width: 5em;
 }
 
 /*----------------------------------------

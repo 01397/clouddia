@@ -53,7 +53,8 @@ export default class StartView extends View {
         h('h1', { class: 'start-readme-heading' }, '注意事項'),
         h('p', { class: 'start-readme-paragraph' }, '編集・保存機能は作りかけなのに公開しちゃってます。動作に期待しないでください(涙)'),
         h('p', { class: 'start-readme-paragraph' }, 'Google Chromeからの閲覧を推奨します。'),
-        h('p', { class: 'start-readme-paragraph' }, 'スマホ対応は微妙です、そのうちちゃんとやります。'),
+        h('p', { class: 'start-readme-paragraph' }, 'スマホ対応は微妙です、いつかやりたい。せめてタブレット対応。'),
+        h('p', { class: 'start-readme-paragraph' }, 'GoogleアナリティクスによってCookieを利用した利用状況の収集をしています。'),
         h('p', { class: 'start-readme-paragraph' }, [
           document.createTextNode('Twitter: '),
           h('a', { href: 'https://twitter.com/01_397' }, '大井さかな(@01_397)'),

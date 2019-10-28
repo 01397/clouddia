@@ -461,3 +461,48 @@ export class Font {
     return 'PointTextHeight=' + this.height + ';Facename=' + this.family + (this.bold ? ';Bold=1' : '') + (this.italic ? ';Italic=1' : '');
   }
 }
+
+/**
+ * Dialogを表示します
+ */
+export class Dialog {
+  public title: string;
+  public message: string;
+  public buttons: string[];
+  public defaultId: number;
+  public cancelId: number;
+  private element: Element;
+  constructor({ title = '', message = '', buttons = ['OK'], defaultId = 0, cancelId = 0 } = {}) {
+    Object.assign(this, { title, message, buttons, defaultId, cancelId });
+  }
+  /**
+   * 選択されたボタンのindexを返す
+   */
+  show(): Promise<number> {
+    return new Promise(resolve => {
+      this.element = h(
+        'div',
+        { class: 'dialog-wrapper show' },
+        h('div', { class: 'dialog' }, [
+          h('div', { class: 'dialog-title' }, this.title),
+          h('div', { class: 'dialog-body' }, this.message),
+          h(
+            'div',
+            { class: 'dialog-buttons' },
+            this.buttons.map((label, id) =>
+              createButton(label, this.defaultId === id ? 'dialog-button form-button-fill' : 'dialog-button', () => {
+                this.hide();
+                resolve(id);
+              })
+            )
+          ),
+        ])
+      );
+      document.body.appendChild(this.element);
+    });
+  }
+  hide() {
+    this.element.classList.remove('show');
+    setTimeout(() => document.body.removeChild(this.element), 2000);
+  }
+}
