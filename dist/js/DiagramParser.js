@@ -5,8 +5,9 @@ export default class DiagramParser {
      * @param oudString oudia形式の文字列
      */
     parse(oudString) {
+        const reg = /([\\―ソЫⅨ噂浬欺圭構.蚕十申曾箪貼能表暴予禄兔喀媾彌拿杤歃濬畚秉綵臀藹觸軆鐔饅鷭偆砡纊犾])\\/gm;
         return new Promise((resolve) => {
-            const lines = oudString.split(/\r\n|\r|\n/);
+            const lines = oudString.replace(reg, '$1').split(/\r\n|\r|\n/);
             resolve(DiagramFile.fromOudia(lines)[0]);
         });
     }
