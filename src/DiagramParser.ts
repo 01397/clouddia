@@ -619,8 +619,8 @@ export class DisplayProperty extends DiagramData {
 // EkiJikoku
 export class StationTime {
   constructor() {
-    this.firstStationIndex = null;
-    this.terminalStationIndex = null;
+    this.firstStationIndex = -1;
+    this.terminalStationIndex = -1;
     this._data = [];
   }
   get data() {
