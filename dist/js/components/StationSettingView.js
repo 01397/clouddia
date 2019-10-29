@@ -83,13 +83,13 @@ export default class StationSettingView extends View {
                 h('div', { class: 'form-row' }, [
                     h('div', { class: 'form-label' }, '上り列車'),
                     h('label', { class: 'fs-label' }, [
-                        createCheckbox(station.timetableStyle.arrival[0], '', e => {
+                        createCheckbox(station.timetableStyle.arrival[1], '', e => {
                             station.timetableStyle.arrival[0] = e.currentTarget.checked;
                         }),
                         h('div', { class: 'fs-text' }, '着時刻'),
                     ]),
                     h('label', { class: 'fs-label' }, [
-                        createCheckbox(station.timetableStyle.departure[0], '', e => {
+                        createCheckbox(station.timetableStyle.departure[1], '', e => {
                             station.timetableStyle.departure[0] = e.currentTarget.checked;
                         }),
                         h('div', { class: 'fs-text' }, '発時刻'),
@@ -98,13 +98,13 @@ export default class StationSettingView extends View {
                 h('div', { class: 'form-row' }, [
                     h('div', { class: 'form-label' }, '下り列車'),
                     h('label', { class: 'fs-label' }, [
-                        createCheckbox(station.timetableStyle.arrival[1], '', e => {
+                        createCheckbox(station.timetableStyle.arrival[0], '', e => {
                             station.timetableStyle.arrival[1] = e.currentTarget.checked;
                         }),
                         h('div', { class: 'fs-text' }, '着時刻'),
                     ]),
                     h('label', { class: 'fs-label' }, [
-                        createCheckbox(station.timetableStyle.departure[1], '', e => {
+                        createCheckbox(station.timetableStyle.departure[0], '', e => {
                             station.timetableStyle.departure[1] = e.currentTarget.checked;
                         }),
                         h('div', { class: 'fs-text' }, '発時刻'),
