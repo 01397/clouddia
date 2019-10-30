@@ -33,6 +33,27 @@ export default class StartView extends View {
             dropArea.classList.remove('drag');
             this.loadLocalFile(evt.dataTransfer.files[0]);
         });
+        const updateInfo = h('div', null, [
+            h('h1', { class: 'start-readme-heading' }, '更新情報'),
+            h('p', { class: 'start-readme-paragraph' }, '読み込み中...'),
+        ]);
+        fetch('https://api.github.com/repos/01397/clouddia/releases/latest')
+            .then(response => response.json())
+            .then(json => {
+            const arr = [
+                h('h1', { class: 'start-readme-heading' }, `更新情報(${json['tag_name']})`),
+                ...json['body'].split('\r\n').map(str => {
+                    if (/^## (.+?)$/.test(str))
+                        return h('h4', { class: 'start-readme-update-heading' }, str.replace(/^## (.+?)/gm, '$1'));
+                    if (/- (.+?)$/.test(str))
+                        return h('p', { class: 'start-readme-paragraph' }, str.replace(/- (.+?)$/gm, '・$1'));
+                    return h('p', { class: 'start-readme-paragraph' }, str);
+                }),
+                h('div', null, '更新日:' + new Date(json['created_at']).toDateString()),
+            ];
+            updateInfo.innerHTML = '';
+            updateInfo.append(...arr);
+        });
         const content = h('div', { class: 'start-container' }, [
             h('img', {
                 class: 'start-logo',
@@ -63,6 +84,7 @@ export default class StartView extends View {
                         target: '_blank',
                     }, '更新履歴(GitHub)'),
                 ]),
+                updateInfo,
             ]),
         ]);
         this.element.appendChild(content);

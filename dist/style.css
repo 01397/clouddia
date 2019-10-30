@@ -345,6 +345,12 @@ html, body {
   margin: 0;
 }
 
+.start-readme-update-heading {
+  margin: 0;
+  font-size: 1.1em;
+  color: #666;
+}
+
 /*----------------------------------------
 
     tt: TrainTimetable
