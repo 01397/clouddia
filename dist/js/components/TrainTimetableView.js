@@ -148,127 +148,75 @@ export default class TrainTimetableView extends View {
                 // 方向に応じた駅Index
                 const sid = this.direction === 0 ? i : stationLen - i - 1;
                 const { arrival, departure, border } = this.stationStyle[i];
-                // データがなければ運行なし or 経由なし
-                if (!data) {
-                    const isBlank = i < timetable.firstStationIndex || timetable.terminalStationIndex < i;
-                    if (arrival)
-                        col.cells.push({
-                            text: isBlank ? TABLE_MARK.blank : TABLE_MARK.nonroute,
-                            color,
-                            bg: i % 2 === 0,
-                            cellName: sid + '-arrival',
-                            address: colIndex + '-' + rowIndex++,
-                        });
-                    if (departure)
-                        col.cells.push({
-                            text: isBlank ? TABLE_MARK.blank : TABLE_MARK.nonroute,
-                            color,
-                            bg: i % 2 === 0,
-                            cellName: sid + '-departure',
-                            address: colIndex + '-' + rowIndex++,
-                        });
-                }
-                else if (data.stopType === 1) {
-                    // 着時刻
-                    if (arrival) {
-                        if (i !== 0 && timetable.data[i - 1] === null) {
-                            // 前駅が経由なしなら着時刻省略
-                            col.cells.push({
-                                text: TABLE_MARK.blank,
-                                color,
-                                bg: i % 2 === 0,
-                                cellName: sid + '-arrival',
-                                address: colIndex + '-' + rowIndex++,
-                            });
-                        }
-                        else if (i === timetable.firstStationIndex) {
-                            // 着時刻なく、始発駅でなければ発時刻を表示
-                            col.cells.push({
-                                text: TABLE_MARK.blank,
-                                color,
-                                bg: i % 2 === 0,
-                                cellName: sid + '-arrival',
-                                address: colIndex + '-' + rowIndex++,
-                            });
-                        }
-                        else {
-                            col.cells.push({
-                                text: numberToTimeString(data.arrival || data.departure, this.timeFormat),
-                                color,
-                                bg: i % 2 === 0,
-                                cellName: sid + '-arrival',
-                                address: colIndex + '-' + rowIndex++,
-                            });
-                        }
+                if (arrival) {
+                    let text = '';
+                    if (i < timetable.firstStationIndex || timetable.terminalStationIndex < i) {
+                        // 走行範囲外 -> 運行なし
+                        text = TABLE_MARK.blank;
                     }
-                    // 発時刻
-                    if (departure) {
-                        // 次駅が経由なしなら発時刻省略
-                        if (i !== stationLen - 1 && timetable.data[i + 1] === null) {
-                            col.cells.push({
-                                text: TABLE_MARK.blank,
-                                color,
-                                bg: i % 2 === 0,
-                                cellName: sid + '-departure',
-                                address: colIndex + '-' + rowIndex++,
-                            });
-                        }
-                        else if (data.departure !== null) {
-                            // 発時刻なく、着時刻の表示がなければ着時刻を表示
-                            col.cells.push({
-                                text: numberToTimeString(data.departure, this.timeFormat),
-                                color,
-                                bg: i % 2 === 0,
-                                cellName: sid + '-departure',
-                                address: colIndex + '-' + rowIndex++,
-                            });
-                        }
-                        else if (arrival && i !== timetable.terminalStationIndex) {
-                            col.cells.push({
-                                text: numberToTimeString(data.arrival, this.timeFormat),
-                                color,
-                                bg: i % 2 === 0,
-                                cellName: sid + '-departure',
-                                address: colIndex + '-' + rowIndex++,
-                            });
-                        }
-                        else if (i < timetable.firstStationIndex || timetable.terminalStationIndex <= i) {
-                            col.cells.push({
-                                text: TABLE_MARK.blank,
-                                color,
-                                bg: i % 2 === 0,
-                                cellName: sid + '-departure',
-                                address: colIndex + '-' + rowIndex++,
-                            });
-                        }
-                        else {
-                            col.cells.push({
-                                text: TABLE_MARK.stop,
-                                color,
-                                bg: i % 2 === 0,
-                                cellName: sid + '-departure',
-                                address: colIndex + '-' + rowIndex++,
-                            });
-                        }
+                    else if (!data) {
+                        // 時刻なし -> 経由なし
+                        text = TABLE_MARK.nonroute;
                     }
+                    else if (data.stopType == 2) {
+                        // 通過 -> 通過
+                        text = TABLE_MARK.pass;
+                    }
+                    else if (departure && !(i - 1 in timetable.data) && i !== timetable.terminalStationIndex) {
+                        // 省略対象セルに入力しても何も見えないんじゃ入れてる気にならなそう。UX悪そう
+                        // 発表示ありで前駅が経由なしで終着駅ではない -> 着時刻省略
+                        text = i === timetable.firstStationIndex ? TABLE_MARK.blank : TABLE_MARK.nonroute;
+                    }
+                    else if (data.arrival !== null || data.departure !== null) {
+                        // 時刻データあり -> 着時刻 (なければ発時刻)
+                        text = numberToTimeString(data.arrival || data.departure, this.timeFormat);
+                    }
+                    else {
+                        // 着時刻,発時刻共にデータ無し -> 停車記号
+                        text = TABLE_MARK.stop;
+                    }
+                    col.cells.push({
+                        text,
+                        color,
+                        bg: i % 2 === 0,
+                        cellName: sid + '-arrival',
+                        address: colIndex + '-' + rowIndex++,
+                    });
                 }
-                else if (data.stopType === 2) {
-                    if (arrival)
-                        col.cells.push({
-                            text: TABLE_MARK.pass,
-                            color,
-                            bg: i % 2 === 0,
-                            cellName: sid + '-departure',
-                            address: colIndex + '-' + rowIndex++,
-                        });
-                    if (departure)
-                        col.cells.push({
-                            text: TABLE_MARK.pass,
-                            color,
-                            bg: i % 2 === 0,
-                            cellName: sid + '-departure',
-                            address: colIndex + '-' + rowIndex++,
-                        });
+                if (departure) {
+                    let text = '';
+                    if (i < timetable.firstStationIndex || timetable.terminalStationIndex < i) {
+                        // 走行範囲外 -> 運行なし
+                        text = TABLE_MARK.blank;
+                    }
+                    else if (!data) {
+                        // 時刻なし -> 経由なし
+                        text = TABLE_MARK.nonroute;
+                    }
+                    else if (data.stopType == 2) {
+                        // 通過 -> 通過
+                        text = TABLE_MARK.pass;
+                    }
+                    else if (arrival && !(i + 1 in timetable.data) && i !== timetable.firstStationIndex) {
+                        // 省略対象セルに入力しても何も見えないんじゃ入れてる気にならなそう。UX悪そう
+                        // 着表示ありで次駅が経由なしで始発駅でない -> 着時刻省略
+                        text = i === timetable.terminalStationIndex ? TABLE_MARK.blank : TABLE_MARK.nonroute;
+                    }
+                    else if (data.departure !== null || data.arrival !== null) {
+                        // 時刻データあり -> 発時刻 (なければ着時刻)
+                        text = numberToTimeString(data.departure || data.arrival, this.timeFormat);
+                    }
+                    else {
+                        // 着時刻,発時刻共にデータ無し -> 停車記号
+                        text = TABLE_MARK.stop;
+                    }
+                    col.cells.push({
+                        text,
+                        color,
+                        bg: i % 2 === 0,
+                        cellName: sid + '-departure',
+                        address: colIndex + '-' + rowIndex++,
+                    });
                 }
                 col.cells[col.cells.length - 1].border = border;
             }
