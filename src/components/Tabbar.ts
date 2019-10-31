@@ -16,6 +16,9 @@ export default class Tabbar {
     if (this._status === value) return;
     this._status = value;
     switch (value) {
+      case 'blank':
+        this.element.innerHTML = '';
+        break;
       case 'diagram':
         this.showDiagramTabs();
         break;

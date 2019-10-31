@@ -107,6 +107,8 @@ export default class App {
     showStartView() {
         this.main = new StartView(this);
         this.sidebar.status = -1;
+        this.sub.hide();
+        this.tabbar.status = 'blank';
     }
     save() {
         //const bom = new Uint8Array([0xef, 0xbb, 0xbf]);
