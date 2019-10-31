@@ -92,7 +92,7 @@ export default class App {
   public currentDiaIndex: number;
 
   constructor(root: Element) {
-    this.version = '0.2.5';
+    this.version = '0.2.6';
     this.sidebarElm = h('aside', { id: 'sidebar' }, null);
     this.toolbarElm = h('div', { id: 'toolbar' }, null);
     this.tabbarElm = h('div', { id: 'tabbar' }, null);
