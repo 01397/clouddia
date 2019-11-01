@@ -1,4 +1,4 @@
-import { h } from '../Util.js';
+import { h, Menu } from '../Util.js';
 export default class Toolbar {
     constructor(app, element) {
         this.app = app;
@@ -16,17 +16,9 @@ export default class Toolbar {
         this.element = menuWrapper;
     }
     showMenu(i) {
-        console.log(i);
         if (!this.menu[i].submenu)
             return;
-        const menuElement = h('div', { class: 'menu-container' }, this.menu[i].submenu.map(item => h('div', { class: 'menu-item' }, item.label, item.click)));
-        menuElement.style.top = '16px';
-        menuElement.style.left = this.element.children[i].offsetLeft + 'px';
-        document.body.appendChild(menuElement);
-        document.body.addEventListener('click', () => document.body.removeChild(menuElement), {
-            once: true,
-            capture: false,
-        });
+        new Menu(this.menu[i].submenu).show(this.element.children[i].offsetLeft, 16);
     }
 }
 //# sourceMappingURL=Toolbar.js.map

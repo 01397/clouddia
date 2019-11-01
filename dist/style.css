@@ -118,19 +118,40 @@ html, body {
 .menu-container {
   color: #eee;
   position: absolute;
-  background-color: rgba(0, 0, 0, 0.9);
+  background-color: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(8px);
   min-width: 128px;
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border: 1px solid #000;
+  border-radius: 4px;
+  box-shadow: inset 0px 0px 0px 1px #444;
   padding: 4px 0;
   z-index: 101;
 }
 
 .menu-item {
-  padding: 0 4px;
+  padding: 0 8px 0 20px;
 }
 
 .menu-item:hover {
   background: #6600cc;
+}
+
+.menu-item-submenu{
+  padding-right: 16px;
+  position: relative;
+}
+.menu-item-submenu:after{
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  border-left: 8px solid rgba(255, 255, 255, 0.8);
+  content: '';
+  display: inline-block;
+  position: absolute;
+  right: 6px;
+  bottom: 0;
+  top: 0;
+  height: 0;
+  margin: auto;
 }
 
 /*----------------------------------------

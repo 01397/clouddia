@@ -410,4 +410,64 @@ export class Dialog {
         setTimeout(() => document.body.removeChild(this.element), 2000);
     }
 }
+export class Menu {
+    constructor(menu) {
+        this.child = null;
+        this.closed = false;
+        this.element = h('div', { class: 'menu-container' }, this.create(menu));
+    }
+    /**
+     * 右クリックメニューまたは、メニューバーメニューを表示
+     * @param menu 表示する項目たち
+     * @param x 左上x座標
+     * @param y 左上y座標
+     */
+    show(x, y) {
+        this.element.style.left = x + 'px';
+        this.element.style.top = y + 'px';
+        document.body.appendChild(this.element);
+        document.body.addEventListener('click', this.close.bind(this), {
+            once: true,
+            capture: true,
+        });
+    }
+    /**
+     * メニューのDOM生成
+     * @param menu 項目
+     */
+    create(menu) {
+        return menu.map(item => {
+            let result;
+            if (!('type' in item) || item.type === 'normal') {
+                result = h('div', { class: 'menu-item' }, item.label, item.click);
+                result.addEventListener('mouseenter', this.closeChild.bind(this), false);
+            }
+            else if (item.type === 'submenu') {
+                result = h('div', { class: 'menu-item menu-item-submenu' }, item.label, item.click);
+                result.addEventListener('mouseenter', this.showChild.bind(this, item.submenu, result), false);
+            }
+            return result;
+        });
+    }
+    showChild(item, element) {
+        this.closeChild();
+        const { top, right } = element.getBoundingClientRect();
+        this.child = new Menu(item);
+        this.child.show(right, top);
+    }
+    closeChild() {
+        if (this.child !== null) {
+            this.child.close();
+            this.child = null;
+        }
+    }
+    close() {
+        this.closeChild();
+        if (this.closed)
+            return;
+        document.body.removeChild(this.element);
+        this.closed = true;
+        delete this.element;
+    }
+}
 //# sourceMappingURL=Util.js.map

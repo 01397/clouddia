@@ -1,3 +1,5 @@
+import { MenuItem } from './App';
+
 // DOM生成。
 export const h = (
   tag: string,
@@ -504,5 +506,67 @@ export class Dialog {
   hide() {
     this.element.classList.remove('show');
     setTimeout(() => document.body.removeChild(this.element), 2000);
+  }
+}
+
+export class Menu {
+  private element: HTMLElement;
+  private child: Menu;
+  private closed: boolean;
+  constructor(menu: MenuItem[]) {
+    this.child = null;
+    this.closed = false;
+    this.element = h('div', { class: 'menu-container' }, this.create(menu)) as HTMLDivElement;
+  }
+  /**
+   * 右クリックメニューまたは、メニューバーメニューを表示
+   * @param menu 表示する項目たち
+   * @param x 左上x座標
+   * @param y 左上y座標
+   */
+  show(x: number, y: number) {
+    this.element.style.left = x + 'px';
+    this.element.style.top = y + 'px';
+    document.body.appendChild(this.element);
+    document.body.addEventListener('click', this.close.bind(this), {
+      once: true,
+      capture: true,
+    });
+  }
+  /**
+   * メニューのDOM生成
+   * @param menu 項目
+   */
+  create(menu: MenuItem[]): Element[] {
+    return menu.map(item => {
+      let result: Element;
+      if (!('type' in item) || item.type === 'normal') {
+        result = h('div', { class: 'menu-item' }, item.label, item.click);
+        result.addEventListener('mouseenter', this.closeChild.bind(this), false);
+      } else if (item.type === 'submenu') {
+        result = h('div', { class: 'menu-item menu-item-submenu' }, item.label, item.click);
+        result.addEventListener('mouseenter', this.showChild.bind(this, item.submenu, result), false);
+      }
+      return result;
+    });
+  }
+  showChild(item: MenuItem[], element: HTMLElement) {
+    this.closeChild();
+    const { top, right } = element.getBoundingClientRect();
+    this.child = new Menu(item);
+    this.child.show(right, top);
+  }
+  closeChild() {
+    if (this.child !== null) {
+      this.child.close();
+      this.child = null;
+    }
+  }
+  close() {
+    this.closeChild();
+    if (this.closed) return;
+    document.body.removeChild(this.element);
+    this.closed = true;
+    delete this.element;
   }
 }
