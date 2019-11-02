@@ -528,10 +528,13 @@ export class Menu {
     this.element.style.left = x + 'px';
     this.element.style.top = y + 'px';
     document.body.appendChild(this.element);
-    document.body.addEventListener('click', this.close.bind(this), {
-      once: true,
-      capture: true,
-    });
+    const clickListener = () => {
+      document.body.removeEventListener('click', clickListener, { capture: true });
+      document.body.removeEventListener('contextmenu', clickListener, { capture: true });
+      this.close();
+    };
+    document.body.addEventListener('click', clickListener, { capture: true });
+    document.body.addEventListener('contextmenu', clickListener, { capture: true });
   }
   /**
    * メニューのDOM生成
@@ -565,8 +568,11 @@ export class Menu {
   close() {
     this.closeChild();
     if (this.closed) return;
-    document.body.removeChild(this.element);
-    this.closed = true;
-    delete this.element;
+    this.element.classList.add('closed');
+    setTimeout(() => {
+      document.body.removeChild(this.element);
+      this.closed = true;
+      delete this.element;
+    }, 1000);
   }
 }

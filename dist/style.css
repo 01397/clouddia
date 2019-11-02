@@ -126,10 +126,33 @@ html, body {
   box-shadow: inset 0px 0px 0px 1px #444;
   padding: 4px 0;
   z-index: 101;
+  transition: opacity 0.2s ease;
+  opacity: 1;
+  overflow-y: hidden;
+  animation: appearMenu 0.15s ease;
+  transform-origin: left top;
+  box-sizing: border-box;
+}
+
+@keyframes appearMenu {
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.menu-container.closed {
+  opacity: 0;
+  pointer-events: none;
 }
 
 .menu-item {
   padding: 0 8px 0 20px;
+  cursor: default;
 }
 
 .menu-item:hover {

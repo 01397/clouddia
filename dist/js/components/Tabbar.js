@@ -59,6 +59,7 @@ export default class Tabbar {
             }
             event.stopPropagation();
         });
+        input.addEventListener('click', event => event.stopPropagation());
         input.addEventListener('blur', () => {
             const value = input.value;
             this.app.data.railway.diagrams[id].name = value;
