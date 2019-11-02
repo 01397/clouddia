@@ -1,5 +1,5 @@
 import { Train } from '../DiagramParser.js';
-import { h, numberToTimeString } from '../Util.js';
+import { h, numberToTimeString, Menu } from '../Util.js';
 import View from './View.js';
 import TrainSubview from './TrainSubview.js';
 // TrainTimetableView.js (module)
@@ -12,13 +12,15 @@ const TABLE_MARK = {
 };
 export default class TrainTimetableView extends View {
     constructor(app, diaIndex, direction) {
+        const trainMenu = [
+            { label: '左に列車を挿入', accelerator: 'Alt+Left', click: () => this.insertTrain(this.getActiveCell().col) },
+            { label: '右に列車を挿入', accelerator: 'Alt+Right', click: () => this.insertTrain(this.getActiveCell().col + 1) },
+            { label: '列車を削除', accelerator: 'CmdOrCtrl+Delete', click: () => this.removeTrain(this.getActiveCell().col) },
+        ];
         super(app, direction === 0 ? 'OutboundTrainTimetable' : 'InboundTrainTimetable', [
             {
                 label: '列車',
-                submenu: [
-                    { label: '左に列車を挿入', accelerator: 'Alt+Left', click: () => this.insertTrain(this.getActiveCell().col) },
-                    { label: '右に列車を挿入', accelerator: 'Alt+Right', click: () => this.insertTrain(this.getActiveCell().col + 1) },
-                ],
+                submenu: trainMenu,
             },
         ]);
         // 表示設定
@@ -43,13 +45,21 @@ export default class TrainTimetableView extends View {
         this.noTrainDialog = h('div', { id: 'tt-noTrain' }, '列車がありません');
         this.element.append(this.tBody, this.tHeader, this.tStation, this.noTrainDialog);
         this.element.addEventListener('scroll', () => (this.rendering = true));
-        this.element.addEventListener('click', event => {
+        const selectByClick = (event) => {
             const target = event.target;
             if (!target.classList.contains('tt-cell'))
                 return;
             // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
             // @ts-ignore
             this.selectCell(...target.dataset.address.split('-').map(value => Number(value)), event.shiftKey ? 'toggle' : 'select');
+        };
+        this.element.addEventListener('click', event => {
+            selectByClick(event);
+        });
+        this.element.addEventListener('contextmenu', event => {
+            selectByClick(event);
+            new Menu(trainMenu).show(event.clientX, event.clientY);
+            event.preventDefault();
         });
         // 現在の表示領域
         this.lastArea = { x: 0, w: 0 };
@@ -389,9 +399,9 @@ export default class TrainTimetableView extends View {
         this.element.scrollBy(dx, dy);
         this.selectCell(col, row);
     }
-    appendTrain() {
+    removeTrain(index) {
         const trainList = this.app.data.railway.diagrams[this.diaIndex].trains[this.direction];
-        trainList.push(new Train());
+        trainList.splice(index, 1);
         this.update();
     }
     insertTrain(index) {
