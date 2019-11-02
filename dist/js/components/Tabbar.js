@@ -1,4 +1,4 @@
-import { h } from '../Util.js';
+import { h, Menu } from '../Util.js';
 import { Diagram } from '../DiagramParser.js';
 export default class Tabbar {
     constructor(app, element) {
@@ -25,15 +25,45 @@ export default class Tabbar {
     }
     showDiagramTabs() {
         const elements = [
-            ...this.app.data.railway.diagrams.map((diagram, i) => h('div', {
-                class: 'tabbar-tab' + (i === 0 ? ' active' : ''),
-                'data-tab-id': i,
-            }, diagram.name, this.tabClicked.bind(this))),
+            ...this.app.data.railway.diagrams.map((diagram, i) => {
+                const result = h('div', {
+                    class: 'tabbar-tab' + (i === 0 ? ' active' : ''),
+                    'data-tab-id': i,
+                }, diagram.name, this.tabClicked.bind(this));
+                result.addEventListener('contextmenu', (event) => {
+                    const menu = [
+                        {
+                            label: '名前の変更',
+                            click: () => this.renameDiagram(i),
+                        },
+                    ];
+                    new Menu(menu).show(event.clientX, event.clientY);
+                    event.preventDefault();
+                });
+                return result;
+            }),
             h('div', { class: 'tabbar-tab' }, '＋', this.addDiagram.bind(this)),
         ];
         this.selectedTab = elements[0];
         this.element.innerHTML = '';
         this.element.append(...elements);
+    }
+    renameDiagram(id) {
+        const tabElement = this.element.children[id];
+        const input = h('input', { class: 'tabbar-input', value: tabElement.textContent });
+        tabElement.innerHTML = '';
+        tabElement.appendChild(input);
+        input.addEventListener('keydown', event => {
+            if (event.keyCode === 13) {
+                input.blur();
+            }
+            event.stopPropagation();
+        });
+        input.addEventListener('blur', () => {
+            const value = input.value;
+            this.app.data.railway.diagrams[id].name = value;
+            tabElement.textContent = value;
+        });
     }
     showSettingTabs() {
         const elements = [

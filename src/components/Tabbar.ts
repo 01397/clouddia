@@ -1,5 +1,5 @@
-import App from '../App.js';
-import { h } from '../Util.js';
+import App, { MenuItem } from '../App.js';
+import { h, Menu } from '../Util.js';
 import { Diagram } from '../DiagramParser.js';
 export default class Tabbar {
   private element: Element;
@@ -30,8 +30,8 @@ export default class Tabbar {
   private showDiagramTabs() {
     const elements = [
       ...this.app.data.railway.diagrams.map(
-        (diagram, i): Element =>
-          h(
+        (diagram, i): Element => {
+          const result = h(
             'div',
             {
               class: 'tabbar-tab' + (i === 0 ? ' active' : ''),
@@ -39,13 +39,43 @@ export default class Tabbar {
             },
             diagram.name,
             this.tabClicked.bind(this)
-          )
+          );
+          result.addEventListener('contextmenu', (event: MouseEvent) => {
+            const menu: MenuItem[] = [
+              {
+                label: '名前の変更',
+                click: () => this.renameDiagram(i),
+              },
+            ];
+            new Menu(menu).show(event.clientX, event.clientY);
+            event.preventDefault();
+          });
+          return result;
+        }
       ),
       h('div', { class: 'tabbar-tab' }, '＋', this.addDiagram.bind(this)),
     ];
     this.selectedTab = elements[0];
     this.element.innerHTML = '';
     this.element.append(...elements);
+  }
+  private renameDiagram(id: number) {
+    const tabElement = this.element.children[id];
+    const input = h('input', { class: 'tabbar-input', value: tabElement.textContent }) as HTMLInputElement;
+    tabElement.innerHTML = '';
+    tabElement.appendChild(input);
+    input.addEventListener('keydown', event => {
+      if (event.keyCode === 13) {
+        input.blur();
+      }
+      event.stopPropagation();
+    });
+    input.addEventListener('click', event => event.stopPropagation());
+    input.addEventListener('blur', () => {
+      const value = input.value;
+      this.app.data.railway.diagrams[id].name = value;
+      tabElement.textContent = value;
+    });
   }
   private showSettingTabs() {
     const elements = [
