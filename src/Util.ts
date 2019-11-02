@@ -222,6 +222,7 @@ export const createLineStyleField = (value: string, className?: string, onchange
 };
 
 const fieldInput = (field: HTMLInputElement, e: Event): void => {
+  e.stopPropagation();
   // 空白を無視したキャレット位置
   let value = field.value;
   let selectionEnd = field.selectionEnd || 0;

@@ -150,6 +150,7 @@ export const createLineStyleField = (value, className, onchange = null) => {
     return wrapper;
 };
 const fieldInput = (field, e) => {
+    e.stopPropagation();
     // 空白を無視したキャレット位置
     let value = field.value;
     let selectionEnd = field.selectionEnd || 0;

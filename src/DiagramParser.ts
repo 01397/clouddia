@@ -660,8 +660,11 @@ export class StationTime {
       e: number;
     for (let i = 0; i < data.length; i++) {
       if (!(i in data)) continue;
+      if (data[i].stopType === 3) {
+        delete data[i];
+        continue;
+      }
       if (s === null) s = i;
-      if (data[i].stopType === 3) delete data[i];
       e = i;
     }
     this.firstStationIndex = s;

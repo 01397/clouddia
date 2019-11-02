@@ -342,11 +342,48 @@ export default class TrainTimetableView extends View {
     }
     keydown(e) {
         if (37 <= e.keyCode && e.keyCode <= 40) {
+            // 方向キー
             this.moveCell(e);
         }
-        else if (e.keyCode === 13 && this.app.sub instanceof TrainSubview) {
+        else if (e.keyCode === 13) {
+            // Enter
             this.app.sub.focusField(this.getActiveCell().cellType);
         }
+        else if (e.keyCode === 80) {
+            // p -> 通過
+            this.changeStopType(this.getActiveCell(), 2);
+        }
+        else if (e.keyCode === 83) {
+            // s -> 停車
+            this.changeStopType(this.getActiveCell(), 1);
+        }
+        else if (e.keyCode === 68) {
+            // d -> 通過
+            this.changeStopType(this.getActiveCell(), 2);
+        }
+        else if (e.keyCode === 70) {
+            // f -> 経由なし/運行なし
+            this.changeStopType(this.getActiveCell(), 3);
+        }
+    }
+    changeStopType({ col, stationIndex }, type) {
+        const timetable = this.app.data.railway.diagrams[this.diaIndex].trains[this.direction][col].timetable;
+        if (!(stationIndex in timetable.data)) {
+            timetable.data[stationIndex] = {
+                arrival: null,
+                departure: null,
+                stopType: type,
+                track: null,
+            };
+        }
+        else {
+            if (timetable.data[stationIndex].stopType === type)
+                return;
+            timetable.data[stationIndex].stopType = type;
+        }
+        timetable.update();
+        this.update();
+        this.app.sub.update();
     }
     moveCell(event) {
         let { col, row } = this.getActiveCell();
