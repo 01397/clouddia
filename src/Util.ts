@@ -123,7 +123,7 @@ export const createColorField = (value: string, className?: string, onchange: (e
 export const createLineStyleField = (value: string, className?: string, onchange: (value: string) => void = null): HTMLDivElement => {
   const changeValue = newValue => {
     onchange(newValue);
-    contentLine.style.strokeDasharray = DASH_ARRAY_STYLE[newValue];
+    contentLine.setAttributeNS('http://www.w3.org/2000/svg', 'strokeDasharray', DASH_ARRAY_STYLE[newValue]);
     wrapper.blur();
   };
   const contentLine = h(
