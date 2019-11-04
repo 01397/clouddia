@@ -64,6 +64,7 @@ export default class TrainTimetableView extends View {
       { label: '停車', accelerator: 'S', click: () => this.changeStopType(this.getActiveCell(), 1) },
       { label: '通過', accelerator: 'D', click: () => this.changeStopType(this.getActiveCell(), 2) },
       { label: '運行なし', accelerator: 'F', click: () => this.changeStopType(this.getActiveCell(), 3) },
+      { label: '時刻を消去', accelerator: 'Backspace', click: () => this.eraceTime(this.getActiveCell()) },
     ];
     super(app, direction === 0 ? 'OutboundTrainTimetable' : 'InboundTrainTimetable', [
       {
@@ -546,6 +547,15 @@ export default class TrainTimetableView extends View {
         direction: this.direction,
         train: this.app.data.railway.diagrams[this.diaIndex].trains[this.direction][col],
       });
+  }
+  private eraceTime({ col, stationIndex }: { col: number; stationIndex: number }) {
+    const timetable = this.app.data.railway.diagrams[this.diaIndex].trains[this.direction][col].timetable;
+    if (!(stationIndex in timetable.data)) return;
+    timetable.data[stationIndex].arrival = null;
+    timetable.data[stationIndex].departure = null;
+    timetable.update();
+    this.update();
+    if (this.app.sub instanceof TrainSubview) this.app.sub.update();
   }
   private getActiveCell() {
     const cell = this.selectedCell[this.selectedCell.length - 1];
