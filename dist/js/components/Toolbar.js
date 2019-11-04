@@ -3,12 +3,12 @@ export default class Toolbar {
     constructor(app, element) {
         this.app = app;
         this.element = element;
-        this.menu = null;
+        this.menuItems = null;
         this.element.innerHTML = '';
     }
-    setMenu(menu) {
-        this.menu = menu;
-        const menuWrapper = h('div', { id: 'toolbar' }, menu.map((item, i) => h('div', { class: 'toolbar-item' }, item.label, e => {
+    setMenu(menuItems) {
+        this.menuItems = menuItems;
+        const menuWrapper = h('div', { id: 'toolbar' }, menuItems.map((item, i) => h('div', { class: 'toolbar-item' }, item.label, e => {
             e.stopPropagation();
             this.showMenu(i);
         })));
@@ -16,9 +16,9 @@ export default class Toolbar {
         this.element = menuWrapper;
     }
     showMenu(i) {
-        if (!this.menu[i].submenu)
+        if (!this.menuItems[i].submenu)
             return;
-        new Menu(this.menu[i].submenu).show(this.element.children[i].offsetLeft, 16);
+        new Menu(this.menuItems[i].submenu).popup({ x: this.element.children[i].offsetLeft, y: 16 });
     }
 }
 //# sourceMappingURL=Toolbar.js.map

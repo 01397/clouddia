@@ -10,7 +10,7 @@ import TrainSubview from './components/TrainSubview.js';
 import TrainTimetableView from './components/TrainTimetableView.js';
 import TrainTypeSettingView from './components/TrainTypeSettingView.js';
 import DiagramParser from './DiagramParser.js';
-import { h } from './Util.js';
+import { h, getDevice, Menu } from './Util.js';
 export default class App {
     constructor(root) {
         this.version = '0.2.6';
@@ -35,8 +35,9 @@ export default class App {
         this.sub = null;
         this.data = null;
         this.currentDiaIndex = 0;
+        this.device = getDevice();
         this.updateLocalData();
-        document.addEventListener('keydown', e => this.main.keydown(e), false);
+        document.addEventListener('keydown', e => this.keydown(e), false);
     }
     /**
      * ファイルに関する設定(FileSettingView)の表示
@@ -179,6 +180,7 @@ export default class App {
             },
             ...viewMenu,
         ];
+        this.menu = menu;
         this.toolbar.setMenu(menu);
     }
     updateLocalData() {
@@ -200,6 +202,16 @@ export default class App {
         }
         catch (err) {
             console.log(err);
+        }
+    }
+    keydown(e) {
+        const func = Menu.findByShortcut(this.menu, e);
+        if (func === null) {
+            this.main.keydown(e);
+        }
+        else {
+            func();
+            e.preventDefault();
         }
     }
 }

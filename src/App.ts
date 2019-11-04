@@ -12,7 +12,7 @@ import TrainTimetableView from './components/TrainTimetableView.js';
 import TrainTypeSettingView from './components/TrainTypeSettingView.js';
 import View, { viewTypeString } from './components/View.js';
 import DiagramParser, { DiagramFile, Train } from './DiagramParser.js';
-import { h } from './Util.js';
+import { h, getDevice, Menu } from './Util.js';
 
 export interface SelectionObject {
   train?: Train;
@@ -90,6 +90,8 @@ export default class App {
   public tabbar: Tabbar;
   public toolbar: Toolbar;
   public currentDiaIndex: number;
+  menu: MenuItem[];
+  device: 'macOS' | 'Windows' | 'Linux' | 'iPhone' | 'Android Mobile' | 'iPad' | 'Android' | 'Other';
 
   constructor(root: Element) {
     this.version = '0.2.6';
@@ -117,9 +119,11 @@ export default class App {
     this.data = null;
     this.currentDiaIndex = 0;
 
+    this.device = getDevice();
+
     this.updateLocalData();
 
-    document.addEventListener('keydown', e => this.main.keydown(e), false);
+    document.addEventListener('keydown', e => this.keydown(e), false);
   }
   /**
    * ファイルに関する設定(FileSettingView)の表示
@@ -259,8 +263,10 @@ export default class App {
       },
       ...viewMenu,
     ];
+    this.menu = menu;
     this.toolbar.setMenu(menu);
   }
+
   private updateLocalData() {
     /*const dialog = new Dialog({
       title: 'ご利用にあたって',
@@ -278,6 +284,16 @@ export default class App {
       window.localStorage.setItem('version', this.version);
     } catch (err) {
       console.log(err);
+    }
+  }
+
+  private keydown(e: KeyboardEvent) {
+    const func = Menu.findByShortcut(this.menu, e);
+    if (func === null) {
+      this.main.keydown(e);
+    } else {
+      func();
+      e.preventDefault();
     }
   }
 }

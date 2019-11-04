@@ -2,7 +2,6 @@ import App from '../App.js';
 import { h } from '../Util.js';
 
 export default abstract class Subview {
-  [x: string]: any;
   protected app: App;
   protected element: HTMLDivElement;
   protected visible: boolean;

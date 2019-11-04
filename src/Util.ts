@@ -45,7 +45,7 @@ export const createTimeField = (value: string, className?: string, onchange: (e?
   field.addEventListener('input', e => fieldInput(field, e));
   field.addEventListener('keydown', e => fieldKeydown(field, e));
   field.addEventListener('blur', e => {
-    fieldBlur(field, e);
+    fieldBlur(field);
     onchange(e);
   });
   if (onchange !== null) field.addEventListener('change', onchange);
@@ -254,6 +254,7 @@ const fieldInput = (field: HTMLInputElement, e: Event): void => {
 };
 
 const fieldKeydown = (field: HTMLInputElement, e: KeyboardEvent): void => {
+  e.stopPropagation();
   // e.keyCode: 37← 38↑ 39→ 40↓
   const keyCode = e.keyCode;
   // キャレット移動
@@ -286,10 +287,9 @@ const fieldKeydown = (field: HTMLInputElement, e: KeyboardEvent): void => {
     default:
       return;
   }
-  e.stopPropagation();
 };
 
-const fieldBlur = (field: HTMLInputElement, e: FocusEvent): void => {
+const fieldBlur = (field: HTMLInputElement): void => {
   const value = field.value;
   if (timeStringCheck(value) && value.length < 7) {
     field.value += ' 00';
@@ -510,63 +510,87 @@ export class Dialog {
   }
 }
 
+export function getDevice(): 'macOS' | 'Windows' | 'Linux' | 'iPhone' | 'Android Mobile' | 'iPad' | 'Android' | 'Other' {
+  const ua = navigator.userAgent;
+  if (ua.includes('Windows')) return 'Windows';
+  if (ua.includes('Mac OS X')) return 'ontouchend' in document ? 'iPad' : 'macOS'; // iPadOS対応
+  if (ua.includes('iPhone')) return 'iPhone';
+  if (ua.includes('iPad')) return 'iPad';
+  if (ua.includes('Android')) return ua.includes('Mobile') ? 'Android Mobile' : 'Android';
+  if (ua.includes('Linux')) return 'Linux';
+  return 'Other'; // iPod, kindle, wii, ps4, 3ds, xbox...
+}
+function checkAppleDevice() {
+  const device = getDevice();
+  return device === 'macOS' || device === 'iPad' || device === 'iPhone';
+}
 export class Menu {
   private element: HTMLElement;
   private child: Menu;
   private closed: boolean;
-  constructor(menu: MenuItem[]) {
+  public items: MenuItem[];
+  constructor(items: MenuItem[]) {
     this.child = null;
     this.closed = false;
-    this.element = h('div', { class: 'menu-container' }, this.create(menu)) as HTMLDivElement;
+    this.element = null;
+    this.items = items;
   }
   /**
    * 右クリックメニューまたは、メニューバーメニューを表示
-   * @param menu 表示する項目たち
    * @param x 左上x座標
    * @param y 左上y座標
    */
-  show(x: number, y: number) {
+  public popup({ x, y }: { x: number; y: number }) {
+    this.element = h('div', { class: 'menu-container' }, this.build()) as HTMLDivElement;
     this.element.style.left = x + 'px';
     this.element.style.top = y + 'px';
     document.body.appendChild(this.element);
     const clickListener = () => {
       document.body.removeEventListener('click', clickListener, { capture: true });
       document.body.removeEventListener('contextmenu', clickListener, { capture: true });
-      this.close();
+      this.closePopup();
     };
     document.body.addEventListener('click', clickListener, { capture: true });
     document.body.addEventListener('contextmenu', clickListener, { capture: true });
   }
+
+  private popupSubmenu(item: MenuItem[], element: HTMLElement) {
+    this.closeChild();
+    const { top, left } = element.getBoundingClientRect();
+    this.child = new Menu(item);
+    this.child.popup({ x: left, y: top });
+  }
   /**
    * メニューのDOM生成
-   * @param menu 項目
    */
-  create(menu: MenuItem[]): Element[] {
-    return menu.map(item => {
+  private build(): Element[] {
+    return this.items.map(item => {
       let result: Element;
+      const content = [h('div', { class: 'menu-item-label' }, item.label)];
+      if (item.hasOwnProperty('accelerator')) {
+        content.push(h('div', { class: 'menu-item-key' }, Menu.getShortcutString(item.accelerator)));
+      }
       if (!('type' in item) || item.type === 'normal') {
-        result = h('div', { class: 'menu-item' }, item.label, item.click);
+        result = h('div', { class: 'menu-item' }, content, item.click);
         result.addEventListener('mouseenter', this.closeChild.bind(this), false);
       } else if (item.type === 'submenu') {
         result = h('div', { class: 'menu-item menu-item-submenu' }, item.label, item.click);
-        result.addEventListener('mouseenter', this.showChild.bind(this, item.submenu, result), false);
+        result.addEventListener('mouseenter', this.popupSubmenu.bind(this, item.submenu, result), false);
+      } else if (item.type === 'separator') {
+        result = h('div', { class: 'menu-item menu-item-separator' });
       }
       return result;
     });
   }
-  showChild(item: MenuItem[], element: HTMLElement) {
-    this.closeChild();
-    const { top, right } = element.getBoundingClientRect();
-    this.child = new Menu(item);
-    this.child.show(right, top);
-  }
-  closeChild() {
+
+  private closeChild() {
     if (this.child !== null) {
-      this.child.close();
+      this.child.closePopup();
       this.child = null;
     }
   }
-  close() {
+
+  public closePopup() {
     this.closeChild();
     if (this.closed) return;
     this.element.classList.add('closed');
@@ -575,5 +599,106 @@ export class Menu {
       this.closed = true;
       delete this.element;
     }, 1000);
+  }
+
+  // Menu内から該当するショートカットキーに対応するMenuItemのclick(=function)をさがす
+  public static findByShortcut(items: MenuItem[], event: KeyboardEvent): Function {
+    const keySet = this.getKeyName(event);
+    return this.searchShortcuts(items, keySet);
+  }
+
+  // findByShortcutの本体。再帰
+  private static searchShortcuts(menu: MenuItem[], keySet: Set<string>): Function {
+    const isApple = checkAppleDevice();
+    loop1: for (const item of menu) {
+      // submenuまでたどる(再帰)
+      if (item.hasOwnProperty('submenu')) {
+        const result = this.searchShortcuts(item.submenu, keySet);
+        if (result !== null) return result;
+      }
+      if (!item.hasOwnProperty('accelerator')) continue;
+      const keys = item.accelerator.split('+');
+      if (keys.length !== keySet.size) continue;
+      for (const key of keys) {
+        // https://electronjs.org/docs/api/accelerator
+        const keyName = key
+          .replace(/CmdOrCtrl|CommandOrControl/, isApple ? 'Command' : 'Control')
+          .replace('Cmd', 'Command')
+          .replace('Ctrl', 'Control')
+          .replace('Option', 'Alt')
+          .replace('Return', 'Enter')
+          .replace('Esc', 'Escape');
+        if (!keySet.has(keyName)) continue loop1;
+      }
+      return item.click;
+    }
+    return null;
+  }
+
+  // キーボードで押しているキーの名前のSetを生成する。
+  private static getKeyName(e: KeyboardEvent): Set<string> {
+    const isApple = checkAppleDevice();
+    const result: Set<string> = new Set();
+    if (e.metaKey) result.add(isApple ? 'Command' : 'Windows');
+    if (e.ctrlKey) result.add('Control');
+    if (e.altKey) result.add('Alt');
+    if (e.shiftKey) result.add('Shift');
+    result.add(
+      e.code
+        .replace(/^(Contol|Shift|Meta|Alt|OS)(Left|Right)$/, '$1')
+        .replace('Meta', isApple ? 'Command' : 'Windows')
+        .replace(/^Digit([0-9])$/, '$1')
+        .replace(/^Key([A-Z])$/, '$1')
+        .replace(/^Arrow(Up|Down|Left|Right)$/, '$1')
+    );
+    return result;
+  }
+
+  // 表示用のキーの名前を生成する
+  public static getShortcutString(accelerator: string) {
+    if (!accelerator) return '';
+    const isApple = checkAppleDevice();
+    let result = '';
+    const keys = accelerator.split('+');
+    if (isApple) {
+      const symbolMap = {
+        Ctrl: '↩',
+        Control: '↩',
+        Alt: '⌥',
+        Option: '⌥',
+        Shift: '⇧',
+        CmdOrCtrl: '⌘',
+        Comannd: '⌘',
+        Cmd: '⌘',
+        Enter: '↩',
+        Return: '↩',
+        Esc: '⎋',
+        Escape: '⎋',
+        Tab: '⇥',
+        Space: 'スペース',
+        Delete: '⌫',
+        Backspace: '⌫',
+        'Caps Lock': '⇪',
+        Up: '↑',
+        Down: '↓',
+        Left: '←',
+        Right: '→',
+      };
+      for (const key in symbolMap) {
+        if (symbolMap.hasOwnProperty(key)) {
+          const index = keys.indexOf(key);
+          if (index === -1) continue;
+          result += symbolMap[key];
+          keys.splice(index, 1);
+        }
+      }
+      result += keys.join('');
+    } else {
+      result = accelerator
+        .replace(/CmdOrCtrl|Control|CommandOrControl/, 'Ctrl')
+        .replace('Escape', 'Esc')
+        .replace('-', "'-'");
+    }
+    return result;
   }
 }

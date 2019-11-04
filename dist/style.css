@@ -118,8 +118,8 @@ html, body {
 .menu-container {
   color: #eee;
   position: absolute;
-  background-color: rgba(0, 0, 0, 0.8);
-  backdrop-filter: blur(8px);
+  background-color: rgba(16, 16, 16, 0.8);
+  backdrop-filter: blur(12px);
   min-width: 128px;
   border: 1px solid #000;
   border-radius: 4px;
@@ -153,10 +153,26 @@ html, body {
 .menu-item {
   padding: 0 8px 0 20px;
   cursor: default;
+  display: flex;
+  line-height: 19px; /* 気持ち悪い？ macに合わせてるのさ */
 }
 
 .menu-item:hover {
   background: #6600cc;
+}
+
+.menu-item-separator {
+  height: 2px;
+  margin: 5px 0;
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
+.menu-item-label {
+  flex: 1;
+}
+
+.menu-item-key {
+  padding-left: 1.5em;
 }
 
 .menu-item-submenu{

@@ -57,12 +57,21 @@ export default class TrainTimetableView extends View {
     const trainMenu = [
       { label: '左に列車を挿入', accelerator: 'Alt+Left', click: () => this.insertTrain(this.getActiveCell().col) },
       { label: '右に列車を挿入', accelerator: 'Alt+Right', click: () => this.insertTrain(this.getActiveCell().col + 1) },
-      { label: '列車を削除', accelerator: 'CmdOrCtrl+Delete', click: () => this.removeTrain(this.getActiveCell().col) },
+      { label: '列車を削除', accelerator: 'CmdOrCtrl+Backspace', click: () => this.removeTrain(this.getActiveCell().col) },
+    ];
+    const stationMenu = [
+      { label: '停車', accelerator: 'S', click: () => this.changeStopType(this.getActiveCell(), 1) },
+      { label: '通過', accelerator: 'D', click: () => this.changeStopType(this.getActiveCell(), 2) },
+      { label: '運行なし', accelerator: 'F', click: () => this.changeStopType(this.getActiveCell(), 3) },
     ];
     super(app, direction === 0 ? 'OutboundTrainTimetable' : 'InboundTrainTimetable', [
       {
         label: '列車',
         submenu: trainMenu,
+      },
+      {
+        label: '駅時刻',
+        submenu: stationMenu,
       },
     ]);
 
@@ -100,7 +109,7 @@ export default class TrainTimetableView extends View {
     });
     this.element.addEventListener('contextmenu', event => {
       selectByClick(event);
-      new Menu(trainMenu).show(event.clientX, event.clientY);
+      new Menu([...stationMenu, { type: 'separator' }, ...trainMenu]).popup({ x: event.clientX, y: event.clientY });
       event.preventDefault();
     });
     // 現在の表示領域
@@ -412,18 +421,6 @@ export default class TrainTimetableView extends View {
     } else if (e.keyCode === 13) {
       // Enter
       (this.app.sub as TrainSubview).focusField(this.getActiveCell().cellType);
-    } else if (e.keyCode === 80) {
-      // p -> 通過
-      this.changeStopType(this.getActiveCell(), 2);
-    } else if (e.keyCode === 83) {
-      // s -> 停車
-      this.changeStopType(this.getActiveCell(), 1);
-    } else if (e.keyCode === 68) {
-      // d -> 通過
-      this.changeStopType(this.getActiveCell(), 2);
-    } else if (e.keyCode === 70) {
-      // f -> 経由なし/運行なし
-      this.changeStopType(this.getActiveCell(), 3);
     }
   }
   private changeStopType({ col, stationIndex }: { col: number; stationIndex: number }, type: number) {
@@ -441,7 +438,7 @@ export default class TrainTimetableView extends View {
     }
     timetable.update();
     this.update();
-    this.app.sub.update();
+    if (this.app.sub instanceof TrainSubview) this.app.sub.update();
   }
   private moveCell(event: KeyboardEvent) {
     let { col, row } = this.getActiveCell();

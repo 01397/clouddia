@@ -37,7 +37,7 @@ export default class Tabbar {
                             click: () => this.renameDiagram(i),
                         },
                     ];
-                    new Menu(menu).show(event.clientX, event.clientY);
+                    new Menu(menu).popup({ x: event.clientX, y: event.clientY });
                     event.preventDefault();
                 });
                 return result;
