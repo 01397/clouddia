@@ -656,15 +656,15 @@ export class StationTime {
   }
   public update() {
     const data = this._data;
-    let s: number = null,
-      e: number;
+    let s = -1,
+      e = -1;
     for (let i = 0; i < data.length; i++) {
       if (!(i in data)) continue;
       if (data[i].stopType === 3) {
         delete data[i];
         continue;
       }
-      if (s === null) s = i;
+      if (s === -1) s = i;
       e = i;
     }
     this.firstStationIndex = s;

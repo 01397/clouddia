@@ -551,7 +551,7 @@ export class StationTime {
     }
     update() {
         const data = this._data;
-        let s = null, e;
+        let s = -1, e = -1;
         for (let i = 0; i < data.length; i++) {
             if (!(i in data))
                 continue;
@@ -559,7 +559,7 @@ export class StationTime {
                 delete data[i];
                 continue;
             }
-            if (s === null)
+            if (s === -1)
                 s = i;
             e = i;
         }

@@ -228,7 +228,7 @@ export default class TrainSubview extends Subview {
     const stationIndex =
       this.cellInfo.train.direction === 0 ? this.cellInfo.stationIndex : this.app.data.railway.stations.length - this.cellInfo.stationIndex - 1;
     if (!this.cellInfo.train.timetable.data[stationIndex]) {
-      //if (arrival.value !== '' || departure.value !== '') return;
+      if (arrival.value === '' && departure.value === '') return;
       this.cellInfo.train.timetable.data[stationIndex] = {
         stopType: 1,
         arrival: null,
