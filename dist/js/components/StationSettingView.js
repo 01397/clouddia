@@ -34,10 +34,10 @@ export default class StationSettingView extends View {
         this.svgElement.addEventListener('click', (e) => {
             const y = e.offsetY;
             if (y % this.rowHeight < 28) {
-                this.insertStation(Math.floor(y / this.rowHeight));
+                this.insert(Math.floor(y / this.rowHeight));
             }
             else {
-                this.editStation(Math.floor(y / this.rowHeight));
+                this.edit(Math.floor(y / this.rowHeight));
             }
         });
         this.rightContainer = h('div', { class: 'fs-right-container' }, '駅が選択されていません');
@@ -47,7 +47,7 @@ export default class StationSettingView extends View {
     finish() {
         return;
     }
-    editStation(stationIndex) {
+    edit(stationIndex) {
         const station = this.app.data.railway.stations[stationIndex];
         const content = [
             h('div', { class: 'fs-section .fs-label5' }, [
@@ -141,27 +141,30 @@ export default class StationSettingView extends View {
                             createRadio(station.mainTrack[1] === i, 'fs-outbound', '', e => (station.mainTrack[1] = i)),
                             createButton('削除', 'form-button-red', () => {
                                 station.tracks.splice(i, 1);
-                                this.editStation(stationIndex);
+                                this.edit(stationIndex);
                             }),
                         ]);
                         return fragment;
                     }),
                     createButton('＋番線追加', '', () => {
                         station.addTrack();
-                        this.editStation(stationIndex);
+                        this.edit(stationIndex);
                     }),
                 ]),
             ]),
             h('div', { class: 'fs-section' }, [
-                createButton('この駅を削除', 'form-button-red', () => {
-                    this.removeStation(stationIndex);
+                createButton('駅を複製', null, () => {
+                    this.copy(stationIndex);
+                }),
+                createButton('駅を削除', 'form-button-red', () => {
+                    this.remove(stationIndex);
                 }),
             ]),
         ];
         this.rightContainer.innerHTML = '';
         this.rightContainer.append(...content);
     }
-    insertStation(stationIndex) {
+    insert(stationIndex) {
         const stations = this.app.data.railway.stations;
         stations.splice(stationIndex, 0, new Station());
         stations.forEach(station => {
@@ -173,9 +176,25 @@ export default class StationSettingView extends View {
             }
         });
         this.updateRailmap();
-        this.editStation(stationIndex);
+        this.edit(stationIndex);
     }
-    removeStation(stationIndex) {
+    copy(stationIndex) {
+        const stations = this.app.data.railway.stations;
+        const newStation = stations[stationIndex].clone();
+        newStation.name = newStation.name.replace(/ [0-9]+$|$/, v => ' ' + (Number(v) + 1));
+        stations.splice(stationIndex + 1, 0, newStation);
+        stations.forEach(station => {
+            if (station.brunchCoreStationIndex !== null && station.brunchCoreStationIndex >= stationIndex) {
+                station.brunchCoreStationIndex++;
+            }
+            if (station.loopOriginStationIndex !== null && station.loopOriginStationIndex >= stationIndex) {
+                station.loopOriginStationIndex++;
+            }
+        });
+        this.updateRailmap();
+        this.edit(stationIndex);
+    }
+    remove(stationIndex) {
         const stations = this.app.data.railway.stations;
         stations.splice(stationIndex, 1);
         stations.forEach(station => {
@@ -187,7 +206,7 @@ export default class StationSettingView extends View {
             }
         });
         this.updateRailmap();
-        this.editStation(stationIndex);
+        this.edit(stationIndex);
     }
     updateRailmap() {
         const stations = this.app.data.railway.stations;

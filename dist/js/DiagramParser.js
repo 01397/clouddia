@@ -178,8 +178,8 @@ export class Railway extends DiagramData {
 export class Station extends DiagramData {
     clone() {
         const result = super.clone();
-        result.timetableStyle.arrival = Array.from(this.timetableStyle.arrival);
-        result.timetableStyle.departure = Array.from(this.timetableStyle.departure);
+        result.timetableStyle.arrival = [this.timetableStyle.arrival[0], this.timetableStyle.arrival[1]];
+        result.timetableStyle.departure = [this.timetableStyle.departure[0], this.timetableStyle.departure[1]];
         result.customTimetableStyle = JSON.parse(JSON.stringify(this.customTimetableStyle));
         return result;
     }

@@ -13,8 +13,9 @@ const TABLE_MARK = {
 export default class TrainTimetableView extends View {
     constructor(app, diaIndex, direction) {
         const trainMenu = [
-            { label: '左に列車を挿入', accelerator: 'Alt+Left', click: () => this.insertTrain(this.getActiveCell().col) },
-            { label: '右に列車を挿入', accelerator: 'Alt+Right', click: () => this.insertTrain(this.getActiveCell().col + 1) },
+            { label: '列車を左に挿入', accelerator: 'Alt+Left', click: () => this.insertTrain(this.getActiveCell().col) },
+            { label: '列車を右に挿入', accelerator: 'Alt+Right', click: () => this.insertTrain(this.getActiveCell().col + 1) },
+            { label: '列車を複製', accelerator: 'CmdOrCtrl+D', click: () => this.cloneTrain(this.getActiveCell().col) },
             { label: '列車を削除', accelerator: 'CmdOrCtrl+Backspace', click: () => this.removeTrain(this.getActiveCell().col) },
         ];
         const stationMenu = [
@@ -440,6 +441,14 @@ export default class TrainTimetableView extends View {
         const train = new Train();
         train.direction = this.direction;
         trainList.splice(index, 0, train);
+        this.selectCell(index, this.getActiveCell().row);
+        this.update();
+    }
+    cloneTrain(index) {
+        const trainList = this.app.data.railway.diagrams[this.diaIndex].trains[this.direction];
+        const train = trainList[index].clone();
+        trainList.splice(index + 1, 0, train);
+        this.selectCell(index + 1, this.getActiveCell().row);
         this.update();
     }
     selectCell(col, row, mode = 'select') {

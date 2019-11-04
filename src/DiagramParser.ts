@@ -94,7 +94,7 @@ class DiagramData {
    * instanceof DiagramData, Array(shallow copy), Object(shallow copy)
    * 必要に応じてOverrideすること!
    */
-  public clone() {
+  public clone(): this {
     const result = new (this as any).constructor();
     for (const prop in this) {
       const val = this[prop];
@@ -145,7 +145,7 @@ export class Railway extends DiagramData {
   public trainTypes: TrainType[];
   public stations: Station[];
   public diagrams: Diagram[];
-  public clone(): Railway {
+  public clone() {
     const result = super.clone();
     result.trainTypes = this.trainTypes.map(v => v.clone());
     result.stations = this.stations.map(v => v.clone());
@@ -209,10 +209,10 @@ export class Station extends DiagramData {
   };
   public tracks: StationTrack[];
   public outerTerminal: OuterTerminal[];
-  public clone(): Railway {
+  public clone() {
     const result = super.clone();
-    result.timetableStyle.arrival = Array.from(this.timetableStyle.arrival);
-    result.timetableStyle.departure = Array.from(this.timetableStyle.departure);
+    result.timetableStyle.arrival = [this.timetableStyle.arrival[0], this.timetableStyle.arrival[1]];
+    result.timetableStyle.departure = [this.timetableStyle.departure[0], this.timetableStyle.departure[1]];
     result.customTimetableStyle = JSON.parse(JSON.stringify(this.customTimetableStyle));
     return result;
   }
