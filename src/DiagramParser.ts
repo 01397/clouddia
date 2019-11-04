@@ -15,7 +15,15 @@ export default class DiagramParser {
   }
 }
 
-export class DiagramData {
+class DiagramData {
+  constructor(params = {}) {
+    this.fromOudiaParams({});
+    for (const key in params) {
+      if (params.hasOwnProperty(key)) {
+        this[key] = params[key];
+      }
+    }
+  }
   /**
    * oudia文字列を解析する
    * @param lines oudia文字列を1行ずつ格納した配列
@@ -67,14 +75,6 @@ export class DiagramData {
     result.fromOudiaParams(oudParams);
     return [result, i];
   }
-  constructor(params = {}) {
-    this.fromOudiaParams({});
-    for (const key in params) {
-      if (params.hasOwnProperty(key)) {
-        this[key] = params[key];
-      }
-    }
-  }
   /**
    * fromOudia内で、oudia文字列からプロパティへ変換するためのメソッド。
    * @param key
@@ -88,6 +88,31 @@ export class DiagramData {
   }
   public toOudiaString(): string {
     return '';
+  }
+  /**
+   * 少しだけDeep Copyする。
+   * instanceof DiagramData, Array(shallow copy), Object(shallow copy)
+   * 必要に応じてOverrideすること!
+   */
+  public clone() {
+    const result = new (this as any).constructor();
+    for (const prop in this) {
+      const val = this[prop];
+      if (val === null) {
+        result[prop] = null;
+      } else if (val === undefined) {
+        result[prop] = undefined;
+      } else if (val instanceof DiagramData || val instanceof Color || val instanceof Font) {
+        result[prop] = val.clone();
+      } else if (val instanceof Array) {
+        result[prop] = Array.from(val);
+      } else if (val.constructor.name === 'Object') {
+        Object.assign({}, val);
+      } else {
+        result[prop] = val;
+      }
+    }
+    return result;
   }
 }
 
@@ -120,6 +145,13 @@ export class Railway extends DiagramData {
   public trainTypes: TrainType[];
   public stations: Station[];
   public diagrams: Diagram[];
+  public clone(): Railway {
+    const result = super.clone();
+    result.trainTypes = this.trainTypes.map(v => v.clone());
+    result.stations = this.stations.map(v => v.clone());
+    result.diagrams = this.diagrams.map(v => v.clone());
+    return result;
+  }
   public fromOudiaParams(params) {
     this.name = params.hasOwnProperty('Rosenmei') ? params.Rosenmei : '新規路線';
     this.directionName = [];
@@ -153,20 +185,20 @@ export class Railway extends DiagramData {
 export class Station extends DiagramData {
   public name: string;
   public abbrName: string;
-  public timetableStyle: { arrival: boolean[]; departure: boolean[] };
-  public visibleDiagramInfo: string[];
-  public mainTrack: number[];
+  public timetableStyle: { arrival: [boolean, boolean]; departure: [boolean, boolean] };
+  public visibleDiagramInfo: [string, string];
+  public mainTrack: [number, number];
   public isMain: boolean;
   public border: boolean;
   public brunchCoreStationIndex: number;
   public isBrunchOpposite: boolean;
   public loopOriginStationIndex: number;
   public isLoopOpposite: boolean;
-  public visibleTimetableTrack: boolean[];
+  public visibleTimetableTrack: [boolean, boolean];
   public visibleDiagramTrack: boolean;
   public nextStaionDistance: number;
   public timetableTrackOmit: boolean;
-  public operationLength: number[];
+  public operationLength: [number, number];
   public customTimetableStyle: {
     arrival: boolean[];
     departure: boolean[];
@@ -177,6 +209,13 @@ export class Station extends DiagramData {
   };
   public tracks: StationTrack[];
   public outerTerminal: OuterTerminal[];
+  public clone(): Railway {
+    const result = super.clone();
+    result.timetableStyle.arrival = Array.from(this.timetableStyle.arrival);
+    result.timetableStyle.departure = Array.from(this.timetableStyle.departure);
+    result.customTimetableStyle = JSON.parse(JSON.stringify(this.customTimetableStyle));
+    return result;
+  }
   public fromOudiaParams(params) {
     this.name = params.hasOwnProperty('Ekimei') ? params.Ekimei : '駅名未設定';
     this.abbrName = params.hasOwnProperty('EkimeiJikokuRyaku') ? params.EkimeiJikokuRyaku : '';
@@ -226,31 +265,29 @@ export class Station extends DiagramData {
     }
     this.isMain = params.hasOwnProperty('Ekikibo') ? params.Ekikibo === 'Ekikibo_Syuyou' : false;
     this.border = params.hasOwnProperty('Kyoukaisen') ? params.Kyoukaisen === '1' : false; // oud2ndV2では廃止
-    this.visibleDiagramInfo = [];
-    this.visibleDiagramInfo[0] = params.hasOwnProperty('DiagramRessyajouhouHyoujiKudari')
-      ? params.DiagramRessyajouhouHyoujiKudari.replace('DiagramRessyajouhouHyouji_', '')
-      : 'Origin';
-    this.visibleDiagramInfo[1] = params.hasOwnProperty('DiagramRessyajouhouHyoujiNobori')
-      ? params.DiagramRessyajouhouHyoujiNobori.replace('DiagramRessyajouhouHyouji_', '')
-      : 'Origin';
-    this.mainTrack = [];
-    this.mainTrack[0] = params.hasOwnProperty('DownMain') ? Number(params.DownMain) : 0;
-    this.mainTrack[1] = params.hasOwnProperty('UpMain') ? Number(params.UpMain) : 1;
+    this.visibleDiagramInfo = ['Origin', 'Origin'];
+    if (params.hasOwnProperty('DiagramRessyajouhouHyoujiKudari'))
+      this.visibleDiagramInfo[0] = params.DiagramRessyajouhouHyoujiKudari.replace('DiagramRessyajouhouHyouji_', '');
+    if (params.hasOwnProperty('DiagramRessyajouhouHyoujiNobori'))
+      this.visibleDiagramInfo[1] = params.DiagramRessyajouhouHyoujiNobori.replace('DiagramRessyajouhouHyouji_', '');
+    this.mainTrack = [1, 0];
+    if (params.hasOwnProperty('DownMain')) this.mainTrack[0] = Number(params.DownMain);
+    if (params.hasOwnProperty('UpMain')) this.mainTrack[1] = Number(params.UpMain);
     this.tracks = params.hasOwnProperty('EkiTrack2Cont') ? params.EkiTrack2Cont.tracks : StationTrackList.defaultTracks;
     this.outerTerminal = params.hasOwnProperty('OuterTerminal') ? params.OuterTerminal : null;
     this.brunchCoreStationIndex = params.hasOwnProperty('BrunchCoreEkiIndex') ? Number(params.BrunchCoreEkiIndex) : null;
     this.isBrunchOpposite = params.hasOwnProperty('BrunchOpposite') ? params.BrunchOpposite === '1' : false;
     this.loopOriginStationIndex = params.hasOwnProperty('LoopOriginEkiIndex') ? Number(params.LoopOriginEkiIndex) : null;
     this.isLoopOpposite = params.hasOwnProperty('LoopOpposite') ? params.LoopOpposite === '1' : false;
-    this.visibleTimetableTrack = [];
-    this.visibleTimetableTrack[0] = params.hasOwnProperty('JikokuhyouTrackDisplayKudari') ? params.JikokuhyouTrackDisplayKudari === '1' : false;
-    this.visibleTimetableTrack[1] = params.hasOwnProperty('JikokuhyouTrackDisplayNobori') ? params.JikokuhyouTrackDisplayNobori === '1' : false;
+    this.visibleTimetableTrack = [false, false];
+    if (params.hasOwnProperty('JikokuhyouTrackDisplayKudari')) this.visibleTimetableTrack[0] = params.JikokuhyouTrackDisplayKudari === '1';
+    if (params.hasOwnProperty('JikokuhyouTrackDisplayNobori')) this.visibleTimetableTrack[1] = params.JikokuhyouTrackDisplayNobori === '1';
     this.visibleDiagramTrack = params.hasOwnProperty('DiagramTrackDisplay') ? params.DiagramTrackDisplay === '1' : false;
     this.nextStaionDistance = params.hasOwnProperty('NextEkiDistance') ? Number(params.NextEkiDistance) : null;
     this.timetableTrackOmit = params.hasOwnProperty('JikokuhyouTrackOmit') ? params.JikokuhyouTrackOmit === '1' : false;
-    this.operationLength = [];
-    this.operationLength[0] = params.hasOwnProperty('JikokuhyouOperationOrigin') ? Number(params.JikokuhyouOperationOrigin) : 0;
-    this.operationLength[1] = params.hasOwnProperty('JikokuhyouOperationTerminal') ? Number(params.JikokuhyouOperationTerminal) : 0;
+    this.operationLength = [0, 0];
+    if (params.hasOwnProperty('JikokuhyouOperationOrigin')) this.operationLength[0] = Number(params.JikokuhyouOperationOrigin);
+    if (params.hasOwnProperty('JikokuhyouOperationTerminal')) this.operationLength[1] = Number(params.JikokuhyouOperationTerminal);
     this.customTimetableStyle = {
       arrival: [false, false],
       departure: [true, true],
@@ -423,9 +460,6 @@ export class TrainType extends DiagramData {
       '.\n'
     );
   }
-  public clone() {
-    return Object.assign(new TrainType(), this);
-  }
 }
 
 // Diaに相当
@@ -435,6 +469,12 @@ export class Diagram extends DiagramData {
   public subBackgroundColorIndex: number;
   public backgroundPatternIndex: number;
   public trains: [Train[], Train[]];
+  public clone() {
+    const result = super.clone();
+    result.trains[0] = this.trains[0].map(v => v.clone());
+    result.trains[1] = this.trains[1].map(v => v.clone());
+    return result;
+  }
   public fromOudiaParams(params) {
     this.name = params.hasOwnProperty('DiaName') ? params.DiaName : '新規ダイヤ';
     this.mainBackgroundColorIndex = params.hasOwnProperty('MainBackColorIndex') ? Number(params.MainBackColorIndex) : 0;
@@ -508,6 +548,11 @@ export class Train extends DiagramData {
       '.\n'
     );
   }
+  public clone() {
+    const result = super.clone();
+    result.timetable = this.timetable.clone();
+    return result;
+  }
 }
 
 // DispPropに相当
@@ -534,6 +579,11 @@ export class DisplayProperty extends DiagramData {
   public visibleOuterTerminalOriginSide: boolean;
   public visibleOuterTerminalTerminalSide: boolean;
   public visibleOuterTerminal: boolean;
+  public clone() {
+    const result = super.clone();
+    result.timetableFont = this.timetableFont.map(v => v.clone());
+    return result;
+  }
   public fromOudiaParams(params) {
     this.timetableFont = params.hasOwnProperty('JikokuhyouFont')
       ? params.JikokuhyouFont.map((value: string) => Font.from(value))
@@ -618,10 +668,31 @@ export class DisplayProperty extends DiagramData {
 
 // EkiJikoku
 export class StationTime {
+  /**
+   * 始発駅番号(方向別！！)
+   */
+  public firstStationIndex: number;
+  /**
+   * 終着駅番号(方向別！！)
+   */
+  public terminalStationIndex: number;
+  private _data: Array<{
+    stopType: number;
+    arrival: number;
+    departure: number;
+    track: number;
+  }>;
   constructor() {
     this.firstStationIndex = -1;
     this.terminalStationIndex = -1;
     this._data = [];
+  }
+  public clone() {
+    const result = new StationTime();
+    result._data = this._data.map(v => Object.assign({}, v));
+    result.firstStationIndex = this.firstStationIndex;
+    result.terminalStationIndex = this.terminalStationIndex;
+    return result;
   }
   get data() {
     return this._data;
@@ -670,20 +741,6 @@ export class StationTime {
     this.firstStationIndex = s;
     this.terminalStationIndex = e;
   }
-  /**
-   * 始発駅番号(方向別！！)
-   */
-  public firstStationIndex: number;
-  /**
-   * 終着駅番号(方向別！！)
-   */
-  public terminalStationIndex: number;
-  private _data: Array<{
-    stopType: number;
-    arrival: number;
-    departure: number;
-    track: number;
-  }>;
   public toOudiaString(): string {
     let result = '';
     for (let i = 0; i < this.firstStationIndex; i++) {

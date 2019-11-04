@@ -428,6 +428,10 @@ export class Color {
 }
 
 export class Font {
+  public height: number;
+  public family: string;
+  public bold: boolean;
+  public italic: boolean;
   public static from(oudstr: string): Font {
     const result = new this();
     const props = oudstr.split(';');
@@ -450,10 +454,6 @@ export class Font {
     }
     return result;
   }
-  public height: number;
-  public family: string;
-  public bold: boolean;
-  public italic: boolean;
   constructor() {
     this.height = 9;
     this.family = 'MS ゴシック';
@@ -462,6 +462,9 @@ export class Font {
   }
   public toOudiaString(): string {
     return 'PointTextHeight=' + this.height + ';Facename=' + this.family + (this.bold ? ';Bold=1' : '') + (this.italic ? ';Italic=1' : '');
+  }
+  public clone() {
+    return Object.assign(new Font(), this);
   }
 }
 

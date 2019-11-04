@@ -382,6 +382,9 @@ export class Font {
     toOudiaString() {
         return 'PointTextHeight=' + this.height + ';Facename=' + this.family + (this.bold ? ';Bold=1' : '') + (this.italic ? ';Italic=1' : '');
     }
+    clone() {
+        return Object.assign(new Font(), this);
+    }
 }
 /**
  * Dialogを表示します
