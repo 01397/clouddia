@@ -501,7 +501,7 @@ export default class TrainTimetableView extends View {
     this.selectCell(index, this.getActiveCell().row);
     this.update();
   }
-  private cloneTrain(index: number){
+  private cloneTrain(index: number) {
     const trainList = this.app.data.railway.diagrams[this.diaIndex].trains[this.direction];
     const train = trainList[index].clone();
     trainList.splice(index + 1, 0, train);

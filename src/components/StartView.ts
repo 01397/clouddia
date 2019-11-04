@@ -12,7 +12,7 @@ export default class StartView extends View {
       this.loadLocalFile(target.files[0]);
     });
     const createNewButton = createButton('新規作成', 'form-button-fill start-file-button', () => this.app.initialize(new DiagramFile()));
-    const fileSelectLabel = h('div', { class: 'form-button form-button-fill start-file-button' }, 'ファイルを選ぶ');
+    const fileSelectLabel = h('div', { class: 'form-button form-button-fill start-file-button' }, 'ファイルを開く');
     const urlField = createTextField('', 'oudiaファイルのURL', 'start-drop-url-field');
     const urlButton = createButton('開く', null, () => this.app.loadOnlineFile(urlField.value));
     const dropArea = h('div', { class: 'start-drop' }, [
