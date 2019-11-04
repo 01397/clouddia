@@ -66,6 +66,7 @@ export const createTextField = (
     placeholder,
   }) as HTMLInputElement;
   field.addEventListener('focus', () => field.select());
+  field.addEventListener('keydown', e => e.stopPropagation());
   if (onchange !== null) field.addEventListener('change', onchange);
   if (oninput !== null) field.addEventListener('input', oninput);
   return field;
@@ -78,6 +79,7 @@ export const createMultilineTextField = (
   onchange: (e?: Event) => void = null
 ): HTMLTextAreaElement => {
   const field = h('textarea', { class: 'form-text-multiline fs-flex', placeholder }, value) as HTMLTextAreaElement;
+  field.addEventListener('keydown', e => e.stopPropagation());
   if (onchange !== null) field.addEventListener('change', onchange);
   return field;
 };
