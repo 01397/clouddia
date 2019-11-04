@@ -157,7 +157,7 @@ html, body {
   line-height: 19px; /* 気持ち悪い？ macに合わせてるのさ */
 }
 
-.menu-item:hover {
+.menu-item:not(.menu-item-separator):hover {
   background: #6600cc;
 }
 

@@ -57,7 +57,7 @@ export default class TrainTimetableView extends View {
         this.element.addEventListener('scroll', () => (this.rendering = true));
         const selectByClick = (event) => {
             const target = event.target;
-            if (!target.classList.contains('tt-cell'))
+            if (!target.classList.contains('tt-cell') || !('address' in target.dataset))
                 return;
             // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
             // @ts-ignore

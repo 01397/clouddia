@@ -100,7 +100,7 @@ export default class TrainTimetableView extends View {
     this.element.addEventListener('scroll', () => (this.rendering = true));
     const selectByClick = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
-      if (!target.classList.contains('tt-cell')) return;
+      if (!target.classList.contains('tt-cell') || !('address' in target.dataset)) return;
       // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
       // @ts-ignore
       this.selectCell(...(target.dataset.address.split('-').map(value => Number(value)) as [number, number]), event.shiftKey ? 'toggle' : 'select');
