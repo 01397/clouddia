@@ -1,4 +1,4 @@
-import App from '../App.js';
+import App, { MenuItem } from '../App.js';
 import { Train, TrainType } from '../DiagramParser.js';
 import { h, numberToTimeString, timeFormat, Menu } from '../Util.js';
 import View from './View.js';
@@ -26,7 +26,7 @@ export default class TrainTimetableView extends View {
   private cellHeight: number;
   private stationCellWidth: number;
   private diaIndex: number;
-  private direction: number;
+  private direction: 0 | 1;
   private timeFormat: timeFormat;
   private sheet: Array<{
     number: string;
@@ -52,19 +52,27 @@ export default class TrainTimetableView extends View {
   private focusElement: HTMLElement;
   private selectedCell: Array<{ col: number; row: number; cellType: string; stationIndex: number }>;
   private noTrainDialog: HTMLDivElement;
-
-  constructor(app: App, diaIndex: number, direction: number) {
-    const trainMenu = [
+  /**
+   * @param app
+   * @param diaIndex Diagramの添字
+   * @param direction 下り0, 上り1
+   * @param trainId 表示する
+   */
+  constructor(app: App, diaIndex: number, direction: 0 | 1, trainId: number, stationId: number) {
+    const trainMenu: MenuItem[] = [
       { label: '列車を左に挿入', accelerator: 'Alt+Left', click: () => this.insertTrain(this.getActiveCell().col) },
       { label: '列車を右に挿入', accelerator: 'Alt+Right', click: () => this.insertTrain(this.getActiveCell().col + 1) },
       { label: '列車を複製', accelerator: 'CmdOrCtrl+D', click: () => this.cloneTrain(this.getActiveCell().col) },
       { label: '列車を削除', accelerator: 'CmdOrCtrl+Backspace', click: () => this.removeTrain(this.getActiveCell().col) },
     ];
-    const stationMenu = [
+    const stationMenu: MenuItem[] = [
       { label: '停車', accelerator: 'S', click: () => this.changeStopType(this.getActiveCell(), 1) },
       { label: '通過', accelerator: 'D', click: () => this.changeStopType(this.getActiveCell(), 2) },
       { label: '運行なし', accelerator: 'F', click: () => this.changeStopType(this.getActiveCell(), 3) },
       { label: '時刻を消去', accelerator: 'Backspace', click: () => this.eraceTime(this.getActiveCell()) },
+      { type: 'separator' },
+      { label: '駅時刻表で表示', click: () => this.viewInStationTimetableView() },
+      { label: 'ダイヤグラムで表示', click: () => this.viewInDiagramView() },
     ];
     super(app, direction === 0 ? 'OutboundTrainTimetable' : 'InboundTrainTimetable', [
       {
@@ -126,6 +134,7 @@ export default class TrainTimetableView extends View {
 
     this.loadStations();
     this.loadTrains();
+    this.jumpToCell({ col: trainId, stationId: stationId });
     const task = () => {
       this.render();
       this.reqId = requestAnimationFrame(task);
@@ -227,13 +236,13 @@ export default class TrainTimetableView extends View {
           } else if (!data) {
             // 時刻なし -> 経由なし
             text = TABLE_MARK.nonroute;
-          } else if (data.stopType == 2) {
-            // 通過 -> 通過
-            text = TABLE_MARK.pass;
           } else if (departure && !(i - 1 in timetable.data) && i !== timetable.terminalStationIndex) {
             // 省略対象セルに入力しても何も見えないんじゃ入れてる気にならなそう。UX悪そう
             // 発表示ありで前駅が経由なしで終着駅ではない -> 着時刻省略
             text = i === timetable.firstStationIndex ? TABLE_MARK.blank : TABLE_MARK.nonroute;
+          } else if (data.stopType == 2) {
+            // 通過 -> 通過
+            text = TABLE_MARK.pass;
           } else if (data.arrival !== null || data.departure !== null) {
             // 時刻データあり -> 着時刻 (なければ発時刻)
             text = numberToTimeString(data.arrival || data.departure, this.timeFormat);
@@ -509,6 +518,16 @@ export default class TrainTimetableView extends View {
     this.selectCell(index + 1, this.getActiveCell().row);
     this.update();
   }
+  private jumpToCell({ col, stationId }) {
+    const viewWidth = this.element.offsetWidth;
+    this.element.scrollLeft = (col - 0.5) * this.cellWidth - viewWidth / 2;
+    this.rendering = true;
+    this.render();
+    const a = document.querySelector(`#tt-body>[data-col-id="${col}"]>div[data-cell-name="${stationId}-departure"]`) as HTMLElement;
+    const b = document.querySelector(`#tt-body>[data-col-id="${col}"]>div[data-cell-name="${stationId}-arrival"]`) as HTMLElement;
+    const target = a || b;
+    this.selectCell(col, Number(target.dataset.address.split('-')[1]), 'select');
+  }
   private selectCell(col: number, row: number, mode: 'select' | 'toggle' | 'adding' | 'deleting' = 'select') {
     const target = document.querySelector(`[data-address="${col}-${row}"]`) as HTMLElement;
     const [stationIndexString, cellType] = target.dataset.cellName.split('-');
@@ -560,5 +579,13 @@ export default class TrainTimetableView extends View {
   private getActiveCell() {
     const cell = this.selectedCell[this.selectedCell.length - 1];
     return cell || { col: 0, row: 0, cellType: 'departure', stationIndex: 0 };
+  }
+  private viewInStationTimetableView() {
+    const cell = this.getActiveCell();
+    this.app.showStationTimetableView(this.diaIndex, this.direction, cell.col, cell.stationIndex);
+  }
+  private viewInDiagramView() {
+    const cell = this.getActiveCell();
+    this.app.showDiagramView(this.diaIndex, this.direction, cell.col, cell.stationIndex);
   }
 }

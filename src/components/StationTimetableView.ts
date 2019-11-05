@@ -1,6 +1,6 @@
 import App from '../App.js';
 import { Station, Train } from '../DiagramParser.js';
-import { h } from '../Util.js';
+import { h, Menu } from '../Util.js';
 import View from './View.js';
 import TrainSubview from './TrainSubview.js';
 
@@ -34,10 +34,14 @@ export default class StationTimetableView extends View {
   private timetableElement: Element;
   private stationSelectorElement: HTMLSelectElement;
   private directionSelectorElement: HTMLInputElement;
+  private direction: 0 | 1;
+  private stationId: number;
 
-  constructor(app: App, diaIndex: number) {
+  constructor(app: App, diaIndex: number, direction: 0 | 1, trainId: number, stationId: number) {
     super(app, 'StationTimetable');
     this.diaIndex = diaIndex;
+    this.direction = direction;
+    this.stationId = stationId;
     this.stations = this.app.data.railway.stations;
     if (this.stations.length === 0) {
       this.showNoData();
@@ -67,12 +71,14 @@ export default class StationTimetableView extends View {
       stationElements.push(h('option', { value: key }, key));
     }
     this.stationSelectorElement = h('select', { id: 'stationSelector' }, stationElements) as HTMLSelectElement;
+    this.stationSelectorElement.value = this.stations[stationId].name;
     this.stationSelectorElement.addEventListener('change', () => this.display(), false);
     // 上り or 下り
     this.directionSelectorElement = h('input', {
       id: 'directionSelector',
       type: 'checkbox',
     }) as HTMLInputElement;
+    this.directionSelectorElement.checked = direction === 1;
     this.directionSelectorElement.addEventListener('change', () => this.display(), false);
     const tools = h('div', { id: 'st-tools-wrapper' }, [
       h('div', { id: 'st-tools' }, [
@@ -94,7 +100,7 @@ export default class StationTimetableView extends View {
       ]),
     ]);
     this.element.append(tools, this.timetableElement);
-    this.display();
+    this.display(false, trainId);
   }
   public finish(): void {
     return;
@@ -123,6 +129,7 @@ export default class StationTimetableView extends View {
         terminalIndex: number;
         time: number;
         trainData: { index: number; direction: number };
+        trainId: number;
       }>;
       topStation: number;
       topStationList: Map<number, number>;
@@ -167,6 +174,7 @@ export default class StationTimetableView extends View {
             index,
           },
           trainType: train.type,
+          trainId: index,
         });
         break;
       }
@@ -222,12 +230,13 @@ export default class StationTimetableView extends View {
    * 画面に表示する
    * @param {boolean} changeDetail 駅名と方向以外の変更か？
    */
-  public display(changeDetail = false): void {
+  public display(changeDetail = false, trainId?: number): void {
     const checkboxes = document.querySelectorAll('.st-tools-direction-item>input:checked');
     const selectedIndexList = changeDetail
       ? new Set(Array.from(checkboxes).map((ele: HTMLElement) => Number(ele.dataset.index)))
       : this.stationList[this.stationSelectorElement.value].indexList;
-    const data = this.compile(this.stationSelectorElement.value, this.directionSelectorElement.checked, selectedIndexList);
+    this.direction = this.directionSelectorElement.checked ? 1 : 0;
+    const data = this.compile(this.stationSelectorElement.value, this.direction === 1, selectedIndexList);
 
     const startHour = 4;
     // 時刻のElementを時間帯別に格納する2次元配列。
@@ -237,37 +246,43 @@ export default class StationTimetableView extends View {
     data.trains.forEach(val => {
       const hour = Math.floor(val.time / 3600);
       const min = Math.floor((val.time % 3600) / 60);
-      times[hour].push(
-        h(
-          'div',
-          { class: 'st-train' },
-          [
-            h(
-              'div',
-              {
-                class: 'st-train-terminal',
-              },
-              val.terminalIndex !== data.topStation ? data.shortName[val.terminalIndex] : ''
-            ),
-            h(
-              'div',
-              {
-                class: 'st-train-minute',
-                style: 'color: ' + this.app.data.railway.trainTypes[val.trainType].textColor.toHEXString(),
-              },
-              min
-            ),
-          ],
-          () => {
-            if (!(this.app.sub instanceof TrainSubview)) return;
-            this.app.sub.showStationTime({
-              stationIndex: this.stationList[this.stationSelectorElement.value].indexList.values().next().value,
-              direction: val.train.direction,
-              train: val.train,
-            });
-          }
-        )
+      const element = h(
+        'div',
+        { class: 'st-train' },
+        [
+          h(
+            'div',
+            {
+              class: 'st-train-terminal',
+            },
+            val.terminalIndex !== data.topStation ? data.shortName[val.terminalIndex] : ''
+          ),
+          h(
+            'div',
+            {
+              class: 'st-train-minute' + (trainId === val.trainId ? ' selected' : ''),
+              style: 'color: ' + this.app.data.railway.trainTypes[val.trainType].textColor.toHEXString(),
+            },
+            min
+          ),
+        ],
+        () => {
+          if (!(this.app.sub instanceof TrainSubview)) return;
+          this.app.sub.showStationTime({
+            stationIndex: this.stationList[this.stationSelectorElement.value].indexList.values().next().value,
+            direction: val.train.direction,
+            train: val.train,
+          });
+        }
       );
+      element.addEventListener('contextmenu', (event: MouseEvent) => {
+        new Menu([
+          { label: '列車時刻表で表示', click: () => this.viewInTrainTimetableView(val.trainId) },
+          { label: 'ダイヤグラムで表示', click: () => this.viewInDiagramView(val.trainId) },
+        ]).popup({ x: event.clientX, y: event.clientY });
+        event.preventDefault();
+      });
+      times[hour].push(element);
     });
     // 1時間ずつの行
     const rows = new Array(24).fill(null).map((v, i) =>
@@ -357,5 +372,13 @@ export default class StationTimetableView extends View {
   private showNoData() {
     const noDataDialog = h('div', { class: 'st-noData' }, '駅がありません');
     this.element.appendChild(noDataDialog);
+  }
+  private viewInTrainTimetableView(trainId: number) {
+    const stationId = Array.from(this.stationList[this.stationSelectorElement.value].indexList)[0];
+    this.app.showTrainTimetableView(this.diaIndex, this.direction, trainId, stationId);
+  }
+  private viewInDiagramView(trainId: number) {
+    const stationId = Array.from(this.stationList[this.stationSelectorElement.value].indexList)[0];
+    this.app.showDiagramView(this.diaIndex, this.direction, trainId, stationId);
   }
 }

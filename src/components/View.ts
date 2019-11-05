@@ -5,7 +5,7 @@ export type viewTypeString = 'Start' | 'StationTimetable' | 'InboundTrainTimetab
 export default abstract class View {
   protected app: App;
   protected element: HTMLDivElement;
-  constructor(app: App, viewType: viewTypeString, menu: MenuItem[] = [{ label: 'メニュー' }]) {
+  constructor(app: App, viewType: viewTypeString, menu: MenuItem[] = []) {
     this.app = app;
     this.app.currentView = viewType;
 

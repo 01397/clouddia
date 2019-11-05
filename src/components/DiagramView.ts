@@ -1,6 +1,6 @@
 import App from '../App.js';
 import { Station, Train } from '../DiagramParser.js';
-import { DASH_ARRAY_STYLE, getDistance2, h, numberToTimeString } from '../Util.js';
+import { DASH_ARRAY_STYLE, getDistance2, h, numberToTimeString, Menu } from '../Util.js';
 import View from './View.js';
 import TrainSubview from './TrainSubview.js';
 type drawingDataItem = Array<{
@@ -103,16 +103,22 @@ export default class CanvasDiagramView extends View {
     inbound: drawingDataItem;
   };
   private reqId: number;
-  private selectedTrain: {
+  private hoveredTrain: {
     direction: number;
     trainIndex: number;
     diaIndex: number;
+  };
+  private selectedTrain: {
+    direction: 0 | 1;
+    trainIndex: number;
+    diaIndex: number;
+    stationIndex: number;
   };
   private dgViewWrapper: HTMLElement;
   /**
    *
    */
-  constructor(app: App, diaIndex: number) {
+  constructor(app: App, diaIndex: number, direction: 0 | 1, trainId: number, stationId: number) {
     super(app, 'Diagram');
     this.devicePixelRatio = window.devicePixelRatio; // そのうち低解像度にする設定でもつける？ iPad mini2だとキツイ。ここを下げるだけ
     this.diaIndex = diaIndex;
@@ -138,6 +144,7 @@ export default class CanvasDiagramView extends View {
     this.visibleOutbound = true;
     this.visibleTrainNumber = true;
     this.visibleTrainName = false;
+    this.hoveredTrain = null;
     this.selectedTrain = null;
     this.forceDraw = false;
     this.pinchStart = null;
@@ -276,9 +283,9 @@ export default class CanvasDiagramView extends View {
         this.forceDraw = true;
       });
       this.element.addEventListener('click', e => {
-        const res = this.getTrainByCoordinate({ x: e.offsetX, y: e.offsetY });
-        if (res === null) return;
-        const { direction, trainIndex, stationIndex } = res;
+        this.selectedTrain = this.getTrainByCoordinate({ x: e.offsetX, y: e.offsetY });
+        if (this.selectedTrain === null) return;
+        const { direction, trainIndex, stationIndex } = this.selectedTrain;
         if (this.app.sub instanceof TrainSubview) {
           this.app.sub.showStationTime({
             stationIndex,
@@ -287,11 +294,35 @@ export default class CanvasDiagramView extends View {
           });
         }
       });
+      this.element.addEventListener('contextmenu', (event: MouseEvent) => {
+        this.selectedTrain = this.getTrainByCoordinate({ x: event.offsetX, y: event.offsetY });
+        if (this.selectedTrain === null) return;
+        const { direction, trainIndex, stationIndex } = this.selectedTrain;
+        new Menu([
+          { label: '列車時刻表で表示', click: () => this.viewInTrainTimetableView(trainIndex, direction, stationIndex) },
+          { label: '駅時刻表で表示', click: () => this.viewInStationTimetableView(trainIndex, direction, stationIndex) },
+        ]).popup({ x: event.clientX, y: event.clientY });
+        event.preventDefault();
+      });
     }
     this.dgViewWrapper = h('div', { id: 'dg-wrapper' }, this.canvasWrapper) as HTMLElement;
     this.element.append(toolContainer, this.dgViewWrapper);
     this.scale(10, 20);
     this.draw();
+    if (stationId !== null && trainId !== null) {
+      this.selectedTrain = {
+        direction,
+        diaIndex,
+        stationIndex: stationId,
+        trainIndex: trainId,
+      };
+      const time = this.app.data.railway.diagrams[this.selectedTrain.diaIndex].trains[this.selectedTrain.direction][this.selectedTrain.trainIndex]
+        .timetable.data[stationId];
+      this.dgViewWrapper.scrollTo(
+        this.getRelativeTime(time.departure || time.arrival) * this.xScale - this.element.offsetWidth / 2,
+        this.drawingData.totalDistance[stationId] * this.yScale - this.element.offsetHeight / 2
+      );
+    }
   }
   public finish() {
     if (this.reqId !== null) {
@@ -474,11 +505,6 @@ export default class CanvasDiagramView extends View {
     let distance = 0;
     // 通過中に経由なしに入った場合には次の停車駅までx座標が決まらないので、y座標とその時点でのdistanceを控えておく。
     let pendingPoints: Array<[number, number]> = [];
-    // this.startTimeを基準とみたときの時刻(分)
-    const getRelativeTime = (time: number): number => {
-      const t1 = (time - this.startTime) / 60;
-      return t1 < 0 ? t1 + 1440 : t1;
-    };
     // 1駅ずつ見ていくよ！
     for (let i = 0; i < timetable.data.length; i++) {
       const val = timetable.data[i];
@@ -492,7 +518,7 @@ export default class CanvasDiagramView extends View {
         }
         // 経由なしを通って停車駅まできたら、控えておいた点を結ぶ
         if (pendingPoints.length !== 0 && (val.departure !== null || val.arrival !== null)) {
-          const x = getRelativeTime(val.arrival !== null ? val.arrival : val.departure);
+          const x = this.getRelativeTime(val.arrival !== null ? val.arrival : val.departure);
           for (let k = 0; k < pendingPoints.length; k++) {
             result.push(k % 2 === 0, ((x - lastX) * pendingPoints[k][1]) / distance + lastX, pendingPoints[k][0]);
           }
@@ -500,7 +526,7 @@ export default class CanvasDiagramView extends View {
         }
         // 到着時刻
         if (val.arrival !== null) {
-          const x = getRelativeTime(val.arrival);
+          const x = this.getRelativeTime(val.arrival);
           // 非接続点の連続は無駄よ
           if (connection === false && result[result.length - 3] === false) result = result.slice(0, -3);
           result.push(connection, x, y);
@@ -508,7 +534,7 @@ export default class CanvasDiagramView extends View {
         }
         // 出発時刻
         if (val.departure !== null && val.departure !== val.arrival) {
-          const x = getRelativeTime(val.departure);
+          const x = this.getRelativeTime(val.departure);
           if (connection === false && result[result.length - 3] === false) result = result.slice(0, -3);
           result.push(connection, x, y);
           lastX = x;
@@ -565,7 +591,7 @@ export default class CanvasDiagramView extends View {
     x: number;
     y: number;
   }): {
-    direction: number;
+    direction: 0 | 1;
     trainIndex: number;
     diaIndex: number;
     stationIndex: number;
@@ -664,7 +690,7 @@ export default class CanvasDiagramView extends View {
 
       // カーソル移動
       if (this.pointerMoved) {
-        this.selectedTrain = this.getTrainByCoordinate(this.pointerPosition);
+        this.hoveredTrain = this.getTrainByCoordinate(this.pointerPosition);
       }
 
       // canvas初期化
@@ -684,7 +710,7 @@ export default class CanvasDiagramView extends View {
       this.lastPosition = position;
 
       this.forceDraw = false;
-      this.element.style.cursor = this.selectedTrain !== null ? 'pointer' : 'default';
+      this.element.style.cursor = this.hoveredTrain !== null ? 'pointer' : 'default';
     }
     this.reqId = requestAnimationFrame(this.draw.bind(this));
   }
@@ -822,7 +848,11 @@ export default class CanvasDiagramView extends View {
         if (position.w < (val.path[1] as number) * this.xScale + xl || (val.path[val.path.length - 2] as number) * this.xScale + xl < 0) continue;
         // 色ごとに分類するよ
         const color = val.color;
-        const selected = this.selectedTrain !== null && this.selectedTrain.direction === direction && this.selectedTrain.trainIndex === i ? 't' : 'f';
+        const selected =
+          (this.hoveredTrain !== null && this.hoveredTrain.direction === direction && this.hoveredTrain.trainIndex === i) ||
+          (this.selectedTrain !== null && this.selectedTrain.direction === direction && this.selectedTrain.trainIndex === i)
+            ? 't'
+            : 'f';
         const bold = val.bold ? 't' : 'f';
         const strokeStyle = val.strokeStyle;
         const style = color + ' ' + selected + ' ' + bold + ' ' + strokeStyle;
@@ -876,6 +906,26 @@ export default class CanvasDiagramView extends View {
       this.context.stroke();
     }
     this.context.restore();
+    this.context.save();
+    if (this.selectedTrain !== null) {
+      const train = this.app.data.railway.diagrams[this.selectedTrain.diaIndex].trains[this.selectedTrain.direction][this.selectedTrain.trainIndex];
+      this.context.fillStyle = '#ffffff';
+      this.context.strokeStyle = this.app.data.railway.trainTypes[train.type].strokeColor.toHEXString();
+      const drawMark = (time, stationId) => {
+        const rx = this.getRelativeTime(time) * this.xScale;
+        this.context.beginPath();
+        this.context.arc(xl + rx, yt + this.drawingData.totalDistance[stationId] * this.yScale, 3, 0, Math.PI * 2);
+        this.context.fill();
+        this.context.stroke();
+        this.context.closePath();
+      };
+      train.timetable.data.forEach((time, i) => {
+        const stationId = train.direction === 0 ? i : this.stationDistance.length - i;
+        if (time.departure !== null) drawMark(time.departure, stationId);
+        if (time.arrival !== null) drawMark(time.arrival, stationId);
+      });
+    }
+    this.context.restore();
   }
 
   /**
@@ -908,5 +958,16 @@ export default class CanvasDiagramView extends View {
   private showNoData() {
     const noDataDialog = h('div', { class: 'dg-noData' }, '駅がありません');
     this.element.appendChild(noDataDialog);
+  }
+  // this.startTimeを基準とみたときの時刻(分)
+  private getRelativeTime(time: number): number {
+    const t1 = (time - this.startTime) / 60;
+    return t1 < 0 ? t1 + 1440 : t1;
+  }
+  private viewInStationTimetableView(trainId: number, direction: 0 | 1, stationId: number) {
+    this.app.showStationTimetableView(this.diaIndex, direction, trainId, stationId);
+  }
+  private viewInTrainTimetableView(trainId: number, direction: 0 | 1, stationId: number) {
+    this.app.showTrainTimetableView(this.diaIndex, direction, trainId, stationId);
   }
 }

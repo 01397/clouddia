@@ -150,10 +150,10 @@ export default class App {
    * @param diaIndex 何番目のダイヤか
    * @param direction 0:下り, 1:上り
    */
-  public showTrainTimetableView(diaIndex: number = null, direction: number) {
+  public showTrainTimetableView(diaIndex: number = null, direction: 0 | 1 = 0, trainId = 0, stationId = 0) {
     if (diaIndex === null) diaIndex = this.currentDiaIndex;
     else this.currentDiaIndex = diaIndex;
-    this.main = new TrainTimetableView(this, diaIndex, direction);
+    this.main = new TrainTimetableView(this, diaIndex, direction, trainId, stationId);
     this.sidebar.status = direction + 1;
     this.sub.show();
     this.tabbar.status = 'diagram';
@@ -162,10 +162,10 @@ export default class App {
    * 駅時刻表(StationTimetableView)の表示
    * @param diaIndex 何番目のダイヤか
    */
-  public showStationTimetableView(diaIndex: number = null) {
+  public showStationTimetableView(diaIndex: number = null, direction: 0 | 1 = 0, trainId = 0, stationId = 0) {
     if (diaIndex === null) diaIndex = this.currentDiaIndex;
     else this.currentDiaIndex = diaIndex;
-    this.main = new StationTimetableView(this, diaIndex);
+    this.main = new StationTimetableView(this, diaIndex, direction, trainId, stationId);
     this.sidebar.status = 3;
     this.sub.show();
     this.tabbar.status = 'diagram';
@@ -174,10 +174,10 @@ export default class App {
    * ダイヤグラム(DiagramView)の表示
    * @param diaIndex 何番目のダイヤか
    */
-  public showDiagramView(diaIndex: number = null) {
+  public showDiagramView(diaIndex: number = null, direction: 0 | 1 = null, trainId = null, stationId = null) {
     if (diaIndex === null) diaIndex = this.currentDiaIndex;
     else this.currentDiaIndex = diaIndex;
-    this.main = new DiagramView(this, diaIndex);
+    this.main = new DiagramView(this, diaIndex, direction, trainId, stationId);
     this.sidebar.status = 4;
     this.sub.show();
     this.tabbar.status = 'diagram';
@@ -262,6 +262,36 @@ export default class App {
         ],
       },
       ...viewMenu,
+      {
+        label: '表示',
+        submenu: [
+          {
+            label: 'ファイル,路線設定',
+            accelerator: 'CmdOrCtrl+1',
+            click: () => this.showFileSettingView(0),
+          },
+          {
+            label: '下り列車時刻表',
+            accelerator: 'CmdOrCtrl+2',
+            click: () => this.showTrainTimetableView(null, 0),
+          },
+          {
+            label: '上り列車時刻表',
+            accelerator: 'CmdOrCtrl+3',
+            click: () => this.showTrainTimetableView(null, 1),
+          },
+          {
+            label: '駅時刻表',
+            accelerator: 'CmdOrCtrl+4',
+            click: () => this.showStationTimetableView(null, 1),
+          },
+          {
+            label: 'ダイヤグラム',
+            accelerator: 'CmdOrCtrl+5',
+            click: () => this.showDiagramView(null, 1),
+          },
+        ],
+      },
     ];
     this.menu = menu;
     this.toolbar.setMenu(menu);

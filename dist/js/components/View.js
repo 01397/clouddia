@@ -1,6 +1,6 @@
 import { h } from '../Util.js';
 export default class View {
-    constructor(app, viewType, menu = [{ label: 'メニュー' }]) {
+    constructor(app, viewType, menu = []) {
         this.app = app;
         this.app.currentView = viewType;
         // お疲れ様、前mainViewの終了

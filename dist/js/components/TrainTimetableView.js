@@ -11,7 +11,13 @@ const TABLE_MARK = {
     stop: '○',
 };
 export default class TrainTimetableView extends View {
-    constructor(app, diaIndex, direction) {
+    /**
+     * @param app
+     * @param diaIndex Diagramの添字
+     * @param direction 下り0, 上り1
+     * @param trainId 表示する
+     */
+    constructor(app, diaIndex, direction, trainId, stationId) {
         const trainMenu = [
             { label: '列車を左に挿入', accelerator: 'Alt+Left', click: () => this.insertTrain(this.getActiveCell().col) },
             { label: '列車を右に挿入', accelerator: 'Alt+Right', click: () => this.insertTrain(this.getActiveCell().col + 1) },
@@ -23,6 +29,9 @@ export default class TrainTimetableView extends View {
             { label: '通過', accelerator: 'D', click: () => this.changeStopType(this.getActiveCell(), 2) },
             { label: '運行なし', accelerator: 'F', click: () => this.changeStopType(this.getActiveCell(), 3) },
             { label: '時刻を消去', accelerator: 'Backspace', click: () => this.eraceTime(this.getActiveCell()) },
+            { type: 'separator' },
+            { label: '駅時刻表で表示', click: () => this.viewInStationTimetableView() },
+            { label: 'ダイヤグラムで表示', click: () => this.viewInDiagramView() },
         ];
         super(app, direction === 0 ? 'OutboundTrainTimetable' : 'InboundTrainTimetable', [
             {
@@ -82,6 +91,7 @@ export default class TrainTimetableView extends View {
         this.tHeader.style.paddingLeft = this.stationCellWidth + 'px';
         this.loadStations();
         this.loadTrains();
+        this.jumpToCell({ col: trainId, stationId: stationId });
         const task = () => {
             this.render();
             this.reqId = requestAnimationFrame(task);
@@ -179,14 +189,14 @@ export default class TrainTimetableView extends View {
                         // 時刻なし -> 経由なし
                         text = TABLE_MARK.nonroute;
                     }
-                    else if (data.stopType == 2) {
-                        // 通過 -> 通過
-                        text = TABLE_MARK.pass;
-                    }
                     else if (departure && !(i - 1 in timetable.data) && i !== timetable.terminalStationIndex) {
                         // 省略対象セルに入力しても何も見えないんじゃ入れてる気にならなそう。UX悪そう
                         // 発表示ありで前駅が経由なしで終着駅ではない -> 着時刻省略
                         text = i === timetable.firstStationIndex ? TABLE_MARK.blank : TABLE_MARK.nonroute;
+                    }
+                    else if (data.stopType == 2) {
+                        // 通過 -> 通過
+                        text = TABLE_MARK.pass;
                     }
                     else if (data.arrival !== null || data.departure !== null) {
                         // 時刻データあり -> 着時刻 (なければ発時刻)
@@ -452,6 +462,16 @@ export default class TrainTimetableView extends View {
         this.selectCell(index + 1, this.getActiveCell().row);
         this.update();
     }
+    jumpToCell({ col, stationId }) {
+        const viewWidth = this.element.offsetWidth;
+        this.element.scrollLeft = (col - 0.5) * this.cellWidth - viewWidth / 2;
+        this.rendering = true;
+        this.render();
+        const a = document.querySelector(`#tt-body>[data-col-id="${col}"]>div[data-cell-name="${stationId}-departure"]`);
+        const b = document.querySelector(`#tt-body>[data-col-id="${col}"]>div[data-cell-name="${stationId}-arrival"]`);
+        const target = a || b;
+        this.selectCell(col, Number(target.dataset.address.split('-')[1]), 'select');
+    }
     selectCell(col, row, mode = 'select') {
         const target = document.querySelector(`[data-address="${col}-${row}"]`);
         const [stationIndexString, cellType] = target.dataset.cellName.split('-');
@@ -501,6 +521,14 @@ export default class TrainTimetableView extends View {
     getActiveCell() {
         const cell = this.selectedCell[this.selectedCell.length - 1];
         return cell || { col: 0, row: 0, cellType: 'departure', stationIndex: 0 };
+    }
+    viewInStationTimetableView() {
+        const cell = this.getActiveCell();
+        this.app.showStationTimetableView(this.diaIndex, this.direction, cell.col, cell.stationIndex);
+    }
+    viewInDiagramView() {
+        const cell = this.getActiveCell();
+        this.app.showDiagramView(this.diaIndex, this.direction, cell.col, cell.stationIndex);
     }
 }
 //# sourceMappingURL=TrainTimetableView.js.map

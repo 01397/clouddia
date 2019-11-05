@@ -723,6 +723,18 @@ html, body {
   line-height: 20px;
 }
 
+.st-train-minute.selected {
+  animation: ponpon .25s 4 ease alternate;
+}
+@keyframes ponpon {
+  0% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(2);
+  }
+}
+
 .st-footer {
   font-size: 12px;
   line-height: 1.2;
