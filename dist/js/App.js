@@ -13,7 +13,7 @@ import DiagramParser from './DiagramParser.js';
 import { h, getDevice, Menu } from './Util.js';
 export default class App {
     constructor(root) {
-        this.version = '0.2.6';
+        this.version = '0.3.0';
         this.sidebarElm = h('aside', { id: 'sidebar' }, null);
         this.toolbarElm = h('div', { id: 'toolbar' }, null);
         this.tabbarElm = h('div', { id: 'tabbar' }, null);

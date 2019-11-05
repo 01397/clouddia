@@ -94,7 +94,7 @@ export default class App {
   device: 'macOS' | 'Windows' | 'Linux' | 'iPhone' | 'Android Mobile' | 'iPad' | 'Android' | 'Other';
 
   constructor(root: Element) {
-    this.version = '0.2.6';
+    this.version = '0.3.0';
     this.sidebarElm = h('aside', { id: 'sidebar' }, null);
     this.toolbarElm = h('div', { id: 'toolbar' }, null);
     this.tabbarElm = h('div', { id: 'tabbar' }, null);
