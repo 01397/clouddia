@@ -10,7 +10,7 @@ import TrainSubview from './components/TrainSubview.js';
 import TrainTimetableView from './components/TrainTimetableView.js';
 import TrainTypeSettingView from './components/TrainTypeSettingView.js';
 import DiagramParser from './DiagramParser.js';
-import { h, getDevice, Menu } from './Util.js';
+import { h, Menu } from './Util.js';
 export default class App {
     constructor(root) {
         this.version = '0.3.0';
@@ -35,7 +35,6 @@ export default class App {
         this.sub = null;
         this.data = null;
         this.currentDiaIndex = 0;
-        this.device = getDevice();
         this.updateLocalData();
         document.addEventListener('keydown', e => this.keydown(e), false);
     }

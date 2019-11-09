@@ -49,7 +49,10 @@ export default class StationTimetableView extends View {
         this.directionSelectorElement.addEventListener('change', () => this.display(), false);
         const tools = h('div', { id: 'st-tools-wrapper' }, [
             h('div', { id: 'st-tools' }, [
-                h('div', { class: 'st-tools-container' }, [h('div', { class: 'st-tools-title' }, '駅名'), this.stationSelectorElement]),
+                h('div', { class: 'st-tools-container' }, [
+                    h('div', { class: 'st-tools-title' }, '駅名'),
+                    this.stationSelectorElement,
+                ]),
                 h('div', { class: 'st-tools-container' }, [
                     h('div', { class: 'st-tools-title' }, '方向'),
                     h('label', null, [
@@ -103,7 +106,9 @@ export default class StationTimetableView extends View {
         trains.forEach((train, index) => {
             for (const i of indexList) {
                 const stationIndex = isInbound ? stationLength - i - 1 : i;
-                const terminalStationIndex = isInbound ? stationLength - train.timetable.terminalStationIndex - 1 : train.timetable.terminalStationIndex;
+                const terminalStationIndex = isInbound
+                    ? stationLength - train.timetable.terminalStationIndex - 1
+                    : train.timetable.terminalStationIndex;
                 if (!(stationIndex in train.timetable.data) ||
                     train.timetable.data[stationIndex].departure === null ||
                     train.timetable.data[stationIndex].stopType !== 1 ||

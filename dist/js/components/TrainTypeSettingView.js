@@ -1,4 +1,4 @@
-import { Color, createButton, createCheckbox, createColorField, createLineStyleField, createTextField, DASH_ARRAY_STYLE, h } from '../Util.js';
+import { Color, createButton, createCheckbox, createColorField, createLineStyleField, createTextField, DASH_ARRAY_STYLE, h, } from '../Util.js';
 import View from './View.js';
 import { TrainType } from '../DiagramParser.js';
 export default class TrainTypeSettingView extends View {
@@ -25,7 +25,10 @@ export default class TrainTypeSettingView extends View {
         });
         this.rightContainer = h('div', { class: 'fs-right-container' }, '列車種別が選択されていません');
         const addButton = h('div', { class: 'fs-typelist-add form-button form-button-fill' }, '＋種別追加', () => this.append());
-        this.element.appendChild(h('div', { class: 'fs-2cols-container' }, [h('div', { class: 'fs-left-container' }, [this.svgElement, addButton]), this.rightContainer]));
+        this.element.appendChild(h('div', { class: 'fs-2cols-container' }, [
+            h('div', { class: 'fs-left-container' }, [this.svgElement, addButton]),
+            this.rightContainer,
+        ]));
         this.updateList();
     }
     finish() {

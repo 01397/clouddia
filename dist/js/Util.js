@@ -288,7 +288,7 @@ export const numberToTimeString = (number, format) => {
         return Math.floor((number % 3600) / 60) + ':' + String(Math.floor((number % 3600) % 60)).padStart(2, '0');
     }
     if (format === 'H:MM') {
-        return Math.floor((number % 86400) / 3600) + ':' + String(Math.floor(((number % 86400) % 3600) / 60)).padStart(2, '0');
+        return (Math.floor((number % 86400) / 3600) + ':' + String(Math.floor(((number % 86400) % 3600) / 60)).padStart(2, '0'));
     }
     if (format === 'HH MM SS') {
         return (String(Math.floor(number / 3600)).padStart(2, '0') +
@@ -298,7 +298,9 @@ export const numberToTimeString = (number, format) => {
             String(number % 60).padStart(2, '0'));
     }
     if (format === 'HMMSS') {
-        return Math.floor(number / 3600) + String(Math.floor((number % 3600) / 60)).padStart(2, '0') + String(number % 60).padStart(2, '0');
+        return (Math.floor(number / 3600) +
+            String(Math.floor((number % 3600) / 60)).padStart(2, '0') +
+            String(number % 60).padStart(2, '0'));
     }
     return '';
 };
@@ -343,10 +345,16 @@ export class Color {
         return new this(r, g, b);
     }
     toHEXString() {
-        return '#' + this.r.toString(16).padStart(2, '0') + this.g.toString(16).padStart(2, '0') + this.b.toString(16).padStart(2, '0');
+        return ('#' +
+            this.r.toString(16).padStart(2, '0') +
+            this.g.toString(16).padStart(2, '0') +
+            this.b.toString(16).padStart(2, '0'));
     }
     toOudiaString() {
-        return ('00' + this.b.toString(16).padStart(2, '0') + this.g.toString(16).padStart(2, '0') + this.r.toString(16).padStart(2, '0')).toUpperCase();
+        return ('00' +
+            this.b.toString(16).padStart(2, '0') +
+            this.g.toString(16).padStart(2, '0') +
+            this.r.toString(16).padStart(2, '0')).toUpperCase();
     }
     clone() {
         return new Color(this.r, this.g, this.b);
@@ -382,7 +390,12 @@ export class Font {
         return result;
     }
     toOudiaString() {
-        return 'PointTextHeight=' + this.height + ';Facename=' + this.family + (this.bold ? ';Bold=1' : '') + (this.italic ? ';Italic=1' : '');
+        return ('PointTextHeight=' +
+            this.height +
+            ';Facename=' +
+            this.family +
+            (this.bold ? ';Bold=1' : '') +
+            (this.italic ? ';Italic=1' : ''));
     }
     clone() {
         return Object.assign(new Font(), this);

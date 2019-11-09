@@ -1,4 +1,4 @@
-import { createTimeField, h, numberToTimeString, timeStringToNumber, createTextField, createCheckbox } from '../Util.js';
+import { createTimeField, h, numberToTimeString, timeStringToNumber, createTextField, createCheckbox, } from '../Util.js';
 import View from './View.js';
 export default class FileSettingView extends View {
     constructor(app) {
@@ -58,10 +58,17 @@ export default class FileSettingView extends View {
                 h('div', { class: 'fs-section-header' }, 'ファイル'),
                 h('div', { class: 'form-row' }, [h('div', { class: 'form-label' }, '路線名'), railwayNameField]),
                 h('div', { class: 'form-row' }, [h('div', { class: 'form-label' }, 'コメント'), railwayCommentField]),
-                h('div', { class: 'form-row' }, [h('div', { class: 'form-label' }, '路線方向名'), directionNameField0, directionNameField1]),
+                h('div', { class: 'form-row' }, [
+                    h('div', { class: 'form-label' }, '路線方向名'),
+                    directionNameField0,
+                    directionNameField1,
+                ]),
                 h('div', { class: 'form-row' }, [h('div', { class: 'form-label' }, '1日の始まり'), startTimeField]),
             ]),
-            h('div', { class: 'fs-section fs-label12' }, [h('div', { class: 'fs-section-header' }, 'OuDiaの設定'), ...oudiaSettings]),
+            h('div', { class: 'fs-section fs-label12' }, [
+                h('div', { class: 'fs-section-header' }, 'OuDiaの設定'),
+                ...oudiaSettings,
+            ]),
         ]);
         this.element.append(content);
     }

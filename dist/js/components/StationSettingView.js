@@ -14,7 +14,8 @@ export default class StationSettingView extends View {
                 this.hoverElement.classList.remove('hover');
             if (y % this.rowHeight < 28) {
                 this.hoverElement = null;
-                this.insertButton.style.transform = 'translateY(' + (Math.floor(y / this.rowHeight) * this.rowHeight + 12) + 'px)';
+                this.insertButton.style.transform =
+                    'translateY(' + (Math.floor(y / this.rowHeight) * this.rowHeight + 12) + 'px)';
                 this.insertButton.style.display = 'inline';
             }
             else {
@@ -41,7 +42,10 @@ export default class StationSettingView extends View {
             }
         });
         this.rightContainer = h('div', { class: 'fs-right-container' }, '駅が選択されていません');
-        this.element.appendChild(h('div', { class: 'fs-2cols-container' }, [h('div', { class: 'fs-left-container' }, this.svgElement), this.rightContainer]));
+        this.element.appendChild(h('div', { class: 'fs-2cols-container' }, [
+            h('div', { class: 'fs-left-container' }, this.svgElement),
+            this.rightContainer,
+        ]));
         this.updateRailmap();
     }
     finish() {
@@ -129,6 +133,7 @@ export default class StationSettingView extends View {
                                     track.name = value;
                                 }
                                 else {
+                                    ;
                                     e.currentTarget.value = track.name;
                                 }
                             }),

@@ -19,18 +19,53 @@ export default class TrainTimetableView extends View {
      */
     constructor(app, diaIndex, direction, trainId, stationId) {
         const trainMenu = [
-            { label: '列車を左に挿入', accelerator: 'Alt+Left', click: () => this.insertTrain(this.getActiveCell().col) },
-            { label: '列車を右に挿入', accelerator: 'Alt+Right', click: () => this.insertTrain(this.getActiveCell().col + 1) },
-            { label: '列車を複製', accelerator: 'CmdOrCtrl+D', click: () => this.cloneTrain(this.getActiveCell().col) },
-            { label: '列車を削除', accelerator: 'CmdOrCtrl+Backspace', click: () => this.removeTrain(this.getActiveCell().col) },
+            {
+                label: '列車を左に挿入',
+                accelerator: 'Alt+Left',
+                click: () => this.insertTrain(this.getActiveCell().col),
+            },
+            {
+                label: '列車を右に挿入',
+                accelerator: 'Alt+Right',
+                click: () => this.insertTrain(this.getActiveCell().col + 1),
+            },
+            {
+                label: '列車を複製',
+                accelerator: 'CmdOrCtrl+D',
+                click: () => this.cloneTrain(this.getActiveCell().col),
+            },
+            {
+                label: '列車を削除',
+                accelerator: 'CmdOrCtrl+Backspace',
+                click: () => this.removeTrain(this.getActiveCell().col),
+            },
         ];
         const stationMenu = [
-            { label: '停車', accelerator: 'S', click: () => this.changeStopType(this.getActiveCell(), 1) },
-            { label: '通過', accelerator: 'D', click: () => this.changeStopType(this.getActiveCell(), 2) },
-            { label: '運行なし', accelerator: 'F', click: () => this.changeStopType(this.getActiveCell(), 3) },
-            { label: '時刻を消去', accelerator: 'Backspace', click: () => this.eraceTime(this.getActiveCell()) },
+            {
+                label: '停車',
+                accelerator: 'S',
+                click: () => this.changeStopType(this.getActiveCell(), 1),
+            },
+            {
+                label: '通過',
+                accelerator: 'D',
+                click: () => this.changeStopType(this.getActiveCell(), 2),
+            },
+            {
+                label: '運行なし',
+                accelerator: 'F',
+                click: () => this.changeStopType(this.getActiveCell(), 3),
+            },
+            {
+                label: '時刻を消去',
+                accelerator: 'Backspace',
+                click: () => this.eraceTime(this.getActiveCell()),
+            },
             { type: 'separator' },
-            { label: '駅時刻表で表示', click: () => this.viewInStationTimetableView() },
+            {
+                label: '駅時刻表で表示',
+                click: () => this.viewInStationTimetableView(),
+            },
             { label: 'ダイヤグラムで表示', click: () => this.viewInDiagramView() },
         ];
         super(app, direction === 0 ? 'OutboundTrainTimetable' : 'InboundTrainTimetable', [
@@ -69,16 +104,20 @@ export default class TrainTimetableView extends View {
             const target = event.target;
             if (!target.classList.contains('tt-cell') || !('address' in target.dataset))
                 return;
+            this.selectCell(...target.dataset.address.split('-').map(value => Number(value)), 
             // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
             // @ts-ignore
-            this.selectCell(...target.dataset.address.split('-').map(value => Number(value)), event.shiftKey ? 'toggle' : 'select');
+            event.shiftKey ? 'toggle' : 'select');
         };
         this.element.addEventListener('click', event => {
             selectByClick(event);
         });
         this.element.addEventListener('contextmenu', event => {
             selectByClick(event);
-            new Menu([...stationMenu, { type: 'separator' }, ...trainMenu]).popup({ x: event.clientX, y: event.clientY });
+            new Menu([...stationMenu, { type: 'separator' }, ...trainMenu]).popup({
+                x: event.clientX,
+                y: event.clientY,
+            });
             event.preventDefault();
         });
         // 現在の表示領域
@@ -87,7 +126,8 @@ export default class TrainTimetableView extends View {
         this.selectedCell = [];
         this.tStation.style.width = this.stationCellWidth + 'px';
         this.rendering = true;
-        this.tHeader.style.width = this.app.data.railway.diagrams[this.diaIndex].trains[this.direction].length * this.cellWidth + 'px';
+        this.tHeader.style.width =
+            this.app.data.railway.diagrams[this.diaIndex].trains[this.direction].length * this.cellWidth + 'px';
         this.tHeader.style.paddingLeft = this.stationCellWidth + 'px';
         this.loadStations();
         this.loadTrains();
@@ -139,7 +179,8 @@ export default class TrainTimetableView extends View {
                 continue;
             const div = h('div', {
                 class: 'tt-cell',
-                style: `height: ${(Number(style.arrival[this.direction]) + Number(style.departure[this.direction])) * this.cellHeight}px;` +
+                style: `height: ${(Number(style.arrival[this.direction]) + Number(style.departure[this.direction])) *
+                    this.cellHeight}px;` +
                     (stationAppearance.border ? `border-bottom: 1px solid #222222;` : '') +
                     (station.isMain ? `font-weight: 500;` : ''),
             }, station.name);
@@ -320,9 +361,14 @@ export default class TrainTimetableView extends View {
         }, bodyContent);
         const header = h('div', {
             class: 'tt-head-row',
-            style: `transform: translateZ(0) translateX(${this.cellWidth * colIndex}px);color: ${data.type.textColor.toHEXString()};width:${this.cellWidth}px;`,
+            style: `transform: translateZ(0) translateX(${this.cellWidth *
+                colIndex}px);color: ${data.type.textColor.toHEXString()};width:${this.cellWidth}px;`,
             'data-col-id': colIndex,
-        }, [h('div', { class: 'tt-cell' }, data.number), h('div', { class: 'tt-cell' }, data.type.abbrName), h('div', { class: 'tt-cell' }, data.name)]);
+        }, [
+            h('div', { class: 'tt-cell' }, data.number),
+            h('div', { class: 'tt-cell' }, data.type.abbrName),
+            h('div', { class: 'tt-cell' }, data.name),
+        ]);
         this.tHeader.appendChild(header);
         this.tBody.appendChild(body);
         this.columns.set(colIndex, { header, body });
@@ -368,6 +414,7 @@ export default class TrainTimetableView extends View {
         }
         else if (e.keyCode === 13) {
             // Enter
+            ;
             this.app.sub.focusField(this.getActiveCell().cellType);
         }
     }
@@ -491,7 +538,10 @@ export default class TrainTimetableView extends View {
             header.classList[this.selectedCell.some(value => value.col === key) ? 'add' : 'remove']('tt-weak-highlight');
         });
         Array.from(this.tStation.children).forEach((element, i) => {
-            element.classList[this.selectedCell.some(value => i == (this.direction === 0 ? value.stationIndex : this.app.data.railway.stations.length - Number(value.stationIndex) - 1))
+            element.classList[this.selectedCell.some(value => i ==
+                (this.direction === 0
+                    ? value.stationIndex
+                    : this.app.data.railway.stations.length - Number(value.stationIndex) - 1))
                 ? 'add'
                 : 'remove']('tt-weak-highlight');
         });
