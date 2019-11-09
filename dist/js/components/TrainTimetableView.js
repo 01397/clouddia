@@ -102,7 +102,7 @@ export default class TrainTimetableView extends View {
         this.element.addEventListener('scroll', () => (this.rendering = true));
         const selectByClick = (event) => {
             const target = event.target;
-            if (!target.classList.contains('tt-cell') || !('address' in target.dataset))
+            if (!target.classList.contains('tt-cell') || !target.dataset.address)
                 return;
             this.selectCell(...target.dataset.address.split('-').map(value => Number(value)), 
             // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
@@ -241,7 +241,7 @@ export default class TrainTimetableView extends View {
                     }
                     else if (data.arrival !== null || data.departure !== null) {
                         // 時刻データあり -> 着時刻 (なければ発時刻)
-                        text = numberToTimeString(data.arrival || data.departure, this.timeFormat);
+                        text = numberToTimeString((data.arrival || data.departure), this.timeFormat);
                     }
                     else {
                         // 着時刻,発時刻共にデータ無し -> 停車記号
@@ -253,6 +253,7 @@ export default class TrainTimetableView extends View {
                         bg: i % 2 === 0,
                         cellName: sid + '-arrival',
                         address: colIndex + '-' + rowIndex++,
+                        border: false,
                     });
                 }
                 if (departure) {
@@ -276,7 +277,7 @@ export default class TrainTimetableView extends View {
                     }
                     else if (data.departure !== null || data.arrival !== null) {
                         // 時刻データあり -> 発時刻 (なければ着時刻)
-                        text = numberToTimeString(data.departure || data.arrival, this.timeFormat);
+                        text = numberToTimeString((data.departure || data.arrival), this.timeFormat);
                     }
                     else {
                         // 着時刻,発時刻共にデータ無し -> 停車記号
@@ -288,6 +289,7 @@ export default class TrainTimetableView extends View {
                         bg: i % 2 === 0,
                         cellName: sid + '-departure',
                         address: colIndex + '-' + rowIndex++,
+                        border: false,
                     });
                 }
                 col.cells[col.cells.length - 1].border = border;
@@ -341,7 +343,7 @@ export default class TrainTimetableView extends View {
     }
     createColumn(colIndex) {
         const data = this.sheet[colIndex];
-        let lastBg = null;
+        let lastBg = false;
         const bodyContent = data.cells.map(({ text = '', color = '#000000', bg = false, border = false, cellName = '', address = '', }) => {
             const result = h('div', {
                 style: `color: ${color};height: ${this.cellHeight}px;` +
@@ -402,6 +404,8 @@ export default class TrainTimetableView extends View {
         this.columns.set(newIdx, oldCol);
     }
     deleteColumn(colIndex) {
+        if (!this.columns.has(colIndex))
+            return;
         const { header, body } = this.columns.get(colIndex);
         this.tHeader.removeChild(header);
         this.tBody.removeChild(body);
@@ -517,10 +521,14 @@ export default class TrainTimetableView extends View {
         const a = document.querySelector(`#tt-body>[data-col-id="${col}"]>div[data-cell-name="${stationId}-departure"]`);
         const b = document.querySelector(`#tt-body>[data-col-id="${col}"]>div[data-cell-name="${stationId}-arrival"]`);
         const target = a || b;
+        if (!target.dataset.address)
+            return;
         this.selectCell(col, Number(target.dataset.address.split('-')[1]), 'select');
     }
     selectCell(col, row, mode = 'select') {
         const target = document.querySelector(`[data-address="${col}-${row}"]`);
+        if (!target.dataset.cellName)
+            return;
         const [stationIndexString, cellType] = target.dataset.cellName.split('-');
         const stationIndex = Number(stationIndexString);
         const isExist = this.selectedCell.some(value => value[0] === col && value[1] === row);

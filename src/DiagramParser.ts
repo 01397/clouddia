@@ -15,7 +15,7 @@ export default class DiagramParser {
   }
 }
 
-class DiagramData {
+abstract class DiagramData {
   constructor(params = {}) {
     this.fromOudiaParams({})
     for (const key in params) {
@@ -30,7 +30,7 @@ class DiagramData {
    * @param count 現在処理している行番号。再帰用なので外から呼ぶときは 省略するか0を指定。
    */
   public static fromOudia(lines: string[], count = 0): [DiagramData, number] {
-    const result = new this()
+    const result = new (this as any)()
     const oudParams: { [x: string]: string | string[] } = {}
     const enumerables = new Set([
       'Eki',
@@ -103,10 +103,12 @@ class DiagramData {
    * instanceof DiagramData, Array(shallow copy), Object(shallow copy)
    * 必要に応じてOverrideすること!
    */
-  public clone(): this {
-    const result = new (this as any).constructor()
-    for (const prop in this) {
-      const val = this[prop]
+  public clone() {
+    return this.shallowCopy(new (this as any).constructor(), this)
+  }
+  private shallowCopy(result, origin) {
+    for (const prop in origin) {
+      const val = origin[prop]
       if (val === null) {
         result[prop] = null
       } else if (val === undefined) {
@@ -206,13 +208,13 @@ export class Station extends DiagramData {
   public mainTrack: [number, number]
   public isMain: boolean
   public border: boolean
-  public brunchCoreStationIndex: number
+  public brunchCoreStationIndex: number | null
   public isBrunchOpposite: boolean
-  public loopOriginStationIndex: number
+  public loopOriginStationIndex: number | null
   public isLoopOpposite: boolean
   public visibleTimetableTrack: [boolean, boolean]
   public visibleDiagramTrack: boolean
-  public nextStaionDistance: number
+  public nextStaionDistance: number | null
   public timetableTrackOmit: boolean
   public operationLength: [number, number]
   public customTimetableStyle: {
@@ -223,7 +225,7 @@ export class Station extends DiagramData {
     trainType: boolean[]
     trainName: boolean[]
   }
-  public tracks: StationTrack[]
+  public tracks: [StationTrack, ...StationTrack[]]
   public outerTerminal: OuterTerminal[]
   public clone() {
     const result = super.clone()
@@ -386,7 +388,7 @@ export class Station extends DiagramData {
     const lAbbrName = this.tracks[this.tracks.length - 1].abbrName
     const m1 = lName.match(/\d+/)
     const m2 = lAbbrName[0].match(/\d+/)
-    const m3 = lAbbrName[0].match(/\d+/)
+    const m3 = lAbbrName[1].match(/\d+/)
     let name = '1番線'
     const abbrName = ['1', '']
     if (m1 !== null && Number.isInteger(Number(m1[0]))) name = lName.replace(/\d+/, String(Number(m1[0]) + 1))
@@ -400,10 +402,10 @@ export class Station extends DiagramData {
 
 export class StationTrack extends DiagramData {
   public name: string
-  public abbrName: [string?, string?]
+  public abbrName: [string, string]
   public fromOudiaParams(params) {
     this.name = params.hasOwnProperty('TrackName') ? params.TrackName : ''
-    this.abbrName = []
+    this.abbrName = ['', '']
     this.abbrName[0] = params.hasOwnProperty('TrackRyakusyou') ? params.TrackRyakusyou : ''
     this.abbrName[1] = params.hasOwnProperty('TrackNoboriRyakusyou') ? params.TrackNoboriRyakusyou : ''
   }
@@ -446,7 +448,7 @@ export class TrainType extends DiagramData {
   public lineStyle: string
   public isBoldLine: boolean
   public stopMark: boolean
-  public parentIndex: number
+  public parentIndex: number | null
   public fromOudiaParams(params) {
     this.name = params.hasOwnProperty('Syubetsumei') ? params.Syubetsumei : '新規種別'
     this.abbrName = params.hasOwnProperty('Ryakusyou') ? params.Ryakusyou : '新規'
@@ -515,7 +517,7 @@ export class Diagram extends DiagramData {
     this.mainBackgroundColorIndex = params.hasOwnProperty('MainBackColorIndex') ? Number(params.MainBackColorIndex) : 0
     this.subBackgroundColorIndex = params.hasOwnProperty('SubBackColorIndex') ? Number(params.SubBackColorIndex) : 0
     this.backgroundPatternIndex = params.hasOwnProperty('BackPatternIndex') ? Number(params.BackPatternIndex) : 0
-    this.trains = [null, null]
+    this.trains = [[], []]
     this.trains[0] = params.hasOwnProperty('Kudari') ? params.Kudari.trains || [] : []
     this.trains[1] = params.hasOwnProperty('Nobori') ? params.Nobori.trains || [] : []
   }
@@ -727,9 +729,9 @@ export class StationTime {
   public terminalStationIndex: number
   private _data: Array<{
     stopType: number
-    arrival: number
-    departure: number
-    track: number
+    arrival: number | null
+    departure: number | null
+    track: number | null
   }>
   constructor() {
     this.firstStationIndex = -1
@@ -766,7 +768,7 @@ export class StationTime {
         return
       }
       const s3 = s2[1].split('/')
-      const arrival = s3.length === 2 ? timeStringToNumber(s3.shift()) : null
+      const arrival = s3.length === 2 ? timeStringToNumber(s3.shift()!) : null
       const departure = s3[0] !== '' ? timeStringToNumber(s3[0]) : null
       result._data[i] = { stopType, arrival, departure, track }
       result.terminalStationIndex = i
@@ -800,11 +802,13 @@ export class StationTime {
         result += '3'
       } else {
         result += this._data[i].stopType + ';'
-        if (this._data[i].arrival !== null) {
-          result += numberToTimeString(this._data[i].arrival, 'HMM') + '/'
+        const arr = this._data[i].arrival
+        const dep = this._data[i].departure
+        if (arr !== null) {
+          result += numberToTimeString(arr, 'HMM') + '/'
         }
-        if (this._data[i].departure !== null) {
-          result += numberToTimeString(this._data[i].departure, 'HMM')
+        if (dep !== null) {
+          result += numberToTimeString(dep, 'HMM')
         }
       }
       result += ','

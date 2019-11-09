@@ -205,7 +205,10 @@ export default class CanvasDiagramView extends View {
                 trainIndex: trainId,
             };
             const time = this.app.data.railway.diagrams[this.selectedTrain.diaIndex].trains[this.selectedTrain.direction][this.selectedTrain.trainIndex].timetable.data[stationId];
-            this.dgViewWrapper.scrollTo(this.getRelativeTime(time.departure || time.arrival) * this.xScale - this.element.offsetWidth / 2, this.drawingData.totalDistance[stationId] * this.yScale - this.element.offsetHeight / 2);
+            // いつかは時刻のない場合でもスクロールできるようにしたいね！
+            if (time.departure !== null || time.arrival !== null) {
+                this.dgViewWrapper.scrollTo(this.getRelativeTime((time.departure || time.arrival)) * this.xScale - this.element.offsetWidth / 2, this.drawingData.totalDistance[stationId] * this.yScale - this.element.offsetHeight / 2);
+            }
         }
     }
     finish() {
@@ -278,6 +281,8 @@ export default class CanvasDiagramView extends View {
             };
         }
         else {
+            if (!this.pinchStart)
+                return;
             this.reservedScale = [
                 [
                     Math.max(this.minXScale, Math.min(this.maxXScale, (this.pinchStart.xScale * dx) / this.pinchStart.dx)),
@@ -326,7 +331,7 @@ export default class CanvasDiagramView extends View {
                         continue;
                     }
                     // 前駅に停車している
-                    if (prevDep !== null) {
+                    if (prevDep !== null && (data[i].arrival !== null || data[i].departure !== null)) {
                         let delta = (data[i].arrival || data[i].departure) - prevDep;
                         if (delta < 0)
                             delta += 24 * 3600;
@@ -403,7 +408,7 @@ export default class CanvasDiagramView extends View {
                 }
                 // 経由なしを通って停車駅まできたら、控えておいた点を結ぶ
                 if (pendingPoints.length !== 0 && (val.departure !== null || val.arrival !== null)) {
-                    const x = this.getRelativeTime(val.arrival !== null ? val.arrival : val.departure);
+                    const x = this.getRelativeTime((val.arrival || val.departure));
                     for (let k = 0; k < pendingPoints.length; k++) {
                         result.push(k % 2 === 0, ((x - lastX) * pendingPoints[k][1]) / distance + lastX, pendingPoints[k][0]);
                     }

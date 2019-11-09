@@ -94,7 +94,7 @@ export default class StationTimetableView extends View {
         const data = {
             stationName,
             trains: [],
-            topStation: null,
+            topStation: -1,
             topStationList: new Map(),
             shortName: [],
             diagramTitle: '',
@@ -170,7 +170,7 @@ export default class StationTimetableView extends View {
                 shortName[i] = currentStationName;
                 return;
             }
-            shortName[i] = count++;
+            shortName[i] = String(count++);
         });
         data.shortName = shortName;
         // 方向

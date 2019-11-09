@@ -16,10 +16,10 @@ import StationTimetableView from './StationTimetableView.js'
 export default class TrainSubview extends Subview {
   private _tabId: number
   private content: Element
-  private cellInfo: { stationIndex: number; direction: number; train: Train }
+  private selectedTrain: { stationIndex: number; direction: number; train: Train } | null
   constructor(app: App, tabId: number) {
     super(app)
-    this.cellInfo = null
+    this.selectedTrain = null
     this.tabId = tabId
   }
   public set tabId(tabId: number) {
@@ -33,20 +33,20 @@ export default class TrainSubview extends Subview {
   public finish() {
     return
   }
-  public showStationTime(cellInfo: { stationIndex: number; direction: number; train: Train } = null) {
-    this.cellInfo = cellInfo
+  public showStationTime(selectedTrain: { stationIndex: number; direction: number; train: Train } | null = null) {
+    this.selectedTrain = selectedTrain
     this.update()
   }
 
   public update() {
     let content
-    if (this.cellInfo == null) {
+    if (this.selectedTrain == null) {
       content = 'セルが選択されていません'
       this.element.innerHTML = ''
       this.element.append(content)
     } else {
-      const tabList = []
-      if (this.cellInfo.stationIndex !== null) {
+      const tabList: Element[] = []
+      if (this.selectedTrain.stationIndex !== null) {
         tabList.push(
           h('div', { class: 'sub-tab-item' + (this.tabId === 0 ? ' selected' : '') }, '駅', () => {
             this.tabId = 0
@@ -65,33 +65,34 @@ export default class TrainSubview extends Subview {
       if (this.tabId === 0) {
         // 液タブ ...じゃなかった、駅タブ
         const stationIndex =
-          this.cellInfo.train.direction === 0
-            ? this.cellInfo.stationIndex
-            : this.app.data.railway.stations.length - this.cellInfo.stationIndex - 1
-        const station = this.app.data.railway.stations[this.cellInfo.stationIndex]
+          this.selectedTrain.train.direction === 0
+            ? this.selectedTrain.stationIndex
+            : this.app.data.railway.stations.length - this.selectedTrain.stationIndex - 1
+        const station = this.app.data.railway.stations[this.selectedTrain.stationIndex]
         const stationName = station.name
-        const ttd = this.cellInfo.train.timetable.data[stationIndex]
+        const ttd = this.selectedTrain.train.timetable.data[stationIndex]
         const stopType = ttd ? ttd.stopType - 1 : 2
 
         // 駅扱い
         const buttonsetChange = (e: Event) => {
           const value = Number((e.currentTarget as HTMLInputElement).value)
+          if (!this.selectedTrain) return
           if (value === 2) {
-            delete this.cellInfo.train.timetable.data[stationIndex]
+            delete this.selectedTrain.train.timetable.data[stationIndex]
             ;(this.element.querySelector('.ts-arrival') as HTMLInputElement).value = ''
             ;(this.element.querySelector('.ts-delta') as HTMLInputElement).value = ''
             ;(this.element.querySelector('.ts-departure') as HTMLInputElement).value = ''
           } else if (ttd) {
             ttd.stopType = value + 1
           } else {
-            this.cellInfo.train.timetable.data[stationIndex] = {
+            this.selectedTrain.train.timetable.data[stationIndex] = {
               arrival: null,
               departure: null,
               stopType: value + 1,
               track: null,
             }
           }
-          this.cellInfo.train.timetable.update()
+          this.selectedTrain.train.timetable.update()
           this.updateMainView()
         }
         const radio = new Array(3).fill(0).map((v, i) => {
@@ -186,11 +187,12 @@ export default class TrainSubview extends Subview {
         const trainTypeList = this.app.data.railway.trainTypes
         const trainTypeOptions = trainTypeList.map((trainType, i) => h('option', { value: i }, trainType.name))
         const trainTypeSelector = h('select', { class: 'form-selector' }, trainTypeOptions) as HTMLSelectElement
-        trainTypeSelector.value = String(this.cellInfo.train.type)
-        trainTypeSelector.style.color = trainTypeList[this.cellInfo.train.type].textColor.toHEXString()
+        trainTypeSelector.value = String(this.selectedTrain.train.type)
+        trainTypeSelector.style.color = trainTypeList[this.selectedTrain.train.type].textColor.toHEXString()
         trainTypeSelector.addEventListener('change', e => {
-          this.cellInfo.train.type = Number((e.currentTarget as HTMLSelectElement).value)
-          trainTypeSelector.style.color = trainTypeList[this.cellInfo.train.type].textColor.toHEXString()
+          if (!this.selectedTrain) return
+          this.selectedTrain.train.type = Number((e.currentTarget as HTMLSelectElement).value)
+          trainTypeSelector.style.color = trainTypeList[this.selectedTrain.train.type].textColor.toHEXString()
           this.updateMainView()
         })
         content = [
@@ -200,27 +202,31 @@ export default class TrainSubview extends Subview {
               h('div', { class: 'form-row' }, [h('div', { class: 'form-label' }, '種別'), trainTypeSelector]),
               h('div', { class: 'form-row' }, [
                 h('div', { class: 'form-label' }, '列車番号'),
-                createTextField(this.cellInfo.train.number, '', '', e => {
-                  this.cellInfo.train.number = (e.currentTarget as HTMLInputElement).value
+                createTextField(this.selectedTrain.train.number, '', '', e => {
+                  if (!this.selectedTrain) return
+                  this.selectedTrain.train.number = (e.currentTarget as HTMLInputElement).value
                   this.updateMainView()
                 }),
               ]),
               h('div', { class: 'form-row' }, [
                 h('div', { class: 'form-label' }, '列車名'),
-                createTextField(this.cellInfo.train.name, '', 'ts-name', e => {
-                  this.cellInfo.train.name = (e.currentTarget as HTMLInputElement).value
+                createTextField(this.selectedTrain.train.name, '', 'ts-name', e => {
+                  if (!this.selectedTrain) return
+                  this.selectedTrain.train.name = (e.currentTarget as HTMLInputElement).value
                   this.updateMainView()
                 }),
-                createTextField(this.cellInfo.train.count, '', 'ts-count', e => {
-                  this.cellInfo.train.count = (e.currentTarget as HTMLInputElement).value
+                createTextField(this.selectedTrain.train.count, '', 'ts-count', e => {
+                  if (!this.selectedTrain) return
+                  this.selectedTrain.train.count = (e.currentTarget as HTMLInputElement).value
                   this.updateMainView()
                 }),
                 h('div', { class: 'ts-count-text' }, '号'),
               ]),
               h('div', { class: 'form-row' }, [
                 h('div', { class: 'form-label' }, '備考'),
-                createMultilineTextField(this.cellInfo.train.note, '', '', e => {
-                  this.cellInfo.train.note = (e.currentTarget as HTMLTextAreaElement).value
+                createMultilineTextField(this.selectedTrain.train.note, '', '', e => {
+                  if (!this.selectedTrain) return
+                  this.selectedTrain.train.note = (e.currentTarget as HTMLTextAreaElement).value
                   this.updateMainView()
                 }),
               ]),
@@ -234,16 +240,17 @@ export default class TrainSubview extends Subview {
     }
   }
   private updateTime(type: string) {
+    if (!this.selectedTrain) return
     const arrival = this.element.querySelector('.ts-arrival') as HTMLInputElement
     const departure = this.element.querySelector('.ts-departure') as HTMLInputElement
     const delta = this.element.querySelector('.ts-delta') as HTMLInputElement
     const stationIndex =
-      this.cellInfo.train.direction === 0
-        ? this.cellInfo.stationIndex
-        : this.app.data.railway.stations.length - this.cellInfo.stationIndex - 1
-    if (!this.cellInfo.train.timetable.data[stationIndex]) {
+      this.selectedTrain.train.direction === 0
+        ? this.selectedTrain.stationIndex
+        : this.app.data.railway.stations.length - this.selectedTrain.stationIndex - 1
+    if (!this.selectedTrain.train.timetable.data[stationIndex]) {
       if (arrival.value === '' && departure.value === '') return
-      this.cellInfo.train.timetable.data[stationIndex] = {
+      this.selectedTrain.train.timetable.data[stationIndex] = {
         stopType: 1,
         arrival: null,
         departure: null,
@@ -251,7 +258,7 @@ export default class TrainSubview extends Subview {
       }
       ;(document.querySelector('input.form-buttonset-radio') as HTMLInputElement).checked = true
     }
-    const ttd = this.cellInfo.train.timetable.data[stationIndex]
+    const ttd = this.selectedTrain.train.timetable.data[stationIndex]
     if (type === 'arrival') {
       if (arrival.value === '') {
         ttd.arrival = null
@@ -276,10 +283,10 @@ export default class TrainSubview extends Subview {
     delta.value =
       ttd.arrival !== null && ttd.departure !== null ? numberToTimeString(ttd.departure - ttd.arrival, 'HH MM SS') : ''
     this.updateMainView()
-    this.cellInfo.train.timetable.update()
+    this.selectedTrain.train.timetable.update()
   }
   public focusField(type: string) {
-    let field = null
+    let field: HTMLInputElement
     this.tabId = 0
     switch (type) {
       case 'arrival':

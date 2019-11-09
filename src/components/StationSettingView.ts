@@ -5,7 +5,7 @@ import View from './View.js'
 
 export default class StationSettingView extends View {
   private svgElement: Element
-  private hoverElement: SVGGElement
+  private hoverElement: SVGGElement | null
   private rowHeight: number
   private insertButton: SVGGElement
   private rightContainer: Element
@@ -229,11 +229,11 @@ export default class StationSettingView extends View {
 
   private updateRailmap() {
     const stations = this.app.data.railway.stations
-    const layer1 = []
-    const layer2 = []
+    const layer1: Element[] = []
+    const layer2: Element[] = []
     this.svgElement.setAttribute('height', String((stations.length + 0.5) * this.rowHeight))
     for (let i = 0; i < stations.length; i++) {
-      const content = []
+      const content: Element[] = []
       const y = this.rowHeight * i + 24
 
       if (stations[i].brunchCoreStationIndex !== null) {
@@ -263,7 +263,7 @@ export default class StationSettingView extends View {
             'http://www.w3.org/2000/svg'
           )
         )
-        const dy = stations[i].brunchCoreStationIndex - i
+        const dy = stations[i].brunchCoreStationIndex! - i
         layer2.push(
           h(
             'path',
@@ -321,9 +321,9 @@ export default class StationSettingView extends View {
 
       // 駅間
       if (
-        (stations[i].brunchCoreStationIndex === null || stations[i].brunchCoreStationIndex < i) &&
+        (stations[i].brunchCoreStationIndex === null || stations[i].brunchCoreStationIndex! < i) &&
         i + 1 in stations &&
-        (stations[i + 1].brunchCoreStationIndex === null || stations[i + 1].brunchCoreStationIndex > i + 1)
+        (stations[i + 1].brunchCoreStationIndex === null || stations[i + 1].brunchCoreStationIndex! > i + 1)
       ) {
         layer2.push(
           h(

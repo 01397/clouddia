@@ -1,6 +1,6 @@
 // DOM生成。
-export const h = (tag, attr = null, body = null, onclick = null, ns = null) => {
-    const element = ns === null ? document.createElement(tag) : document.createElementNS(ns, tag);
+export const h = (tag, attr = null, body = null, onclick = null, ns) => {
+    const element = ns === undefined ? document.createElement(tag) : document.createElementNS(ns, tag);
     if (attr != null) {
         for (const key in attr) {
             if (attr.hasOwnProperty(key)) {
@@ -8,7 +8,7 @@ export const h = (tag, attr = null, body = null, onclick = null, ns = null) => {
             }
         }
     }
-    if (onclick != null) {
+    if (onclick !== null) {
         element.addEventListener('click', onclick, {
             passive: true,
             capture: false,
@@ -31,23 +31,22 @@ export const h = (tag, attr = null, body = null, onclick = null, ns = null) => {
     }
     return element;
 };
-export const createTimeField = (value, className, onchange = null) => {
+export const createTimeField = (value, className = null, onchange) => {
     const field = h('input', {
-        class: 'form-time ' + className,
+        class: 'form-time ' + (className == null ? '' : ' ' + className),
         value,
         type: 'text',
     });
     field.addEventListener('input', e => fieldInput(field, e));
     field.addEventListener('keydown', e => fieldKeydown(field, e));
-    field.addEventListener('blur', e => {
-        fieldBlur(field);
-        onchange(e);
-    });
-    if (onchange !== null)
+    field.addEventListener('blur', e => fieldBlur(field));
+    if (onchange) {
         field.addEventListener('change', onchange);
+        field.addEventListener('blur', onchange);
+    }
     return field;
 };
-export const createTextField = (value, placeholder = '', className, onchange = null, oninput = null) => {
+export const createTextField = (value, placeholder = '', className = null, onchange = null, oninput = null) => {
     const field = h('input', {
         class: 'form-text ' + (className !== null ? className : ''),
         value,
@@ -62,48 +61,49 @@ export const createTextField = (value, placeholder = '', className, onchange = n
         field.addEventListener('input', oninput);
     return field;
 };
-export const createMultilineTextField = (value, placeholder = '', className, onchange = null) => {
-    const field = h('textarea', { class: 'form-text-multiline fs-flex', placeholder }, value);
+export const createMultilineTextField = (value, placeholder = '', className = null, onchange) => {
+    const field = h('textarea', { class: 'form-text-multiline fs-flex' + (className == null ? '' : ' ' + className), placeholder }, value);
     field.addEventListener('keydown', e => e.stopPropagation());
-    if (onchange !== null)
+    if (onchange)
         field.addEventListener('change', onchange);
     return field;
 };
-export const createCheckbox = (checked, className, onchange = null) => {
+export const createCheckbox = (checked, className = null, onchange) => {
     const checkbox = h('input', {
-        class: 'form-checkbox ' + className,
+        class: 'form-checkbox' + (className == null ? '' : ' ' + className),
         type: 'checkbox',
     });
     checkbox.checked = checked;
-    if (onchange !== null)
+    if (onchange)
         checkbox.addEventListener('change', onchange);
     return checkbox;
 };
-export const createRadio = (checked, name, className, onchange = null) => {
+export const createRadio = (checked, name, className = null, onchange) => {
     const radio = h('input', {
-        class: 'form-radio ' + className,
+        class: 'form-radio' + (className == null ? '' : ' ' + className),
         type: 'radio',
         name,
     });
     radio.checked = checked;
-    if (onchange !== null)
+    if (onchange)
         radio.addEventListener('change', onchange);
     return radio;
 };
-export const createButton = (value, className, onclick = null) => {
-    return h('input', { class: 'form-button ' + className, type: 'button', value }, null, onclick);
+export const createButton = (value, className = null, onclick) => {
+    return h('input', { class: 'form-button' + (className == null ? '' : ' ' + className), type: 'button', value }, null, onclick);
 };
-export const createColorField = (value, className, onchange = null) => {
+export const createColorField = (value, className = null, onchange) => {
     const colorField = h('input', { type: 'color', value });
-    const label = h('label', { class: 'form-color ' + className, tabindex: 0 }, colorField);
+    const label = h('label', { class: 'form-color' + (className == null ? '' : ' ' + className), tabindex: 0 }, colorField);
     label.style.backgroundColor = value;
-    colorField.addEventListener('change', onchange);
+    if (onchange)
+        colorField.addEventListener('change', onchange);
     colorField.addEventListener('input', () => {
         label.style.backgroundColor = colorField.value;
     });
     return label;
 };
-export const createLineStyleField = (value, className, onchange = null) => {
+export const createLineStyleField = (value, className = null, onchange) => {
     const changeValue = newValue => {
         onchange(newValue);
         contentLine.setAttributeNS('http://www.w3.org/2000/svg', 'strokeDasharray', DASH_ARRAY_STYLE[newValue]);
@@ -116,7 +116,7 @@ export const createLineStyleField = (value, className, onchange = null) => {
         y2: 16,
         'stroke-dasharray': DASH_ARRAY_STYLE[value],
     }, '', null, 'http://www.w3.org/2000/svg');
-    const wrapper = h('div', { class: 'form-line ' + className, tabindex: 0 }, [
+    const wrapper = h('div', { class: 'form-line ' + (className == null ? '' : ' ' + className), tabindex: 0 }, [
         h('svg', { class: 'form-line-content' }, contentLine, null, 'http://www.w3.org/2000/svg'),
         h('div', { class: 'form-line-selector ' + className }, [
             h('svg', { class: 'form-line-item' }, h('line', {
@@ -159,7 +159,7 @@ const fieldInput = (field, e) => {
     selectionEnd = Math.max(selectionEnd - (value.slice(0, selectionEnd).match(/ /g) || { length: 0 }).length, 0);
     // 空白を削除 -> 空白前の文字を削除
     const m1 = value.match(/\d{4}/);
-    if (m1 !== null) {
+    if (m1 !== null && m1.index) {
         value = value.slice(0, m1.index + 1) + value.slice(m1.index + 2);
         selectionEnd--;
     }
@@ -196,6 +196,8 @@ const fieldKeydown = (field, e) => {
             {
                 const value = field.value;
                 const selectionEnd = field.selectionEnd;
+                if (selectionEnd === null)
+                    return;
                 const d = keyCode === 37 ? -1 : 1;
                 if (!value[selectionEnd - 1 + d] || value[selectionEnd - 1 + d] !== ' ')
                     break;
@@ -264,7 +266,7 @@ export const timeStringCheck = (string) => {
  */
 export const timeStringToNumber = (oudstr) => {
     if (!timeStringCheck(oudstr)) {
-        return;
+        return -1;
     }
     oudstr = oudstr.replace(/ /g, '');
     if (oudstr.length <= 4) {
@@ -484,7 +486,7 @@ export class Menu {
      * メニューのDOM生成
      */
     build() {
-        return this.items.map(item => {
+        return this.items.map((item) => {
             let result;
             const content = [h('div', { class: 'menu-item-label' }, item.label)];
             if (item.hasOwnProperty('accelerator')) {
@@ -501,6 +503,9 @@ export class Menu {
             else if (item.type === 'separator') {
                 result = h('div', { class: 'menu-item menu-item-separator' });
             }
+            else {
+                result = h('div', { class: 'menu-item' });
+            }
             return result;
         });
     }
@@ -512,7 +517,7 @@ export class Menu {
     }
     closePopup() {
         this.closeChild();
-        if (this.closed)
+        if (this.closed || !this.element)
             return;
         this.element.classList.add('closed');
         setTimeout(() => {
@@ -531,12 +536,12 @@ export class Menu {
         const isApple = checkAppleDevice();
         loop1: for (const item of menu) {
             // submenuまでたどる(再帰)
-            if (item.hasOwnProperty('submenu')) {
+            if (item.submenu) {
                 const result = this.searchShortcuts(item.submenu, keySet);
                 if (result !== null)
                     return result;
             }
-            if (!item.hasOwnProperty('accelerator'))
+            if (!item.accelerator || !item.click)
                 continue;
             const keys = item.accelerator.split('+');
             if (keys.length !== keySet.size)

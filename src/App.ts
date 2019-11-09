@@ -108,14 +108,11 @@ export default class App {
     ])
     root.replaceWith(this.rootElm)
 
-    this.currentView = null
-    this.sidebar = null
-    this.tabbar = null
+    this.sidebar = new Sidebar(this, this.sidebarElm)
+    this.tabbar = new Tabbar(this, this.tabbarElm)
     this.toolbar = new Toolbar(this, this.toolbarElm)
     this.main = new StartView(this)
-    this.sub = null
-
-    this.data = null
+    this.sub = new TrainSubview(this, 0)
     this.currentDiaIndex = 0
 
     this.updateLocalData()
@@ -147,7 +144,7 @@ export default class App {
    * @param diaIndex 何番目のダイヤか
    * @param direction 0:下り, 1:上り
    */
-  public showTrainTimetableView(diaIndex: number = null, direction: 0 | 1 = 0, trainId = 0, stationId = 0) {
+  public showTrainTimetableView(diaIndex: number | null = null, direction: 0 | 1 = 0, trainId = 0, stationId = 0) {
     if (diaIndex === null) diaIndex = this.currentDiaIndex
     else this.currentDiaIndex = diaIndex
     this.main = new TrainTimetableView(this, diaIndex, direction, trainId, stationId)
@@ -159,7 +156,7 @@ export default class App {
    * 駅時刻表(StationTimetableView)の表示
    * @param diaIndex 何番目のダイヤか
    */
-  public showStationTimetableView(diaIndex: number = null, direction: 0 | 1 = 0, trainId = 0, stationId = 0) {
+  public showStationTimetableView(diaIndex: number | null = null, direction: 0 | 1 = 0, trainId = 0, stationId = 0) {
     if (diaIndex === null) diaIndex = this.currentDiaIndex
     else this.currentDiaIndex = diaIndex
     this.main = new StationTimetableView(this, diaIndex, direction, trainId, stationId)
@@ -171,7 +168,12 @@ export default class App {
    * ダイヤグラム(DiagramView)の表示
    * @param diaIndex 何番目のダイヤか
    */
-  public showDiagramView(diaIndex: number = null, direction: 0 | 1 = null, trainId = null, stationId = null) {
+  public showDiagramView(
+    diaIndex: number | null = null,
+    direction: 0 | 1 = 0,
+    trainId: number | null = null,
+    stationId: number | null = null
+  ) {
     if (diaIndex === null) diaIndex = this.currentDiaIndex
     else this.currentDiaIndex = diaIndex
     this.main = new DiagramView(this, diaIndex, direction, trainId, stationId)
@@ -190,7 +192,7 @@ export default class App {
   }
   public save() {
     //const bom = new Uint8Array([0xef, 0xbb, 0xbf]);
-    const unicodeArray = []
+    const unicodeArray: number[] = []
     const oudiaString = this.data.saveAsOud('CloudDia v' + this.version)
     for (let i = 0; i < oudiaString.length; i++) {
       unicodeArray.push(oudiaString.charCodeAt(i))
@@ -225,9 +227,8 @@ export default class App {
     // tslint:disable-next-line: no-console
     console.log(diagram)
     this.data = diagram
-    this.sidebar = new Sidebar(this, this.sidebarElm)
-    this.tabbar = new Tabbar(this, this.tabbarElm)
-    this.sub = new TrainSubview(this, 0)
+    this.sidebar.show()
+    this.sub.show()
     this.showTrainTimetableView(0, 0)
   }
   public loadOnlineFile(fileURL: string) {

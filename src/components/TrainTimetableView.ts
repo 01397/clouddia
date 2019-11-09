@@ -149,7 +149,7 @@ export default class TrainTimetableView extends View {
     this.element.addEventListener('scroll', () => (this.rendering = true))
     const selectByClick = (event: MouseEvent) => {
       const target = event.target as HTMLElement
-      if (!target.classList.contains('tt-cell') || !('address' in target.dataset)) return
+      if (!target.classList.contains('tt-cell') || !target.dataset.address) return
       this.selectCell(
         ...(target.dataset.address.split('-').map(value => Number(value)) as [number, number]),
         // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
@@ -263,7 +263,14 @@ export default class TrainTimetableView extends View {
         name: train.name,
         note: train.note,
         count: train.count,
-        cells: [],
+        cells: [] as {
+          text: string
+          color: string
+          bg: boolean
+          cellName: string
+          address: string
+          border: boolean
+        }[],
       }
       const trainType = this.app.data.railway.trainTypes[train.type]
       const color = trainType.textColor.toHEXString()
@@ -293,7 +300,7 @@ export default class TrainTimetableView extends View {
             text = TABLE_MARK.pass
           } else if (data.arrival !== null || data.departure !== null) {
             // 時刻データあり -> 着時刻 (なければ発時刻)
-            text = numberToTimeString(data.arrival || data.departure, this.timeFormat)
+            text = numberToTimeString((data.arrival || data.departure)!, this.timeFormat)
           } else {
             // 着時刻,発時刻共にデータ無し -> 停車記号
             text = TABLE_MARK.stop
@@ -304,6 +311,7 @@ export default class TrainTimetableView extends View {
             bg: i % 2 === 0,
             cellName: sid + '-arrival',
             address: colIndex + '-' + rowIndex++,
+            border: false,
           })
         }
         if (departure) {
@@ -323,7 +331,7 @@ export default class TrainTimetableView extends View {
             text = i === timetable.terminalStationIndex ? TABLE_MARK.blank : TABLE_MARK.nonroute
           } else if (data.departure !== null || data.arrival !== null) {
             // 時刻データあり -> 発時刻 (なければ着時刻)
-            text = numberToTimeString(data.departure || data.arrival, this.timeFormat)
+            text = numberToTimeString((data.departure || data.arrival)!, this.timeFormat)
           } else {
             // 着時刻,発時刻共にデータ無し -> 停車記号
             text = TABLE_MARK.stop
@@ -334,6 +342,7 @@ export default class TrainTimetableView extends View {
             bg: i % 2 === 0,
             cellName: sid + '-departure',
             address: colIndex + '-' + rowIndex++,
+            border: false,
           })
         }
         col.cells[col.cells.length - 1].border = border
@@ -384,7 +393,7 @@ export default class TrainTimetableView extends View {
 
   private createColumn(colIndex: number) {
     const data = this.sheet[colIndex]
-    let lastBg = null
+    let lastBg = false
     const bodyContent = data.cells.map(
       ({
         text = '',
@@ -451,7 +460,7 @@ export default class TrainTimetableView extends View {
   private reuseColumn(oldIdx: number, newIdx: number, forceUpdate: boolean) {
     const oldData = this.sheet[oldIdx]
     const newData = this.sheet[newIdx]
-    const oldCol = this.columns.get(oldIdx)
+    const oldCol = this.columns.get(oldIdx)!
     Array.from(oldCol.body.children).forEach((element: HTMLDivElement, i: number) => {
       if (oldData.cells[i].text !== newData.cells[i].text || forceUpdate) element.textContent = newData.cells[i].text
       if (oldData.cells[i].color !== newData.cells[i].color || forceUpdate) element.style.color = newData.cells[i].color
@@ -476,7 +485,8 @@ export default class TrainTimetableView extends View {
   }
 
   private deleteColumn(colIndex: number) {
-    const { header, body } = this.columns.get(colIndex)
+    if (!this.columns.has(colIndex)) return
+    const { header, body } = this.columns.get(colIndex)!
     this.tHeader.removeChild(header)
     this.tBody.removeChild(body)
     this.columns.delete(colIndex)
@@ -587,10 +597,12 @@ export default class TrainTimetableView extends View {
       `#tt-body>[data-col-id="${col}"]>div[data-cell-name="${stationId}-arrival"]`
     ) as HTMLElement
     const target = a || b
+    if (!target.dataset.address) return
     this.selectCell(col, Number(target.dataset.address.split('-')[1]), 'select')
   }
   private selectCell(col: number, row: number, mode: 'select' | 'toggle' | 'adding' | 'deleting' = 'select') {
     const target = document.querySelector(`[data-address="${col}-${row}"]`) as HTMLElement
+    if (!target.dataset.cellName) return
     const [stationIndexString, cellType] = target.dataset.cellName.split('-')
     const stationIndex = Number(stationIndexString)
     const isExist = this.selectedCell.some(value => value[0] === col && value[1] === row)

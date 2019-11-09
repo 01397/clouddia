@@ -41,7 +41,7 @@ export default class FileSettingView extends View {
             return h('div', { class: 'form-row' }, [
                 h('div', { class: 'form-label' }, label),
                 createTextField(font.family, '書体', null, e => (font.family = e.currentTarget.value)),
-                createTextField(font.height + '', null, 'fs-number', e => (font.height = Number(e.currentTarget.value))),
+                createTextField(font.height + '', '', 'fs-number', e => (font.height = Number(e.currentTarget.value))),
                 h('label', { class: 'fs-label' }, [
                     createCheckbox(font.bold, null, e => (font.bold = e.currentTarget.checked)),
                     h('div', { class: 'fs-text' }, '太字'),

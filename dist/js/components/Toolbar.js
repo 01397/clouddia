@@ -16,7 +16,7 @@ export default class Toolbar {
         this.element = menuWrapper;
     }
     showMenu(i) {
-        if (!this.menuItems[i].submenu)
+        if (this.menuItems === null || !this.menuItems[i].submenu)
             return;
         new Menu(this.menuItems[i].submenu).popup({ x: this.element.children[i].offsetLeft, y: 16 });
     }

@@ -3,12 +3,12 @@ import { MenuItem } from './App'
 // DOM生成。
 export const h = (
   tag: string,
-  attr: {} = null,
-  body: string | number | Node | Node[] = null,
-  onclick: (e: Event) => void = null,
-  ns: string = null
+  attr: {} | null = null,
+  body: string | number | Node | Node[] | null = null,
+  onclick: null | ((e: Event) => void) = null,
+  ns?: string
 ): Element => {
-  const element = ns === null ? document.createElement(tag) : document.createElementNS(ns, tag)
+  const element = ns === undefined ? document.createElement(tag) : document.createElementNS(ns, tag)
   if (attr != null) {
     for (const key in attr) {
       if (attr.hasOwnProperty(key)) {
@@ -16,7 +16,7 @@ export const h = (
       }
     }
   }
-  if (onclick != null) {
+  if (onclick !== null) {
     element.addEventListener('click', onclick, {
       passive: true,
       capture: false,
@@ -38,30 +38,30 @@ export const h = (
 
 export const createTimeField = (
   value: string,
-  className?: string,
-  onchange: (e?: Event) => void = null
+  className: string | null = null,
+  onchange?: (e: Event) => void
 ): HTMLInputElement => {
   const field = h('input', {
-    class: 'form-time ' + className,
+    class: 'form-time ' + (className == null ? '' : ' ' + className),
     value,
     type: 'text',
   }) as HTMLInputElement
   field.addEventListener('input', e => fieldInput(field, e))
   field.addEventListener('keydown', e => fieldKeydown(field, e))
-  field.addEventListener('blur', e => {
-    fieldBlur(field)
-    onchange(e)
-  })
-  if (onchange !== null) field.addEventListener('change', onchange)
+  field.addEventListener('blur', e => fieldBlur(field))
+  if (onchange) {
+    field.addEventListener('change', onchange)
+    field.addEventListener('blur', onchange)
+  }
   return field
 }
 
 export const createTextField = (
   value: string,
   placeholder = '',
-  className?: string,
-  onchange: (e?: Event) => void = null,
-  oninput: (e?: Event) => void = null
+  className: string | null = null,
+  onchange: null | ((e: Event) => void) = null,
+  oninput: null | ((e: Event) => void) = null
 ): HTMLInputElement => {
   const field = h('input', {
     class: 'form-text ' + (className !== null ? className : ''),
@@ -79,62 +79,75 @@ export const createTextField = (
 export const createMultilineTextField = (
   value: string,
   placeholder = '',
-  className?: string,
-  onchange: (e?: Event) => void = null
+  className: string | null = null,
+  onchange?: (e: Event) => void
 ): HTMLTextAreaElement => {
-  const field = h('textarea', { class: 'form-text-multiline fs-flex', placeholder }, value) as HTMLTextAreaElement
+  const field = h(
+    'textarea',
+    { class: 'form-text-multiline fs-flex' + (className == null ? '' : ' ' + className), placeholder },
+    value
+  ) as HTMLTextAreaElement
   field.addEventListener('keydown', e => e.stopPropagation())
-  if (onchange !== null) field.addEventListener('change', onchange)
+  if (onchange) field.addEventListener('change', onchange)
   return field
 }
 
 export const createCheckbox = (
   checked: boolean,
-  className?: string,
-  onchange: (e?: Event) => void = null
+  className: string | null = null,
+  onchange?: (e: Event) => void
 ): HTMLInputElement => {
   const checkbox = h('input', {
-    class: 'form-checkbox ' + className,
+    class: 'form-checkbox' + (className == null ? '' : ' ' + className),
     type: 'checkbox',
   }) as HTMLInputElement
   checkbox.checked = checked
-  if (onchange !== null) checkbox.addEventListener('change', onchange)
+  if (onchange) checkbox.addEventListener('change', onchange)
   return checkbox
 }
 
 export const createRadio = (
   checked: boolean,
   name?: string,
-  className?: string,
-  onchange: (e?: Event) => void = null
+  className: string | null = null,
+  onchange?: (e: Event) => void
 ): HTMLInputElement => {
   const radio = h('input', {
-    class: 'form-radio ' + className,
+    class: 'form-radio' + (className == null ? '' : ' ' + className),
     type: 'radio',
     name,
   }) as HTMLInputElement
   radio.checked = checked
-  if (onchange !== null) radio.addEventListener('change', onchange)
+  if (onchange) radio.addEventListener('change', onchange)
   return radio
 }
 
 export const createButton = (
   value: string,
-  className?: string,
-  onclick: (e?: Event) => void = null
+  className: string | null = null,
+  onclick?: (e: Event) => void
 ): HTMLInputElement => {
-  return h('input', { class: 'form-button ' + className, type: 'button', value }, null, onclick) as HTMLInputElement
+  return h(
+    'input',
+    { class: 'form-button' + (className == null ? '' : ' ' + className), type: 'button', value },
+    null,
+    onclick
+  ) as HTMLInputElement
 }
 
 export const createColorField = (
   value: string,
-  className?: string,
-  onchange: (e?: Event) => void = null
+  className: string | null = null,
+  onchange?: (e: Event) => void
 ): HTMLLabelElement => {
   const colorField = h('input', { type: 'color', value }) as HTMLInputElement
-  const label = h('label', { class: 'form-color ' + className, tabindex: 0 }, colorField) as HTMLLabelElement
+  const label = h(
+    'label',
+    { class: 'form-color' + (className == null ? '' : ' ' + className), tabindex: 0 },
+    colorField
+  ) as HTMLLabelElement
   label.style.backgroundColor = value
-  colorField.addEventListener('change', onchange)
+  if (onchange) colorField.addEventListener('change', onchange)
   colorField.addEventListener('input', () => {
     label.style.backgroundColor = colorField.value
   })
@@ -143,8 +156,8 @@ export const createColorField = (
 
 export const createLineStyleField = (
   value: string,
-  className?: string,
-  onchange: (value: string) => void = null
+  className: string | null = null,
+  onchange: (value: string) => void
 ): HTMLDivElement => {
   const changeValue = newValue => {
     onchange(newValue)
@@ -164,7 +177,7 @@ export const createLineStyleField = (
     null,
     'http://www.w3.org/2000/svg'
   ) as SVGLineElement
-  const wrapper = h('div', { class: 'form-line ' + className, tabindex: 0 }, [
+  const wrapper = h('div', { class: 'form-line ' + (className == null ? '' : ' ' + className), tabindex: 0 }, [
     h('svg', { class: 'form-line-content' }, contentLine, null, 'http://www.w3.org/2000/svg'),
     h('div', { class: 'form-line-selector ' + className }, [
       h(
@@ -256,7 +269,7 @@ const fieldInput = (field: HTMLInputElement, e: Event): void => {
   selectionEnd = Math.max(selectionEnd - (value.slice(0, selectionEnd).match(/ /g) || { length: 0 }).length, 0)
   // 空白を削除 -> 空白前の文字を削除
   const m1 = value.match(/\d{4}/)
-  if (m1 !== null) {
+  if (m1 !== null && m1.index) {
     value = value.slice(0, m1.index + 1) + value.slice(m1.index + 2)
     selectionEnd--
   }
@@ -291,6 +304,7 @@ const fieldKeydown = (field: HTMLInputElement, e: KeyboardEvent): void => {
       {
         const value = field.value
         const selectionEnd = field.selectionEnd
+        if (selectionEnd === null) return
         const d = keyCode === 37 ? -1 : 1
         if (!value[selectionEnd - 1 + d] || value[selectionEnd - 1 + d] !== ' ') break
         field.selectionStart = field.selectionEnd = selectionEnd + (keyCode === 37 ? -1 : 1)
@@ -357,7 +371,7 @@ export const timeStringCheck = (string: string): boolean => {
  */
 export const timeStringToNumber = (oudstr: string): number => {
   if (!timeStringCheck(oudstr)) {
-    return
+    return -1
   }
   oudstr = oudstr.replace(/ /g, '')
   if (oudstr.length <= 4) {
@@ -513,7 +527,7 @@ export class Font {
       (this.italic ? ';Italic=1' : '')
     )
   }
-  public clone() {
+  public clone(): Font {
     return Object.assign(new Font(), this)
   }
 }
@@ -586,8 +600,8 @@ function checkAppleDevice() {
   return device === 'macOS' || device === 'iPad' || device === 'iPhone'
 }
 export class Menu {
-  private element: HTMLElement
-  private child: Menu
+  private element: HTMLElement | null
+  private child: Menu | null
   private closed: boolean
   public items: MenuItem[]
   constructor(items: MenuItem[]) {
@@ -625,7 +639,7 @@ export class Menu {
    * メニューのDOM生成
    */
   private build(): Element[] {
-    return this.items.map(item => {
+    return this.items.map((item: MenuItem) => {
       let result: Element
       const content = [h('div', { class: 'menu-item-label' }, item.label)]
       if (item.hasOwnProperty('accelerator')) {
@@ -639,6 +653,8 @@ export class Menu {
         result.addEventListener('mouseenter', this.popupSubmenu.bind(this, item.submenu, result), false)
       } else if (item.type === 'separator') {
         result = h('div', { class: 'menu-item menu-item-separator' })
+      } else {
+        result = h('div', { class: 'menu-item' })
       }
       return result
     })
@@ -653,31 +669,31 @@ export class Menu {
 
   public closePopup() {
     this.closeChild()
-    if (this.closed) return
+    if (this.closed || !this.element) return
     this.element.classList.add('closed')
     setTimeout(() => {
-      document.body.removeChild(this.element)
+      document.body.removeChild(this.element!)
       this.closed = true
       delete this.element
     }, 1000)
   }
 
   // Menu内から該当するショートカットキーに対応するMenuItemのclick(=function)をさがす
-  public static findByShortcut(items: MenuItem[], event: KeyboardEvent): Function {
+  public static findByShortcut(items: MenuItem[], event: KeyboardEvent): Function | null {
     const keySet = this.getKeyName(event)
     return this.searchShortcuts(items, keySet)
   }
 
   // findByShortcutの本体。再帰
-  private static searchShortcuts(menu: MenuItem[], keySet: Set<string>): Function {
+  private static searchShortcuts(menu: MenuItem[], keySet: Set<string>): Function | null {
     const isApple = checkAppleDevice()
     loop1: for (const item of menu) {
       // submenuまでたどる(再帰)
-      if (item.hasOwnProperty('submenu')) {
+      if (item.submenu) {
         const result = this.searchShortcuts(item.submenu, keySet)
         if (result !== null) return result
       }
-      if (!item.hasOwnProperty('accelerator')) continue
+      if (!item.accelerator || !item.click) continue
       const keys = item.accelerator.split('+')
       if (keys.length !== keySet.size) continue
       for (const key of keys) {
@@ -716,7 +732,7 @@ export class Menu {
   }
 
   // 表示用のキーの名前を生成する
-  public static getShortcutString(accelerator: string) {
+  public static getShortcutString(accelerator?: string) {
     if (!accelerator) return ''
     const isApple = checkAppleDevice()
     let result = ''

@@ -14,6 +14,8 @@ export default abstract class Subview {
 
     // EventListenerなどのしがらみのない、まっとうなDIVを取り戻す
     const newDiv = h('div', { id: 'subView' }) as HTMLDivElement
+    newDiv.style.display = 'none'
+    this.visible = false
     app.subElm.replaceWith(newDiv)
     app.subElm = newDiv
     this.element = newDiv

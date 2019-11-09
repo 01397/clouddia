@@ -95,30 +95,30 @@ export default class CanvasDiagramView extends View {
     yScale: number
     px: number
     py: number
-  }
+  } | null
   private stationDistance: number[]
   private drawingData: {
     totalDistance: number[]
     outbound: drawingDataItem
     inbound: drawingDataItem
   }
-  private reqId: number
+  private reqId: number | null
   private hoveredTrain: {
     direction: number
     trainIndex: number
     diaIndex: number
-  }
+  } | null
   private selectedTrain: {
     direction: 0 | 1
     trainIndex: number
     diaIndex: number
     stationIndex: number
-  }
+  } | null
   private dgViewWrapper: HTMLElement
   /**
    *
    */
-  constructor(app: App, diaIndex: number, direction: 0 | 1, trainId: number, stationId: number) {
+  constructor(app: App, diaIndex: number, direction: 0 | 1, trainId: number | null, stationId: number | null) {
     super(app, 'Diagram')
     this.devicePixelRatio = window.devicePixelRatio // そのうち低解像度にする設定でもつける？ iPad mini2だとキツイ。ここを下げるだけ
     this.diaIndex = diaIndex
@@ -280,7 +280,7 @@ export default class CanvasDiagramView extends View {
     this.canvas.style.transform = `scale(${1 / this.devicePixelRatio})`
     this.canvas.width = this.element.offsetWidth * this.devicePixelRatio
     this.canvas.height = this.element.offsetHeight * this.devicePixelRatio
-    this.context = this.canvas.getContext('2d', { alpha: false })
+    this.context = this.canvas.getContext('2d', { alpha: false })!
     this.canvasWrapper.appendChild(this.canvas)
 
     if ('ontouchstart' in document && 'orientation' in window) {
@@ -351,10 +351,13 @@ export default class CanvasDiagramView extends View {
       const time = this.app.data.railway.diagrams[this.selectedTrain.diaIndex].trains[this.selectedTrain.direction][
         this.selectedTrain.trainIndex
       ].timetable.data[stationId]
-      this.dgViewWrapper.scrollTo(
-        this.getRelativeTime(time.departure || time.arrival) * this.xScale - this.element.offsetWidth / 2,
-        this.drawingData.totalDistance[stationId] * this.yScale - this.element.offsetHeight / 2
-      )
+      // いつかは時刻のない場合でもスクロールできるようにしたいね！
+      if (time.departure !== null || time.arrival !== null) {
+        this.dgViewWrapper.scrollTo(
+          this.getRelativeTime((time.departure || time.arrival)!) * this.xScale - this.element.offsetWidth / 2,
+          this.drawingData.totalDistance[stationId] * this.yScale - this.element.offsetHeight / 2
+        )
+      }
     }
   }
   public finish() {
@@ -422,6 +425,7 @@ export default class CanvasDiagramView extends View {
         py: this.lastPosition.y,
       }
     } else {
+      if (!this.pinchStart) return
       this.reservedScale = [
         [
           Math.max(this.minXScale, Math.min(this.maxXScale, (this.pinchStart.xScale * dx) / this.pinchStart.dx)), // x scale
@@ -470,7 +474,7 @@ export default class CanvasDiagramView extends View {
     const f = (trains: Train[], isOutbound: boolean) => {
       trains.forEach((train: Train) => {
         // 前駅の発車時刻
-        let prevDep: number = null
+        let prevDep: number | null = null
         const data = train.timetable.data
         for (let i = 0; i < len; i++) {
           // 停車駅でない
@@ -479,8 +483,8 @@ export default class CanvasDiagramView extends View {
             continue
           }
           // 前駅に停車している
-          if (prevDep !== null) {
-            let delta = (data[i].arrival || data[i].departure) - prevDep
+          if (prevDep !== null && (data[i].arrival !== null || data[i].departure !== null)) {
+            let delta = (data[i].arrival || data[i].departure)! - prevDep
             if (delta < 0) delta += 24 * 3600
             result[isOutbound ? i - 1 : len - i - 1] = Math.max(
               minimum,
@@ -537,7 +541,7 @@ export default class CanvasDiagramView extends View {
    * 上り列車のパスを計算するときは下から座標を引いていくのでheightに高さの値を入れる。
    */
   private getTrainPath(train: Train, height: number): Array<boolean | number> {
-    let result = []
+    let result: Array<boolean | number> = []
     const timetable = train.timetable
     // trueなら線は接続する
     let connection = false
@@ -564,7 +568,7 @@ export default class CanvasDiagramView extends View {
         }
         // 経由なしを通って停車駅まできたら、控えておいた点を結ぶ
         if (pendingPoints.length !== 0 && (val.departure !== null || val.arrival !== null)) {
-          const x = this.getRelativeTime(val.arrival !== null ? val.arrival : val.departure)
+          const x = this.getRelativeTime((val.arrival || val.departure)!)
           for (let k = 0; k < pendingPoints.length; k++) {
             result.push(k % 2 === 0, ((x - lastX) * pendingPoints[k][1]) / distance + lastX, pendingPoints[k][0])
           }
@@ -616,8 +620,8 @@ export default class CanvasDiagramView extends View {
     xNew: number,
     yNew: number,
     frames: number
-  ): Array<[number, number, number, number]> {
-    const result = []
+  ): [number, number, number, number][] {
+    const result: [number, number, number, number][] = []
     for (let i = 0; i < frames; i++) {
       const t = i / frames
       const tp = 1 - t
@@ -647,7 +651,7 @@ export default class CanvasDiagramView extends View {
     trainIndex: number
     diaIndex: number
     stationIndex: number
-  } {
+  } | null {
     const x0 = this.lastPosition.x + x * this.devicePixelRatio - this.paddingLeft
     const y0 = this.lastPosition.y + y * this.devicePixelRatio - this.paddingTop
     const dMax = 81 * this.devicePixelRatio
@@ -727,7 +731,7 @@ export default class CanvasDiagramView extends View {
     ) {
       // 表示倍率を変更するか？
       if (this.reservedScale.length !== 0) {
-        const rData = this.reservedScale.shift()
+        const rData = this.reservedScale.shift()!
         // 新しい表示倍率
         this.xScale = rData[0]
         this.yScale = rData[1]

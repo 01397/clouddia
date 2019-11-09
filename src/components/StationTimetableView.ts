@@ -65,7 +65,7 @@ export default class StationTimetableView extends View {
     // メインの時刻表部分
     this.timetableElement = h('div')
     // 駅名のプルダウン
-    const stationElements = []
+    const stationElements: Element[] = []
     for (const key in this.stationList) {
       if (!this.stationList.hasOwnProperty(key)) continue
       stationElements.push(h('option', { value: key }, key))
@@ -143,7 +143,7 @@ export default class StationTimetableView extends View {
     } = {
       stationName,
       trains: [],
-      topStation: null,
+      topStation: -1,
       topStationList: new Map(),
       shortName: [],
       diagramTitle: '',
@@ -172,7 +172,7 @@ export default class StationTimetableView extends View {
         typeList[train.type] = true
         data.trains.push({
           terminalIndex: terminalStationIndex,
-          time: train.timetable.data[stationIndex].departure,
+          time: train.timetable.data[stationIndex].departure!,
           train,
           trainData: {
             direction: isInbound ? 0 : 1,
@@ -205,7 +205,7 @@ export default class StationTimetableView extends View {
 
     // 行き先の略称を作る
     let count = 1
-    const shortName = []
+    const shortName: string[] = []
     stationCount.forEach((val, i) => {
       if (val === 0 || i === maxIdx) return
       // かぶりのない文字を探す
@@ -217,7 +217,7 @@ export default class StationTimetableView extends View {
         shortName[i] = currentStationName
         return
       }
-      shortName[i] = count++
+      shortName[i] = String(count++)
     })
     data.shortName = shortName
 
@@ -245,7 +245,7 @@ export default class StationTimetableView extends View {
 
     const startHour = 4
     // 時刻のElementを時間帯別に格納する2次元配列。
-    const times = new Array(24).fill(null).map(() => [])
+    const times: Element[][] = new Array(24).fill(null).map(() => [])
 
     // 時刻ひとつひとつ
     data.trains.forEach(val => {
@@ -319,7 +319,7 @@ export default class StationTimetableView extends View {
 
     // フッター
     const types = () => {
-      const result = []
+      const result: Element[] = []
       data.typeList.forEach((val, i) => {
         if (val !== true) return
         result.push(
@@ -357,7 +357,7 @@ export default class StationTimetableView extends View {
 
     if (!changeDetail) {
       // 設定部分更新
-      const directionContent = []
+      const directionContent: Element[] = []
       for (const [key, val] of data.topStationList) {
         const input = h('input', {
           type: 'checkbox',
@@ -371,7 +371,7 @@ export default class StationTimetableView extends View {
           h('label', { class: 'st-tools-direction-item' }, [input, h('span', null, this.stations[key].name + '方面')])
         )
       }
-      const oldDirectionDetail = document.getElementById('st-tools-direction-detail')
+      const oldDirectionDetail = document.getElementById('st-tools-direction-detail')!
       const newDirectionDetail = h('div', { id: 'st-tools-direction-detail' }, directionContent)
       oldDirectionDetail.replaceWith(newDirectionDetail)
     }

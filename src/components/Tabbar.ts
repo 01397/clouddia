@@ -3,7 +3,7 @@ import { h, Menu } from '../Util.js'
 import { Diagram } from '../DiagramParser.js'
 export default class Tabbar {
   private element: Element
-  private selectedTab: Element
+  private selectedTab: Element | null
   private app: App
   private _status: string
   constructor(app: App, element: Element) {

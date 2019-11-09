@@ -15,7 +15,7 @@ import { TrainType } from '../DiagramParser.js'
 export default class TrainTypeSettingView extends View {
   private rightContainer: Element
   private svgElement: Element
-  private hoverElement: Element
+  private hoverElement: Element | null
   constructor(app: App) {
     super(app, 'FileSetting')
     this.hoverElement = null

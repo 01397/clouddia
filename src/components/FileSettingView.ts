@@ -34,7 +34,7 @@ export default class FileSettingView extends View {
     directionNameField0.addEventListener('change', e => {
       const value = (e.currentTarget as HTMLTextAreaElement).value
       data.railway.directionName[0] = value == '' ? '下り' : value
-      document.getElementById('sidebar-label-inbound').textContent = data.railway.directionName[0]
+      document.getElementById('sidebar-label-inbound')!.textContent = data.railway.directionName[0]
     })
     const directionNameField1 = h('input', {
       class: 'form-text fs-flex',
@@ -45,7 +45,7 @@ export default class FileSettingView extends View {
     directionNameField1.addEventListener('change', e => {
       const value = (e.currentTarget as HTMLTextAreaElement).value
       data.railway.directionName[1] = value == '' ? '上り' : value
-      document.getElementById('sidebar-label-outbound').textContent = data.railway.directionName[1]
+      document.getElementById('sidebar-label-outbound')!.textContent = data.railway.directionName[1]
     })
     const startTimeField = createTimeField(
       numberToTimeString(data.railway.startTime, 'HH MM SS'),
@@ -59,7 +59,7 @@ export default class FileSettingView extends View {
         createTextField(font.family, '書体', null, e => (font.family = (e.currentTarget as HTMLTextAreaElement).value)),
         createTextField(
           font.height + '',
-          null,
+          '',
           'fs-number',
           e => (font.height = Number((e.currentTarget as HTMLTextAreaElement).value))
         ),

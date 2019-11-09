@@ -112,9 +112,11 @@ class DiagramData {
      * 必要に応じてOverrideすること!
      */
     clone() {
-        const result = new this.constructor();
-        for (const prop in this) {
-            const val = this[prop];
+        return this.shallowCopy(new this.constructor(), this);
+    }
+    shallowCopy(result, origin) {
+        for (const prop in origin) {
+            const val = origin[prop];
             if (val === null) {
                 result[prop] = null;
             }
@@ -351,7 +353,7 @@ export class Station extends DiagramData {
         const lAbbrName = this.tracks[this.tracks.length - 1].abbrName;
         const m1 = lName.match(/\d+/);
         const m2 = lAbbrName[0].match(/\d+/);
-        const m3 = lAbbrName[0].match(/\d+/);
+        const m3 = lAbbrName[1].match(/\d+/);
         let name = '1番線';
         const abbrName = ['1', ''];
         if (m1 !== null && Number.isInteger(Number(m1[0])))
@@ -366,7 +368,7 @@ export class Station extends DiagramData {
 export class StationTrack extends DiagramData {
     fromOudiaParams(params) {
         this.name = params.hasOwnProperty('TrackName') ? params.TrackName : '';
-        this.abbrName = [];
+        this.abbrName = ['', ''];
         this.abbrName[0] = params.hasOwnProperty('TrackRyakusyou') ? params.TrackRyakusyou : '';
         this.abbrName[1] = params.hasOwnProperty('TrackNoboriRyakusyou') ? params.TrackNoboriRyakusyou : '';
     }
@@ -453,7 +455,7 @@ export class Diagram extends DiagramData {
         this.mainBackgroundColorIndex = params.hasOwnProperty('MainBackColorIndex') ? Number(params.MainBackColorIndex) : 0;
         this.subBackgroundColorIndex = params.hasOwnProperty('SubBackColorIndex') ? Number(params.SubBackColorIndex) : 0;
         this.backgroundPatternIndex = params.hasOwnProperty('BackPatternIndex') ? Number(params.BackPatternIndex) : 0;
-        this.trains = [null, null];
+        this.trains = [[], []];
         this.trains[0] = params.hasOwnProperty('Kudari') ? params.Kudari.trains || [] : [];
         this.trains[1] = params.hasOwnProperty('Nobori') ? params.Nobori.trains || [] : [];
     }
@@ -687,11 +689,13 @@ export class StationTime {
             }
             else {
                 result += this._data[i].stopType + ';';
-                if (this._data[i].arrival !== null) {
-                    result += numberToTimeString(this._data[i].arrival, 'HMM') + '/';
+                const arr = this._data[i].arrival;
+                const dep = this._data[i].departure;
+                if (arr !== null) {
+                    result += numberToTimeString(arr, 'HMM') + '/';
                 }
-                if (this._data[i].departure !== null) {
-                    result += numberToTimeString(this._data[i].departure, 'HMM');
+                if (dep !== null) {
+                    result += numberToTimeString(dep, 'HMM');
                 }
             }
             result += ',';

@@ -27,13 +27,11 @@ export default class App {
             ]),
         ]);
         root.replaceWith(this.rootElm);
-        this.currentView = null;
-        this.sidebar = null;
-        this.tabbar = null;
+        this.sidebar = new Sidebar(this, this.sidebarElm);
+        this.tabbar = new Tabbar(this, this.tabbarElm);
         this.toolbar = new Toolbar(this, this.toolbarElm);
         this.main = new StartView(this);
-        this.sub = null;
-        this.data = null;
+        this.sub = new TrainSubview(this, 0);
         this.currentDiaIndex = 0;
         this.updateLocalData();
         document.addEventListener('keydown', e => this.keydown(e), false);
@@ -91,7 +89,7 @@ export default class App {
      * ダイヤグラム(DiagramView)の表示
      * @param diaIndex 何番目のダイヤか
      */
-    showDiagramView(diaIndex = null, direction = null, trainId = null, stationId = null) {
+    showDiagramView(diaIndex = null, direction = 0, trainId = null, stationId = null) {
         if (diaIndex === null)
             diaIndex = this.currentDiaIndex;
         else
@@ -147,9 +145,8 @@ export default class App {
         // tslint:disable-next-line: no-console
         console.log(diagram);
         this.data = diagram;
-        this.sidebar = new Sidebar(this, this.sidebarElm);
-        this.tabbar = new Tabbar(this, this.tabbarElm);
-        this.sub = new TrainSubview(this, 0);
+        this.sidebar.show();
+        this.sub.show();
         this.showTrainTimetableView(0, 0);
     }
     loadOnlineFile(fileURL) {

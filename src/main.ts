@@ -1,6 +1,6 @@
 import App from './App.js'
 document.addEventListener('DOMContentLoaded', () => {
-  const rootElement = document.getElementById('app')
+  const rootElement = document.getElementById('app')!
   const app = new App(rootElement)
   // for debug
   // tslint:disable-next-line: no-string-literal

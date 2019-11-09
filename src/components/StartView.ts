@@ -9,14 +9,16 @@ export default class StartView extends View {
     const fileSelector = h('input', { type: 'file', class: 'start-file' })
     fileSelector.addEventListener('change', (e: Event) => {
       const target = e.currentTarget as HTMLInputElement
-      this.loadLocalFile(target.files[0])
+      const files = target.files
+      if (files === null) return
+      this.loadLocalFile(files[0])
     })
     const createNewButton = createButton('新規作成', 'form-button-fill start-file-button', () =>
       this.app.initialize(new DiagramFile())
     )
     const fileSelectLabel = h('div', { class: 'form-button form-button-fill start-file-button' }, 'ファイルを開く')
     const urlField = createTextField('', 'oudiaファイルのURL', 'start-drop-url-field')
-    const urlButton = createButton('開く', null, () => this.app.loadOnlineFile(urlField.value))
+    const urlButton = createButton('開く', '', () => this.app.loadOnlineFile(urlField.value))
     const dropArea = h('div', { class: 'start-drop' }, [
       h('div', { class: 'start-drop-caption' }, '新しいダイヤグラムを作ります'),
       h('label', { class: 'start-file-label' }, createNewButton),
@@ -25,17 +27,17 @@ export default class StartView extends View {
       h('div', { class: 'start-drop-caption' }, '直リンク禁止ファイルの閲覧は推奨しません'),
       h('div', { class: 'start-drop-url-wrapper' }, [urlField, urlButton]),
     ])
-    dropArea.addEventListener('dragover', (evt: DragEvent) => {
-      evt.preventDefault()
+    dropArea.addEventListener('dragover', (event: DragEvent) => {
+      event.preventDefault()
       dropArea.classList.add('drag')
     })
     dropArea.addEventListener('dragleave', () => {
       dropArea.classList.remove('drag')
     })
-    dropArea.addEventListener('drop', (evt: DragEvent) => {
-      evt.preventDefault()
+    dropArea.addEventListener('drop', (event: DragEvent) => {
+      event.preventDefault()
       dropArea.classList.remove('drag')
-      this.loadLocalFile(evt.dataTransfer.files[0])
+      if (event.dataTransfer) this.loadLocalFile(event.dataTransfer.files[0])
     })
     const updateInfo = h('div', null, [
       h('h1', { class: 'start-readme-heading' }, '更新情報'),
