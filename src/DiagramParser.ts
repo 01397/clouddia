@@ -797,7 +797,7 @@ export class StationTime {
     for (let i = 0; i < this.firstStationIndex; i++) {
       result += ','
     }
-    for (let i = this.firstStationIndex; i < this.terminalStationIndex; i++) {
+    for (let i = this.firstStationIndex; i <= this.terminalStationIndex; i++) {
       if (!(i in this._data)) {
         result += '3'
       } else {
