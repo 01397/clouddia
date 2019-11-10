@@ -218,7 +218,7 @@ export default class TrainTimetableView extends View {
         border: false,
         departure: style.departure[this.direction],
       }
-      if (i < len - 1) {
+      if (i === len - 1) {
         stationAppearance.border = false
       } else if (this.direction === 0) {
         stationAppearance.border = station.border
@@ -234,7 +234,7 @@ export default class TrainTimetableView extends View {
           style:
             `height: ${(Number(style.arrival[this.direction]) + Number(style.departure[this.direction])) *
               this.cellHeight}px;` +
-            (stationAppearance.border ? `border-bottom: 1px solid #222222;` : '') +
+            (stationAppearance.border && i !== len - 1 ? `border-bottom: 1px solid #222222;` : '') +
             (station.isMain ? `font-weight: 500;` : ''),
         },
         station.name
