@@ -104,9 +104,9 @@ export const createColorField = (value, className = null, onchange) => {
     return label;
 };
 export const createLineStyleField = (value, className = null, onchange) => {
-    const changeValue = newValue => {
+    const changeValue = (newValue) => {
         onchange(newValue);
-        contentLine.setAttributeNS('http://www.w3.org/2000/svg', 'strokeDasharray', DASH_ARRAY_STYLE[newValue]);
+        contentLine.style.strokeDasharray = DASH_ARRAY_STYLE[newValue];
         wrapper.blur();
     };
     const contentLine = h('line', {
@@ -114,8 +114,8 @@ export const createLineStyleField = (value, className = null, onchange) => {
         y1: 16,
         x2: 112,
         y2: 16,
-        'stroke-dasharray': DASH_ARRAY_STYLE[value],
     }, '', null, 'http://www.w3.org/2000/svg');
+    contentLine.style.strokeDasharray = DASH_ARRAY_STYLE[value];
     const wrapper = h('div', { class: 'form-line ' + (className == null ? '' : ' ' + className), tabindex: 0 }, [
         h('svg', { class: 'form-line-content' }, contentLine, null, 'http://www.w3.org/2000/svg'),
         h('div', { class: 'form-line-selector ' + className }, [

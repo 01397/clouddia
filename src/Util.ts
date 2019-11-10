@@ -159,9 +159,9 @@ export const createLineStyleField = (
   className: string | null = null,
   onchange: (value: string) => void
 ): HTMLDivElement => {
-  const changeValue = newValue => {
+  const changeValue = (newValue: string) => {
     onchange(newValue)
-    contentLine.setAttributeNS('http://www.w3.org/2000/svg', 'strokeDasharray', DASH_ARRAY_STYLE[newValue])
+    contentLine.style.strokeDasharray = DASH_ARRAY_STYLE[newValue]
     wrapper.blur()
   }
   const contentLine = h(
@@ -171,12 +171,12 @@ export const createLineStyleField = (
       y1: 16,
       x2: 112,
       y2: 16,
-      'stroke-dasharray': DASH_ARRAY_STYLE[value],
     },
     '',
     null,
     'http://www.w3.org/2000/svg'
   ) as SVGLineElement
+  contentLine.style.strokeDasharray = DASH_ARRAY_STYLE[value]
   const wrapper = h('div', { class: 'form-line ' + (className == null ? '' : ' ' + className), tabindex: 0 }, [
     h('svg', { class: 'form-line-content' }, contentLine, null, 'http://www.w3.org/2000/svg'),
     h('div', { class: 'form-line-selector ' + className }, [
