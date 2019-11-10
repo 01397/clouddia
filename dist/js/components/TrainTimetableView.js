@@ -165,14 +165,14 @@ export default class TrainTimetableView extends View {
                 border: false,
                 departure: style.departure[this.direction],
             };
-            if (this.direction === 0 && i < len - 1) {
+            if (i < len - 1) {
+                stationAppearance.border = false;
+            }
+            else if (this.direction === 0) {
                 stationAppearance.border = station.border;
             }
-            else if (i < len - 1) {
-                stationAppearance.border = stations[len - i - 2].border;
-            }
             else {
-                stationAppearance.border = false;
+                stationAppearance.border = stations[len - i - 2].border;
             }
             // その駅は何行分かな？
             if (!style.arrival[this.direction] && !style.departure[this.direction])

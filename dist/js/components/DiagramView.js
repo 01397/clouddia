@@ -171,6 +171,7 @@ export default class CanvasDiagramView extends View {
                         train: this.app.data.railway.diagrams[this.diaIndex].trains[direction][trainIndex],
                     });
                 }
+                this.forceDraw = true;
             });
             this.element.addEventListener('contextmenu', (event) => {
                 this.selectedTrain = this.getTrainByCoordinate({
