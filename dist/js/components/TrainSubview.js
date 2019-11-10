@@ -60,6 +60,7 @@ export default class TrainSubview extends Subview {
                     const value = Number(e.currentTarget.value);
                     if (!this.selectedTrain)
                         return;
+                    const ttd = this.selectedTrain.train.timetable.data[stationIndex];
                     if (value === 2) {
                         delete this.selectedTrain.train.timetable.data[stationIndex];
                         this.element.querySelector('.ts-arrival').value = '';

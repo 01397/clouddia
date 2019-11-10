@@ -77,6 +77,7 @@ export default class TrainSubview extends Subview {
         const buttonsetChange = (e: Event) => {
           const value = Number((e.currentTarget as HTMLInputElement).value)
           if (!this.selectedTrain) return
+          const ttd = this.selectedTrain.train.timetable.data[stationIndex]
           if (value === 2) {
             delete this.selectedTrain.train.timetable.data[stationIndex]
             ;(this.element.querySelector('.ts-arrival') as HTMLInputElement).value = ''
