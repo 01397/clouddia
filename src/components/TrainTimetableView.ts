@@ -218,12 +218,12 @@ export default class TrainTimetableView extends View {
         border: false,
         departure: style.departure[this.direction],
       }
-      if (this.direction === 0) {
-        stationAppearance.border = station.border
-      } else if (i < len - 1) {
-        stationAppearance.border = stations[len - i - 2].border
-      } else {
+      if (i < len - 1) {
         stationAppearance.border = false
+      } else if (this.direction === 0) {
+        stationAppearance.border = station.border
+      } else {
+        stationAppearance.border = stations[len - i - 2].border
       }
       // その駅は何行分かな？
       if (!style.arrival[this.direction] && !style.departure[this.direction]) continue
@@ -590,14 +590,10 @@ export default class TrainTimetableView extends View {
     this.element.scrollLeft = (col - 0.5) * this.cellWidth - viewWidth / 2
     this.rendering = true
     this.render()
-    const a = document.querySelector(
-      `#tt-body>[data-col-id="${col}"]>div[data-cell-name="${stationId}-departure"]`
-    ) as HTMLElement
-    const b = document.querySelector(
-      `#tt-body>[data-col-id="${col}"]>div[data-cell-name="${stationId}-arrival"]`
-    ) as HTMLElement
-    const target = a || b
-    if (!target.dataset.address) return
+    const a = document.querySelector(`#tt-body>[data-col-id="${col}"]>div[data-cell-name="${stationId}-departure"]`)
+    const b = document.querySelector(`#tt-body>[data-col-id="${col}"]>div[data-cell-name="${stationId}-arrival"]`)
+    const target = (a || b) as HTMLElement | null
+    if (!target || !target.dataset.address) return
     this.selectCell(col, Number(target.dataset.address.split('-')[1]), 'select')
   }
   private selectCell(col: number, row: number, mode: 'select' | 'toggle' | 'adding' | 'deleting' = 'select') {

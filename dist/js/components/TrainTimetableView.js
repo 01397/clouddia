@@ -165,7 +165,7 @@ export default class TrainTimetableView extends View {
                 border: false,
                 departure: style.departure[this.direction],
             };
-            if (this.direction === 0) {
+            if (this.direction === 0 && i < len - 1) {
                 stationAppearance.border = station.border;
             }
             else if (i < len - 1) {
@@ -520,8 +520,8 @@ export default class TrainTimetableView extends View {
         this.render();
         const a = document.querySelector(`#tt-body>[data-col-id="${col}"]>div[data-cell-name="${stationId}-departure"]`);
         const b = document.querySelector(`#tt-body>[data-col-id="${col}"]>div[data-cell-name="${stationId}-arrival"]`);
-        const target = a || b;
-        if (!target.dataset.address)
+        const target = (a || b);
+        if (!target || !target.dataset.address)
             return;
         this.selectCell(col, Number(target.dataset.address.split('-')[1]), 'select');
     }

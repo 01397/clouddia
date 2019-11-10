@@ -75,9 +75,8 @@ html, body {
 
 #mainContainer {
   flex: 1;
-  /*background-color: var(--bg-color-light);*/
   position: relative;
-  overflow: scroll;
+  overflow: auto;
   -webkit-overflow-scrolling: touch;
 }
 
@@ -88,6 +87,35 @@ html, body {
   top: 64px;
   right: -300px;
   bottom: 0;
+}
+
+/* scrolbar */
+
+::-webkit-scrollbar {
+  width: 9px;
+  height: 9px;
+}
+
+::-webkit-scrollbar-track {
+  background-color: #f8f8f8;
+  border-left: 1px solid #eeeeee;
+}
+
+::-webkit-scrollbar-track:hover {
+  border-left: 1px solid #ddd;
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 8px;
+  background-color: #ccc;
+  border: 2px solid #f8f8f8;
+  min-width: 48px;
+  min-height: 48px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #bbb;
+  border-width: 1px;
 }
 
 /*----------------------------------------
@@ -154,7 +182,8 @@ html, body {
   padding: 0 8px 0 20px;
   cursor: default;
   display: flex;
-  line-height: 19px; /* 気持ち悪い？ macに合わせてるのさ */
+  line-height: 19px;
+  /* 気持ち悪い？ macに合わせてるのさ */
 }
 
 .menu-item:not(.menu-item-separator):hover {
@@ -175,11 +204,12 @@ html, body {
   padding-left: 1.5em;
 }
 
-.menu-item-submenu{
+.menu-item-submenu {
   padding-right: 16px;
   position: relative;
 }
-.menu-item-submenu:after{
+
+.menu-item-submenu:after {
   border-top: 5px solid transparent;
   border-bottom: 5px solid transparent;
   border-left: 8px solid rgba(255, 255, 255, 0.8);
@@ -204,6 +234,7 @@ html, body {
   overflow-x: hidden;
   white-space: nowrap;
   -webkit-user-select: none;
+  display: flex;
 }
 
 .tabbar-tab {
@@ -726,6 +757,7 @@ html, body {
 .st-train-minute.selected {
   animation: ponpon .25s 4 ease alternate;
 }
+
 @keyframes ponpon {
   0% {
     transform: scale(1);
@@ -851,16 +883,15 @@ html, body {
 }
 
 .fs-left-container {
-  width: 300px;
   border-right: 1px solid #888888;
   height: 100%;
-  overflow-y: scroll;
+  overflow-y: auto;
 }
 
 .fs-right-container {
   padding: 16px;
   flex: 1;
-  overflow: scroll;
+  overflow: auto;
   height: 100%;
   box-sizing: border-box;
 }
@@ -1431,6 +1462,7 @@ html, body {
   pointer-events: all;
   animation: dialog-appear .2s linear 0s 1;
 }
+
 @keyframes dialog-appear {
   from {
     opacity: 0;
