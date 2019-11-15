@@ -131,7 +131,7 @@ export default class StationTimetableView extends View {
         trainType: number
         terminalIndex: number
         time: number
-        trainData: { index: number; direction: number }
+        direction: number
         trainId: number
       }>
       topStation: number
@@ -174,10 +174,7 @@ export default class StationTimetableView extends View {
           terminalIndex: terminalStationIndex,
           time: train.timetable.data[stationIndex].departure!,
           train,
-          trainData: {
-            direction: isInbound ? 0 : 1,
-            index,
-          },
+          direction: isInbound ? 0 : 1,
           trainType: train.type,
           trainId: index,
         })
@@ -247,13 +244,33 @@ export default class StationTimetableView extends View {
     // 時刻のElementを時間帯別に格納する2次元配列。
     const times: Element[][] = new Array(24).fill(null).map(() => [])
 
+    const clickListener = (event: MouseEvent) => {
+      if (!(this.app.sub instanceof TrainSubview)) return
+      if (!(event.currentTarget instanceof HTMLDivElement)) return
+      const id = Number(event.currentTarget.dataset.index)
+      const direction = Number(event.currentTarget.dataset.direction)
+      this.app.sub.showStationTime({
+        stationIndex: this.stationList[this.stationSelectorElement.value].indexList.values().next().value,
+        direction: direction,
+        train: direction == 0 ? this.inboundTrains[id] : this.outboundTrains[id],
+      })
+    }
+    const contextmenuListener = (event: MouseEvent) => {
+      if (!(event.currentTarget instanceof HTMLDivElement)) return
+      const trainId = Number(event.currentTarget.dataset.index)
+      new Menu([
+        { label: '列車時刻表で表示', click: () => this.viewInTrainTimetableView(trainId) },
+        { label: 'ダイヤグラムで表示', click: () => this.viewInDiagramView(trainId) },
+      ]).popup({ x: event.clientX, y: event.clientY })
+      event.preventDefault()
+    }
     // 時刻ひとつひとつ
     data.trains.forEach(val => {
       const hour = Math.floor(val.time / 3600)
       const min = Math.floor((val.time % 3600) / 60)
       const element = h(
         'div',
-        { class: 'st-train' },
+        { class: 'st-train', 'data-index': val.trainId, 'data-direction': val.direction },
         [
           h(
             'div',
@@ -271,22 +288,9 @@ export default class StationTimetableView extends View {
             min
           ),
         ],
-        () => {
-          if (!(this.app.sub instanceof TrainSubview)) return
-          this.app.sub.showStationTime({
-            stationIndex: this.stationList[this.stationSelectorElement.value].indexList.values().next().value,
-            direction: val.train.direction,
-            train: val.train,
-          })
-        }
+        clickListener
       )
-      element.addEventListener('contextmenu', (event: MouseEvent) => {
-        new Menu([
-          { label: '列車時刻表で表示', click: () => this.viewInTrainTimetableView(val.trainId) },
-          { label: 'ダイヤグラムで表示', click: () => this.viewInDiagramView(val.trainId) },
-        ]).popup({ x: event.clientX, y: event.clientY })
-        event.preventDefault()
-      })
+      element.addEventListener('contextmenu', contextmenuListener)
       times[hour].push(element)
     })
     // 1時間ずつの行
