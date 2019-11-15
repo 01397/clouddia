@@ -2,6 +2,7 @@ import { createMultilineTextField, createTextField, createTimeField, h, numberTo
 import Subview from './Subview.js';
 import TrainTimetableView from './TrainTimetableView.js';
 import StationTimetableView from './StationTimetableView.js';
+import CanvasDiagramView from './DiagramView.js';
 export default class TrainSubview extends Subview {
     constructor(app, tabId) {
         super(app);
@@ -25,13 +26,13 @@ export default class TrainSubview extends Subview {
         this.update();
     }
     update() {
-        let content;
         if (this.selectedTrain == null) {
-            content = 'セルが選択されていません';
+            const content = h('div', { class: 'sub-unselected' }, '選択されていません');
             this.element.innerHTML = '';
             this.element.append(content);
         }
         else {
+            let content = [];
             const tabList = [];
             if (this.selectedTrain.stationIndex !== null) {
                 tabList.push(h('div', { class: 'sub-tab-item' + (this.tabId === 0 ? ' selected' : '') }, '駅', () => {
@@ -303,6 +304,9 @@ export default class TrainSubview extends Subview {
         }
         else if (this.app.main instanceof StationTimetableView) {
             this.app.main.display(true);
+        }
+        else if (this.app.main instanceof CanvasDiagramView) {
+            this.app.main.update();
         }
     }
 }

@@ -303,20 +303,22 @@ export default class CanvasDiagramView extends View {
         this.forceDraw = true
       })
       this.element.addEventListener('click', e => {
+        this.forceDraw = true
         this.selectedTrain = this.getTrainByCoordinate({
           x: e.offsetX,
           y: e.offsetY,
         })
-        if (this.selectedTrain === null) return
-        const { direction, trainIndex, stationIndex } = this.selectedTrain
-        if (this.app.sub instanceof TrainSubview) {
+        if (!(this.app.sub instanceof TrainSubview)) return
+        if (this.selectedTrain === null) {
+          this.app.sub.showStationTime(null)
+        } else {
+          const { direction, trainIndex, stationIndex } = this.selectedTrain
           this.app.sub.showStationTime({
             stationIndex,
             direction,
             train: this.app.data.railway.diagrams[this.diaIndex].trains[direction][trainIndex],
           })
         }
-        this.forceDraw = true
       })
       this.element.addEventListener('contextmenu', (event: MouseEvent) => {
         this.selectedTrain = this.getTrainByCoordinate({
@@ -1059,5 +1061,9 @@ export default class CanvasDiagramView extends View {
   }
   private viewInTrainTimetableView(trainId: number, direction: 0 | 1, stationId: number) {
     this.app.showTrainTimetableView(this.diaIndex, direction, trainId, stationId)
+  }
+  public update() {
+    this.drawingData = this.calcDrawingData()
+    this.forceDraw = true
   }
 }
