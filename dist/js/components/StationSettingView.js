@@ -147,6 +147,7 @@ export default class StationSettingView extends View {
                             createButton('削除', 'form-button-red', () => {
                                 station.tracks.splice(i, 1);
                                 this.edit(stationIndex);
+                                this.updateRailmap();
                             }),
                         ]);
                         return fragment;
@@ -154,6 +155,7 @@ export default class StationSettingView extends View {
                     createButton('＋番線追加', '', () => {
                         station.addTrack();
                         this.edit(stationIndex);
+                        this.updateRailmap();
                     }),
                 ]),
             ]),
