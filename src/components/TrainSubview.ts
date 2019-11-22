@@ -280,10 +280,15 @@ export default class TrainSubview extends Subview {
         ttd.arrival = timeStringToNumber(departure.value) - timeStringToNumber(delta.value)
       }
     }
-    arrival.value = ttd.arrival !== null ? numberToTimeString(ttd.arrival, 'HH MM SS') : ''
-    departure.value = ttd.departure !== null ? numberToTimeString(ttd.departure, 'HH MM SS') : ''
-    delta.value =
-      ttd.arrival !== null && ttd.departure !== null ? numberToTimeString(ttd.departure - ttd.arrival, 'HH MM SS') : ''
+    if (arrival !== document.activeElement)
+      arrival.value = ttd.arrival !== null ? numberToTimeString(ttd.arrival, 'HH MM SS') : ''
+    if (departure !== document.activeElement)
+      departure.value = ttd.departure !== null ? numberToTimeString(ttd.departure, 'HH MM SS') : ''
+    if (delta !== document.activeElement)
+      delta.value =
+        ttd.arrival !== null && ttd.departure !== null
+          ? numberToTimeString(ttd.departure - ttd.arrival, 'HH MM SS')
+          : ''
     this.updateMainView()
     this.selectedTrain.train.timetable.update()
   }

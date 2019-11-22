@@ -46,12 +46,20 @@ export const createTimeField = (
     value,
     type: 'text',
   }) as HTMLInputElement
-  field.addEventListener('input', e => fieldInput(field, e))
-  field.addEventListener('keydown', e => fieldKeydown(field, e))
-  field.addEventListener('blur', e => fieldBlur(field))
+  field.addEventListener('input', e => timeFieldInput(field, e))
+  field.addEventListener('keydown', e => timeFieldKeydown(field, e))
+  field.addEventListener('blur', e => timeFieldBlur(field))
   if (onchange) {
     field.addEventListener('change', onchange)
     field.addEventListener('blur', onchange)
+    // 入力しながら
+    field.addEventListener('input', e => {
+      if (timeStringCheck(field.value)) onchange(e)
+    })
+    // 上下キー用
+    field.addEventListener('keydown', e => {
+      if (timeStringCheck(field.value)) onchange(e)
+    })
   }
   return field
 }
@@ -261,7 +269,7 @@ export const createLineStyleField = (
   return wrapper
 }
 
-const fieldInput = (field: HTMLInputElement, e: Event): void => {
+const timeFieldInput = (field: HTMLInputElement, e: Event): void => {
   e.stopPropagation()
   // 空白を無視したキャレット位置
   let value = field.value
@@ -293,7 +301,7 @@ const fieldInput = (field: HTMLInputElement, e: Event): void => {
   field.classList[!timeStringCheck(str) ? 'add' : 'remove']('invalid')
 }
 
-const fieldKeydown = (field: HTMLInputElement, e: KeyboardEvent): void => {
+const timeFieldKeydown = (field: HTMLInputElement, e: KeyboardEvent): void => {
   e.stopPropagation()
   // e.keyCode: 37← 38↑ 39→ 40↓
   const keyCode = e.keyCode
@@ -330,7 +338,7 @@ const fieldKeydown = (field: HTMLInputElement, e: KeyboardEvent): void => {
   }
 }
 
-const fieldBlur = (field: HTMLInputElement): void => {
+const timeFieldBlur = (field: HTMLInputElement): void => {
   const value = field.value
   if (timeStringCheck(value) && value.length < 7) {
     field.value += ' 00'
