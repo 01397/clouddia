@@ -144,7 +144,10 @@ export default class TrainTimetableView extends View {
       style: `height:${this.headerHeight}px`,
     }) as HTMLElement
     this.tStation = h('div', { id: 'tt-station' }) as HTMLElement
-    this.noTrainDialog = h('div', { id: 'tt-noTrain' }, '列車がありません') as HTMLDivElement
+    // this.noTrainDialog = h('div', { id: 'tt-noTrain' }, '列車がありません') as HTMLDivElement
+    this.noTrainDialog = h('div', { id: 'tt-noTrainButton', class: 'form-button' }, '＋列車を追加', () =>
+      this.insertTrain(0)
+    ) as HTMLDivElement
     this.element.append(this.tBody, this.tHeader, this.tStation, this.noTrainDialog)
     this.element.addEventListener('scroll', () => (this.rendering = true))
     const selectByClick = (event: MouseEvent) => {
@@ -458,9 +461,13 @@ export default class TrainTimetableView extends View {
   }
 
   private reuseColumn(oldIdx: number, newIdx: number, forceUpdate: boolean) {
+    const oldCol = this.columns.get(oldIdx)!
+    if (!(newIdx in this.sheet)) {
+      this.deleteColumn(oldIdx)
+      return
+    }
     const oldData = this.sheet[oldIdx]
     const newData = this.sheet[newIdx]
-    const oldCol = this.columns.get(oldIdx)!
     Array.from(oldCol.body.children).forEach((element: HTMLDivElement, i: number) => {
       if (oldData.cells[i].text !== newData.cells[i].text || forceUpdate) element.textContent = newData.cells[i].text
       if (oldData.cells[i].color !== newData.cells[i].color || forceUpdate) element.style.color = newData.cells[i].color
@@ -569,21 +576,30 @@ export default class TrainTimetableView extends View {
     const trainList = this.app.data.railway.diagrams[this.diaIndex].trains[this.direction]
     trainList.splice(index, 1)
     this.update()
+    if (index >= trainList.length) {
+      this.selectCell(trainList.length - 1, this.getActiveCell().row)
+    } else {
+      this.selectCell(index, this.getActiveCell().row)
+    }
   }
   private insertTrain(index: number) {
     const trainList = this.app.data.railway.diagrams[this.diaIndex].trains[this.direction]
     const train = new Train()
     train.direction = this.direction
     trainList.splice(index, 0, train)
-    this.selectCell(index, this.getActiveCell().row)
+    this.rendering = true
+    this.render()
     this.update()
+    requestAnimationFrame(() => this.selectCell(index, this.getActiveCell().row))
   }
   private cloneTrain(index: number) {
     const trainList = this.app.data.railway.diagrams[this.diaIndex].trains[this.direction]
     const train = trainList[index].clone()
     trainList.splice(index + 1, 0, train)
-    this.selectCell(index + 1, this.getActiveCell().row)
+    this.rendering = true
+    this.render()
     this.update()
+    requestAnimationFrame(() => this.selectCell(index + 1, this.getActiveCell().row))
   }
   private jumpToCell({ col, stationId }) {
     const viewWidth = this.element.offsetWidth
@@ -597,8 +613,13 @@ export default class TrainTimetableView extends View {
     this.selectCell(col, Number(target.dataset.address.split('-')[1]), 'select')
   }
   private selectCell(col: number, row: number, mode: 'select' | 'toggle' | 'adding' | 'deleting' = 'select') {
-    const target = document.querySelector(`[data-address="${col}-${row}"]`) as HTMLElement
-    if (!target.dataset.cellName) return
+    const target = document.querySelector(`[data-address="${col}-${row}"]`) as HTMLElement | null
+    if (!target || !target.dataset.cellName) {
+      this.selectedCell = []
+      this.focusElement.style.top = '-99px'
+      if (this.app.sub instanceof TrainSubview) this.app.sub.showStationTime(null)
+      return
+    }
     const [stationIndexString, cellType] = target.dataset.cellName.split('-')
     const stationIndex = Number(stationIndexString)
     const isExist = this.selectedCell.some(value => value[0] === col && value[1] === row)
