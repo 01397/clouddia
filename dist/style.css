@@ -31,6 +31,10 @@ html, body {
   font-size: 12px;
   overflow: hidden;
   font-weight: 300;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+      -ms-user-select: none;
+          user-select: none;
 }
 
 #app {
@@ -126,17 +130,14 @@ html, body {
 
 #toolbar {
   height: 24px;
+  display: flex;
+  cursor: default;
 }
 
 .toolbar-item {
   color: #eee;
   padding: 0 .5em;
   position: relative;
-}
-
-#toolbar {
-  display: flex;
-  cursor: default;
 }
 
 .toolbar-item:hover {
@@ -147,7 +148,8 @@ html, body {
   color: #eee;
   position: absolute;
   background-color: rgba(16, 16, 16, 0.8);
-  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+          backdrop-filter: blur(12px);
   min-width: 128px;
   border: 1px solid #000;
   border-radius: 6px;
@@ -233,7 +235,6 @@ html, body {
   height: 24px;
   overflow-x: hidden;
   white-space: nowrap;
-  -webkit-user-select: none;
   display: flex;
 }
 
@@ -315,6 +316,8 @@ html, body {
   font-weight: 500;
   padding: 2px 4px;
   width: 7em;
+  width: -webkit-max-content;
+  width: -moz-max-content;
   width: max-content;
   transition: transform .5s ease, opacity .5s ease, box-shadow .15s ease;
   transform: rotate(-20deg) scale(0);
@@ -404,7 +407,8 @@ html, body {
 }
 
 .start-drop-url-button {
-  appearance: none;
+  -moz-appearance: none;
+       appearance: none;
   -webkit-appearance: none;
   border-radius: 0 4px 4px 0;
   background-color: #a852ff;
@@ -455,7 +459,6 @@ html, body {
   line-height: 1;
   text-align: center;
   box-sizing: border-box;
-  -webkit-user-select: none;
   cursor: default;
 }
 
@@ -707,6 +710,10 @@ html, body {
   max-width: 700px;
   flex: 1;
   margin: 16px auto;
+  -webkit-user-select: text;
+     -moz-user-select: text;
+      -ms-user-select: text;
+          user-select: text;
 }
 
 .st-row {
@@ -798,6 +805,7 @@ html, body {
 }
 
 #st-tools-wrapper {
+  position: -webkit-sticky;
   position: sticky;
   top: 0;
   box-shadow: 0 -10px 2px 10px #00000088;
@@ -805,6 +813,8 @@ html, body {
 }
 
 #st-tools {
+  width: -webkit-max-content;
+  width: -moz-max-content;
   width: max-content;
   margin: auto;
   display: flex;
@@ -1194,7 +1204,8 @@ html, body {
   height: 32px;
   border: none;
   -webkit-appearance: none;
-  appearance: none;
+  -moz-appearance: none;
+       appearance: none;
   padding: 0 4px;
   font-size: 14px;
   font-weight: 500;
@@ -1224,6 +1235,14 @@ html, body {
 
 .form-color>input {
   display: none;
+}
+
+.form-selector::-webkit-input-placeholder, .form-time::-webkit-input-placeholder, .form-text::-webkit-input-placeholder, .form-text-multiline::-webkit-input-placeholder {
+  font-weight: 300;
+}
+
+.form-selector::-ms-input-placeholder, .form-time::-ms-input-placeholder, .form-text::-ms-input-placeholder, .form-text-multiline::-ms-input-placeholder {
+  font-weight: 300;
 }
 
 .form-selector::placeholder, .form-time::placeholder, .form-text::placeholder, .form-text-multiline::placeholder {
@@ -1341,7 +1360,8 @@ html, body {
   height: 32px;
   border: 1px solid rgba(168, 82, 255, 0.5);
   -webkit-appearance: none;
-  appearance: none;
+  -moz-appearance: none;
+       appearance: none;
   padding: 0 8px;
   font-size: 14px;
   font-weight: 500;
@@ -1450,7 +1470,8 @@ html, body {
   bottom: 0;
   opacity: 0;
   background-color: rgba(0, 0, 0, 0.0);
-  backdrop-filter: blur(0px);
+  -webkit-backdrop-filter: blur(0px);
+          backdrop-filter: blur(0px);
   transition: opacity 0.3s linear, background-color 0.3s linear;
   pointer-events: none;
 }
@@ -1458,7 +1479,8 @@ html, body {
 .dialog-wrapper.show {
   opacity: 1;
   background-color: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+          backdrop-filter: blur(2px);
   pointer-events: all;
   animation: dialog-appear .2s linear 0s 1;
 }
