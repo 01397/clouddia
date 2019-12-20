@@ -43,10 +43,12 @@ export const createTimeField = (value, className = null, onchange) => {
     if (onchange) {
         field.addEventListener('change', onchange);
         field.addEventListener('blur', onchange);
+        // 入力しながら
         field.addEventListener('input', e => {
             if (timeStringCheck(field.value))
                 onchange(e);
         });
+        // 上下キー用
         field.addEventListener('keydown', e => {
             if (timeStringCheck(field.value))
                 onchange(e);
