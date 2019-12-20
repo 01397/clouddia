@@ -1,5 +1,5 @@
 import App from '../App.js'
-import { Station, Train, StationTime } from '../DiagramParser.js'
+import { Station, Train } from '../DiagramParser.js'
 import { DASH_ARRAY_STYLE, getDistance2, h, numberToTimeString, Menu } from '../Util.js'
 import View from './View.js'
 import TrainSubview from './TrainSubview.js'
@@ -11,13 +11,6 @@ type drawingDataItem = Array<{
   trainNumber: string
   trainName: string
 }>
-
-type TrainSelection = {
-  direction: 0 | 1
-  trainIndex: number
-  diaIndex: number
-  stationIndex: number
-} | null
 
 // CanvasDiagramView.js (module)
 // ダイヤグラムを表示する。斜め線いっぱいのやつ。
@@ -115,7 +108,12 @@ export default class CanvasDiagramView extends View {
     trainIndex: number
     diaIndex: number
   } | null
-  private selectedTrain: TrainSelection
+  private selectedTrain: {
+    direction: 0 | 1
+    trainIndex: number
+    diaIndex: number
+    stationIndex: number
+  } | null
   private dgViewWrapper: HTMLElement
   /**
    *
@@ -609,70 +607,6 @@ export default class CanvasDiagramView extends View {
     }
     return result
   }
-  private getTrainFullPath(train: Train, height: number): Array<boolean | number> {
-    let result: {x: number, y: number, type: 'arrival' | 'departure', }[] = []
-    const timetable = train.timetable
-    // trueなら線は接続する
-    let connection = false
-    // 上り列車のパスを計算するときは下から座標を引いていく
-    let y = train.direction === 0 ? 1 : height
-    // 上り列車の時はy座標を減らしていく
-    const sign = train.direction === 0 ? 1 : -1
-    // 最後に描画した地点のX座標
-    let lastX = -1
-    // 最後の停車駅からのY座標を進んだ距離(経由なしの区間を除く)
-    let distance = 0
-    // 通過中に経由なしに入った場合には次の停車駅までx座標が決まらないので、y座標とその時点でのdistanceを控えておく。
-    let pendingPoints: Array<[number, number]> = []
-    // 1駅ずつ見ていくよ！
-    for (let i = 0; i < timetable.data.length; i++) {
-      const val = timetable.data[i]
-      // 今回y座標を進む距離。
-      const d = this.stationDistance[train.direction === 0 ? i : this.stationDistance.length - 1 - i]
-      const delta = sign * (d === Number.MAX_SAFE_INTEGER ? 1 : d)
-      if (val) {
-        // 経由なしから飛び出した時。
-        if (lastX !== -1 && !(i - 1 in timetable.data)) {
-          pendingPoints.push([y, distance])
-        }
-        // 経由なしを通って停車駅まできたら、控えておいた点を結ぶ
-        if (pendingPoints.length !== 0 && (val.departure !== null || val.arrival !== null)) {
-          const x = this.getRelativeTime((val.arrival || val.departure)!)
-          for (let k = 0; k < pendingPoints.length; k++) {
-            result.push(k % 2 === 0, ((x - lastX) * pendingPoints[k][1]) / distance + lastX, pendingPoints[k][0])
-          }
-          pendingPoints = []
-        }
-        // 到着時刻
-        if (val.arrival !== null) {
-          const x = this.getRelativeTime(val.arrival)
-          // 非接続点の連続は無駄よ
-          if (connection === false && result[result.length - 3] === false) result = result.slice(0, -3)
-          result.push(connection, x, y)
-          lastX = x
-        }
-        // 出発時刻
-        if (val.departure !== null && val.departure !== val.arrival) {
-          const x = this.getRelativeTime(val.departure)
-          if (connection === false && result[result.length - 3] === false) result = result.slice(0, -3)
-          result.push(connection, x, y)
-          lastX = x
-        }
-        // 線を描いたら、distanceリセット
-        if (val.departure !== null || val.arrival !== null) {
-          connection = true
-          distance = 0
-        }
-        // 経由なしに飛び込む時、そのy座標を控える(始発駅を除く)
-        if (lastX !== -1 && i in timetable.data && !(i + 1 in timetable.data)) {
-          pendingPoints.push([y, distance])
-        }
-        if (val) distance += delta
-      }
-      y += delta
-    }
-    return result
-  }
 
   /**
    * 拡大縮小のアニメーションを計算
@@ -709,12 +643,23 @@ export default class CanvasDiagramView extends View {
 
   /* クリックやタップにより列車を選択 */
   // x, yはクリック座標
-  private getTrainByCoordinate({ x, y }: { x: number; y: number }): TrainSelection {
+  private getTrainByCoordinate({
+    x,
+    y,
+  }: {
+    x: number
+    y: number
+  }): {
+    direction: 0 | 1
+    trainIndex: number
+    diaIndex: number
+    stationIndex: number
+  } | null {
     const x0 = this.lastPosition.x + x * this.devicePixelRatio - this.paddingLeft
     const y0 = this.lastPosition.y + y * this.devicePixelRatio - this.paddingTop
     const dMax = 81 * this.devicePixelRatio
     let minDistance = dMax
-    let result: TrainSelection = null
+    let result
     const func = (
       trains: Array<{
         path: Array<number | boolean>
@@ -722,7 +667,7 @@ export default class CanvasDiagramView extends View {
         trainNumber: string
         trainName: string
       }>,
-      direction: 0 | 1
+      direction: number
     ) => {
       const trainLength = trains.length
       for (let i = 0; i < trainLength; i++) {
@@ -753,31 +698,16 @@ export default class CanvasDiagramView extends View {
     }
     if (this.visibleOutbound) func(this.drawingData.outbound, 0)
     if (this.visibleInbound) func(this.drawingData.inbound, 1)
-    if (minDistance >= dMax || result === null) return null
-    result!.stationIndex = this.getStationIndexFromY(y0)
-    return result
-  }
-  private getHandleFromCoordinate(x: number, y: number, path: number[], timetable: StationTime) {
-    const x0 = this.lastPosition.x + x * this.devicePixelRatio - this.paddingLeft
-    const y0 = this.lastPosition.y + y * this.devicePixelRatio - this.paddingTop
-    const dMax = 8 * this.devicePixelRatio
-    const stationIndex = this.getStationIndexFromY(y0)
-    const sd = this.drawingData.totalDistance[stationIndex]
-    for (let i = 2; i < path.length; i += 3) {
-      if (i === sd) {
-
-      }
-    }
-  }
-  private getStationIndexFromY(y0: number): number {
+    if (minDistance >= dMax) return null
     const ya = y0 / this.yScale
     let stationIndex = this.drawingData.totalDistance.findIndex(value => ya < value)
     if (
       stationIndex !== 0 &&
       (this.drawingData.totalDistance[stationIndex - 1] + this.drawingData.totalDistance[stationIndex]) / 2 > ya
     )
-      stationIndex -= 1
-    return stationIndex
+      stationIndex--
+    result.stationIndex = stationIndex
+    return result
   }
   /**
    * 画面描画
@@ -1071,33 +1001,20 @@ export default class CanvasDiagramView extends View {
       const train = this.app.data.railway.diagrams[this.selectedTrain.diaIndex].trains[this.selectedTrain.direction][
         this.selectedTrain.trainIndex
       ]
-      let prevSelected = false
       this.context.fillStyle = '#ffffff'
-      this.context.strokeStyle = '#444444' //this.app.data.railway.trainTypes[train.type].strokeColor.toHEXString()
-      this.context.lineWidth = 1 * this.devicePixelRatio
-      const drawMark = ({ time, stationId, selected }: { time: number; stationId: number; selected: boolean }) => {
+      this.context.strokeStyle = this.app.data.railway.trainTypes[train.type].strokeColor.toHEXString()
+      const drawMark = (time, stationId) => {
         const rx = this.getRelativeTime(time) * this.xScale
         this.context.beginPath()
-        this.context.arc(
-          xl + rx,
-          yt + this.drawingData.totalDistance[stationId] * this.yScale,
-          4 * this.devicePixelRatio,
-          0,
-          Math.PI * 2
-        )
-        if (prevSelected !== selected) {
-          this.context.fillStyle = selected ? '#bf80ff' : '#ffffff'
-          prevSelected = selected
-        }
+        this.context.arc(xl + rx, yt + this.drawingData.totalDistance[stationId] * this.yScale, 3, 0, Math.PI * 2)
         this.context.fill()
         this.context.stroke()
         this.context.closePath()
       }
       train.timetable.data.forEach((time, i) => {
         const stationId = train.direction === 0 ? i : this.stationDistance.length - i
-        const selected = this.selectedTrain!.stationIndex === stationId
-        if (time.departure !== null) drawMark({ time: time.departure, stationId, selected })
-        if (time.arrival !== null) drawMark({ time: time.arrival, stationId, selected })
+        if (time.departure !== null) drawMark(time.departure, stationId)
+        if (time.arrival !== null) drawMark(time.arrival, stationId)
       })
     }
     this.context.restore()
