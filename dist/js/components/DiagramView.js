@@ -478,12 +478,12 @@ export default class CanvasDiagramView extends View {
     }
     /* クリックやタップにより列車を選択 */
     // x, yはクリック座標
-    getTrainByCoordinate({ x, y, }) {
+    getTrainByCoordinate({ x, y }) {
         const x0 = this.lastPosition.x + x * this.devicePixelRatio - this.paddingLeft;
         const y0 = this.lastPosition.y + y * this.devicePixelRatio - this.paddingTop;
         const dMax = 81 * this.devicePixelRatio;
         let minDistance = dMax;
-        let result;
+        let result = null;
         const func = (trains, direction) => {
             const trainLength = trains.length;
             for (let i = 0; i < trainLength; i++) {
@@ -518,7 +518,7 @@ export default class CanvasDiagramView extends View {
             func(this.drawingData.outbound, 0);
         if (this.visibleInbound)
             func(this.drawingData.inbound, 1);
-        if (minDistance >= dMax)
+        if (minDistance >= dMax || result == null)
             return null;
         const ya = y0 / this.yScale;
         let stationIndex = this.drawingData.totalDistance.findIndex(value => ya < value);
@@ -794,22 +794,29 @@ export default class CanvasDiagramView extends View {
         this.context.save();
         if (this.selectedTrain !== null) {
             const train = this.app.data.railway.diagrams[this.selectedTrain.diaIndex].trains[this.selectedTrain.direction][this.selectedTrain.trainIndex];
+            let prevSelected = false;
             this.context.fillStyle = '#ffffff';
-            this.context.strokeStyle = this.app.data.railway.trainTypes[train.type].strokeColor.toHEXString();
-            const drawMark = (time, stationId) => {
+            this.context.strokeStyle = '#444444'; //this.app.data.railway.trainTypes[train.type].strokeColor.toHEXString()
+            this.context.lineWidth = 1 * this.devicePixelRatio;
+            const drawMark = ({ time, stationId, selected }) => {
                 const rx = this.getRelativeTime(time) * this.xScale;
                 this.context.beginPath();
-                this.context.arc(xl + rx, yt + this.drawingData.totalDistance[stationId] * this.yScale, 3, 0, Math.PI * 2);
+                this.context.arc(xl + rx, yt + this.drawingData.totalDistance[stationId] * this.yScale, 4 * this.devicePixelRatio, 0, Math.PI * 2);
+                if (prevSelected !== selected) {
+                    this.context.fillStyle = selected ? '#a852ff' : '#ffffff';
+                    prevSelected = selected;
+                }
                 this.context.fill();
                 this.context.stroke();
                 this.context.closePath();
             };
             train.timetable.data.forEach((time, i) => {
                 const stationId = train.direction === 0 ? i : this.stationDistance.length - i;
+                const selected = this.selectedTrain.stationIndex == i;
                 if (time.departure !== null)
-                    drawMark(time.departure, stationId);
+                    drawMark({ time: time.departure, stationId, selected });
                 if (time.arrival !== null)
-                    drawMark(time.arrival, stationId);
+                    drawMark({ time: time.arrival, stationId, selected });
             });
         }
         this.context.restore();
