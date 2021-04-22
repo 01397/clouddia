@@ -10,6 +10,10 @@ export default class CanvasDiagramView extends View {
      */
     constructor(app, diaIndex, direction, trainId, stationId) {
         super(app, 'Diagram');
+        /**
+         * タッチ開始位置
+         */
+        this.touchStartPosition = null;
         this.devicePixelRatio = window.devicePixelRatio; // そのうち低解像度にする設定でもつける？ iPad mini2だとキツイ。ここを下げるだけ
         this.diaIndex = diaIndex;
         // 利用するデータ群
@@ -137,9 +141,9 @@ export default class CanvasDiagramView extends View {
         this.context = this.canvas.getContext('2d', { alpha: false });
         this.canvasWrapper.appendChild(this.canvas);
         if ('ontouchstart' in document && 'orientation' in window) {
-            this.element.addEventListener('touchstart', e => this.touchstart(e), true);
-            this.element.addEventListener('touchmove', e => this.pinchScaling(e), false);
-            this.element.addEventListener('touchend', () => this.pinchEnd(), false);
+            this.element.addEventListener('touchstart', (e) => this.touchstart(e), true);
+            this.element.addEventListener('touchmove', (e) => { this.touchMove(e); this.pinchScaling(e); }, false);
+            this.element.addEventListener('touchend', (e) => { this.touchEnd(e); this.pinchEnd(); }, false);
             this.element.addEventListener('touchend', e => {
                 const rect = e.currentTarget.getBoundingClientRect();
                 this.pointerPosition = {
@@ -165,48 +169,13 @@ export default class CanvasDiagramView extends View {
                 const x = e.offsetX;
                 const y = e.offsetY;
                 this.pointerPosition = { x, y };
-                if (this.dragStart && this.draggedTrain) {
-                    const dt = Math.round((x - this.dragStart.x) / this.xScale * this.devicePixelRatio) * 60;
-                    if (dt === 0)
-                        return;
-                    this.dragStart = { x, y };
-                    const train = this.app.data.railway.diagrams[this.draggedTrain.diaIndex].trains[this.draggedTrain.direction][this.draggedTrain.trainIndex];
-                    for (const td of train.timetable.data) {
-                        if (!td)
-                            continue;
-                        if (td.arrival != null)
-                            td.arrival += dt;
-                        if (td.departure != null)
-                            td.departure += dt;
-                    }
-                }
-                this.update();
+                this.dragTrain();
                 this.pointerMoved = true;
-                this.forceDraw = true;
             });
             this.element.addEventListener('mouseup', e => {
                 this.dragStart = null;
             });
-            this.element.addEventListener('click', e => {
-                this.forceDraw = true;
-                this.selectedTrain = this.getTrainByCoordinate({
-                    x: e.offsetX,
-                    y: e.offsetY,
-                });
-                if (!(this.app.sub instanceof TrainSubview))
-                    return;
-                if (this.selectedTrain === null) {
-                    this.app.sub.showStationTime(null);
-                }
-                else {
-                    const { direction, trainIndex, stationIndex } = this.selectedTrain;
-                    this.app.sub.showStationTime({
-                        stationIndex,
-                        direction,
-                        train: this.app.data.railway.diagrams[this.diaIndex].trains[direction][trainIndex],
-                    });
-                }
-            });
+            this.element.addEventListener('click', e => this.selectTrain(e.offsetX, e.offsetY));
             this.element.addEventListener('contextmenu', (event) => {
                 this.selectedTrain = this.getTrainByCoordinate({
                     x: event.offsetX,
@@ -257,6 +226,26 @@ export default class CanvasDiagramView extends View {
         this.canvasWrapper.style.height = height / this.devicePixelRatio + 'px';
     }
     /**
+     * 列車を選択表示に切り替え、サブビューに表示
+     */
+    selectTrain(x, y) {
+        this.forceDraw = true;
+        this.selectedTrain = this.getTrainByCoordinate({ x, y });
+        if (!(this.app.sub instanceof TrainSubview))
+            return;
+        if (this.selectedTrain === null) {
+            this.app.sub.showStationTime(null);
+        }
+        else {
+            const { direction, trainIndex, stationIndex } = this.selectedTrain;
+            this.app.sub.showStationTime({
+                stationIndex,
+                direction,
+                train: this.app.data.railway.diagrams[this.diaIndex].trains[direction][trainIndex],
+            });
+        }
+    }
+    /**
      * 表示倍率変更
      */
     scale(newXScale = this.xScale, newYScale = this.yScale, animation = false) {
@@ -284,6 +273,13 @@ export default class CanvasDiagramView extends View {
         if (event.touches.length > 1 && event.cancelable) {
             event.preventDefault();
         }
+        const rect = event.currentTarget.getBoundingClientRect();
+        this.touchStartPosition = {
+            x: event.touches[0].clientX - rect.left,
+            y: event.touches[0].clientY - rect.top
+        };
+        this.touchStartTime = performance.now();
+        this.touchDragWaiting = true;
     }
     /**
      * ピンチによる拡大縮小(モバイル)
@@ -337,6 +333,63 @@ export default class CanvasDiagramView extends View {
      */
     pinchEnd() {
         this.isScaling = false;
+    }
+    touchMove(e) {
+        const rect = e.currentTarget.getBoundingClientRect();
+        this.pointerPosition = {
+            x: e.changedTouches[0].clientX - rect.left,
+            y: e.changedTouches[0].clientY - rect.top,
+        };
+        if (this.dragStart) {
+            this.dragTrain();
+            this.update();
+            this.forceDraw = true;
+        }
+        if (this.touchDragWaiting === false || !this.touchStartPosition)
+            return;
+        const x1 = e.touches[0].clientX;
+        const y1 = e.touches[0].clientY;
+        if (performance.now() - this.touchStartTime < 200) {
+            const { x, y } = this.touchStartPosition;
+            if ((x - x1) ** 2 + (y - y1) ** 2 < 5 ** 2)
+                return;
+            this.touchDragWaiting = false;
+        }
+        else {
+            this.touchDragWaiting = false;
+            this.dragStart = this.touchStartPosition;
+            this.draggedTrain = this.getTrainByCoordinate(this.touchStartPosition);
+        }
+    }
+    touchEnd(e) {
+        if (performance.now() - this.touchStartTime < 200 && this.touchDragWaiting == true && this.touchStartPosition) {
+            const { x, y } = this.touchStartPosition;
+            this.selectTrain(x, y);
+        }
+        this.touchStartPosition = null;
+        this.touchStartTime = 0;
+        this.touchDragWaiting = false;
+        this.dragStart = null;
+        this.draggedTrain = null;
+    }
+    dragTrain() {
+        const { x, y } = this.pointerPosition;
+        if (this.dragStart && this.draggedTrain) {
+            const dt = Math.round((x - this.dragStart.x) / this.xScale * this.devicePixelRatio) * 60;
+            if (dt === 0)
+                return;
+            console.log('move');
+            this.dragStart = { x, y };
+            const train = this.app.data.railway.diagrams[this.draggedTrain.diaIndex].trains[this.draggedTrain.direction][this.draggedTrain.trainIndex];
+            for (const td of train.timetable.data) {
+                if (!td)
+                    continue;
+                if (td.arrival != null)
+                    td.arrival += dt;
+                if (td.departure != null)
+                    td.departure += dt;
+            }
+        }
     }
     // 駅間距離(描画用)
     getStationDistanceArray() {
