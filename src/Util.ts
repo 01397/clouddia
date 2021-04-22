@@ -608,7 +608,7 @@ function checkAppleDevice() {
   return device === 'macOS' || device === 'iPad' || device === 'iPhone'
 }
 export class Menu {
-  private element: HTMLElement | null
+  private element?: HTMLElement | null
   private child: Menu | null
   private closed: boolean
   public items: MenuItem[]

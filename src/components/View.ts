@@ -17,6 +17,7 @@ export default abstract class View {
 
     // お疲れ様、前mainViewの終了
     if (app.main) app.main.finish()
+    // @ts-ignore
     delete app.main
 
     // EventListenerなどのしがらみのない、まっとうなDIVを取り戻す

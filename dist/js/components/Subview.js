@@ -5,6 +5,7 @@ export default class Subview {
         // お疲れ様、前subViewの終了
         if (app.sub)
             app.sub.finish();
+        // @ts-ignore
         delete app.sub;
         // EventListenerなどのしがらみのない、まっとうなDIVを取り戻す
         const newDiv = h('div', { id: 'subView' });
