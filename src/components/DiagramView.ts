@@ -3,6 +3,7 @@ import { Station, Train } from '../DiagramParser.js'
 import { DASH_ARRAY_STYLE, getDistance2, h, numberToTimeString, Menu } from '../Util.js'
 import View from './View.js'
 import TrainSubview from './TrainSubview.js'
+import { textChangeRangeIsUnchanged } from '../../../../../node_modules/typescript/lib/typescript.js'
 type drawingDataItem = Array<{
   path: Array<number | boolean>
   color: string
@@ -86,6 +87,15 @@ export default class CanvasDiagramView extends View {
   private canvasWrapper: HTMLElement
   private canvas: HTMLCanvasElement
   private context: CanvasRenderingContext2D
+  private dragStart: {
+    x: number;
+    y: number;
+  } | null;
+  private draggedTrain: {
+    direction: number
+    trainIndex: number
+    diaIndex: number
+  } | null;
   private pinchStart: {
     x0: number
     y0: number
@@ -297,11 +307,38 @@ export default class CanvasDiagramView extends View {
         this.forceDraw = true
       })
     } else {
+      this.element.addEventListener('mousedown', e => {
+        const x = e.offsetX;
+        const y = e.offsetY;
+        this.draggedTrain = this.getTrainByCoordinate({
+          x, y
+        });
+        this.dragStart = {
+          x, y
+        };
+      })
       this.element.addEventListener('mousemove', e => {
-        this.pointerPosition = { x: e.offsetX, y: e.offsetY }
+        const x = e.offsetX;
+        const y = e.offsetY;
+        this.pointerPosition = { x, y }
+        if (this.dragStart && this.draggedTrain) {
+          const dt = Math.round((x - this.dragStart.x) / this.xScale * this.devicePixelRatio) * 60;
+          if (dt === 0) return;
+          this.dragStart = {x, y}
+          const train = this.app.data.railway.diagrams[this.draggedTrain.diaIndex].trains[this.draggedTrain.direction][this.draggedTrain.trainIndex]
+          for (const td of train.timetable.data) {
+            if(!td) continue
+            if (td.arrival != null) td.arrival += dt
+            if (td.departure != null) td.departure += dt
+          }
+        }
+        this.update();
         this.pointerMoved = true
         this.forceDraw = true
       })
+      this.element.addEventListener('mouseup', e => {
+        this.dragStart = null;
+      });
       this.element.addEventListener('click', e => {
         this.forceDraw = true
         this.selectedTrain = this.getTrainByCoordinate({

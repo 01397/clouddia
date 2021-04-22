@@ -151,10 +151,41 @@ export default class CanvasDiagramView extends View {
             });
         }
         else {
+            this.element.addEventListener('mousedown', e => {
+                const x = e.offsetX;
+                const y = e.offsetY;
+                this.draggedTrain = this.getTrainByCoordinate({
+                    x, y
+                });
+                this.dragStart = {
+                    x, y
+                };
+            });
             this.element.addEventListener('mousemove', e => {
-                this.pointerPosition = { x: e.offsetX, y: e.offsetY };
+                const x = e.offsetX;
+                const y = e.offsetY;
+                this.pointerPosition = { x, y };
+                if (this.dragStart && this.draggedTrain) {
+                    const dt = Math.round((x - this.dragStart.x) / this.xScale * this.devicePixelRatio) * 60;
+                    if (dt === 0)
+                        return;
+                    this.dragStart = { x, y };
+                    const train = this.app.data.railway.diagrams[this.draggedTrain.diaIndex].trains[this.draggedTrain.direction][this.draggedTrain.trainIndex];
+                    for (const td of train.timetable.data) {
+                        if (!td)
+                            continue;
+                        if (td.arrival != null)
+                            td.arrival += dt;
+                        if (td.departure != null)
+                            td.departure += dt;
+                    }
+                }
+                this.update();
                 this.pointerMoved = true;
                 this.forceDraw = true;
+            });
+            this.element.addEventListener('mouseup', e => {
+                this.dragStart = null;
             });
             this.element.addEventListener('click', e => {
                 this.forceDraw = true;
