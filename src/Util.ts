@@ -147,19 +147,20 @@ export const createColorField = (
   value: string,
   className: string | null = null,
   onchange?: (e: Event) => void
-): HTMLLabelElement => {
-  const colorField = h('input', { type: 'color', value }) as HTMLInputElement
-  const label = h(
-    'label',
-    { class: 'form-color' + (className == null ? '' : ' ' + className), tabindex: 0 },
-    colorField
-  ) as HTMLLabelElement
-  label.style.backgroundColor = value
+): HTMLInputElement => {
+  const colorField = h('input', { type: 'color', value, class: 'form-color' + (className == null ? '' : ' ' + className) }) as HTMLInputElement
+  // const label = h(
+  //   'label',
+  //   { class: 'form-color' + (className == null ? '' : ' ' + className), tabindex: 0 },
+  //   colorField
+  // ) as HTMLLabelElement
+  // label.style.backgroundColor = value
   if (onchange) colorField.addEventListener('change', onchange)
-  colorField.addEventListener('input', () => {
-    label.style.backgroundColor = colorField.value
-  })
-  return label
+  // colorField.addEventListener('input', () => {
+  //   label.style.backgroundColor = colorField.value
+  // })
+  // return label
+  return colorField
 }
 
 export const createLineStyleField = (

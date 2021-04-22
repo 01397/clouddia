@@ -103,15 +103,20 @@ export const createButton = (value, className = null, onclick) => {
     return h('input', { class: 'form-button' + (className == null ? '' : ' ' + className), type: 'button', value }, null, onclick);
 };
 export const createColorField = (value, className = null, onchange) => {
-    const colorField = h('input', { type: 'color', value });
-    const label = h('label', { class: 'form-color' + (className == null ? '' : ' ' + className), tabindex: 0 }, colorField);
-    label.style.backgroundColor = value;
+    const colorField = h('input', { type: 'color', value, class: 'form-color' + (className == null ? '' : ' ' + className) });
+    // const label = h(
+    //   'label',
+    //   { class: 'form-color' + (className == null ? '' : ' ' + className), tabindex: 0 },
+    //   colorField
+    // ) as HTMLLabelElement
+    // label.style.backgroundColor = value
     if (onchange)
         colorField.addEventListener('change', onchange);
-    colorField.addEventListener('input', () => {
-        label.style.backgroundColor = colorField.value;
-    });
-    return label;
+    // colorField.addEventListener('input', () => {
+    //   label.style.backgroundColor = colorField.value
+    // })
+    // return label
+    return colorField;
 };
 export const createLineStyleField = (value, className = null, onchange) => {
     const changeValue = (newValue) => {
