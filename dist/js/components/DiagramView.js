@@ -342,8 +342,6 @@ export default class CanvasDiagramView extends View {
         };
         if (this.dragStart) {
             this.dragTrain();
-            this.update();
-            this.forceDraw = true;
         }
         if (this.touchDragWaiting === false || !this.touchStartPosition)
             return;
@@ -378,7 +376,6 @@ export default class CanvasDiagramView extends View {
             const dt = Math.round((x - this.dragStart.x) / this.xScale * this.devicePixelRatio) * 60;
             if (dt === 0)
                 return;
-            console.log('move');
             this.dragStart = { x, y };
             const train = this.app.data.railway.diagrams[this.draggedTrain.diaIndex].trains[this.draggedTrain.direction][this.draggedTrain.trainIndex];
             for (const td of train.timetable.data) {
@@ -390,6 +387,8 @@ export default class CanvasDiagramView extends View {
                     td.departure += dt;
             }
         }
+        this.update();
+        this.forceDraw = true;
     }
     // 駅間距離(描画用)
     getStationDistanceArray() {
