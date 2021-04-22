@@ -44,22 +44,22 @@ export default class TrainTimetableView extends View {
             {
                 label: '停車',
                 accelerator: 'S',
-                click: () => this.changeStopType(this.getActiveCell(), 1),
+                click: () => this.changeStopType(this.getActiveCell(), 1, this.direction),
             },
             {
                 label: '通過',
                 accelerator: 'D',
-                click: () => this.changeStopType(this.getActiveCell(), 2),
+                click: () => this.changeStopType(this.getActiveCell(), 2, this.direction),
             },
             {
                 label: '運行なし',
                 accelerator: 'F',
-                click: () => this.changeStopType(this.getActiveCell(), 3),
+                click: () => this.changeStopType(this.getActiveCell(), 3, this.direction),
             },
             {
                 label: '時刻を消去',
                 accelerator: 'Backspace',
-                click: () => this.eraceTime(this.getActiveCell()),
+                click: () => this.eraceTime(this.getActiveCell(), this.direction),
             },
             { type: 'separator' },
             {
@@ -427,8 +427,11 @@ export default class TrainTimetableView extends View {
             this.app.sub.focusField(this.getActiveCell().cellType);
         }
     }
-    changeStopType({ col, stationIndex }, type) {
-        const timetable = this.app.data.railway.diagrams[this.diaIndex].trains[this.direction][col].timetable;
+    changeStopType(cell, type, direction) {
+        const timetable = this.app.data.railway.diagrams[this.diaIndex].trains[this.direction][cell.col].timetable;
+        const stationIndex = direction === 0
+            ? cell.stationIndex
+            : this.app.data.railway.stations.length - cell.stationIndex - 1;
         if (!(stationIndex in timetable.data)) {
             timetable.data[stationIndex] = {
                 arrival: null,
@@ -585,8 +588,11 @@ export default class TrainTimetableView extends View {
                 train: this.app.data.railway.diagrams[this.diaIndex].trains[this.direction][col],
             });
     }
-    eraceTime({ col, stationIndex }) {
-        const timetable = this.app.data.railway.diagrams[this.diaIndex].trains[this.direction][col].timetable;
+    eraceTime(cell, direction) {
+        const timetable = this.app.data.railway.diagrams[this.diaIndex].trains[this.direction][cell.col].timetable;
+        const stationIndex = direction === 0
+            ? cell.stationIndex
+            : this.app.data.railway.stations.length - cell.stationIndex - 1;
         if (!(stationIndex in timetable.data))
             return;
         timetable.data[stationIndex].arrival = null;
