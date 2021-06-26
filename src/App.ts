@@ -93,7 +93,7 @@ export default class App {
   private menu: MenuItem[]
 
   constructor(root: Element) {
-    this.version = '0.4.1'
+    this.version = '0.4.2'
     this.sidebarElm = h('aside', { id: 'sidebar' }, null)
     this.toolbarElm = h('div', { id: 'toolbar' }, null)
     this.tabbarElm = h('div', { id: 'tabbar' }, null)
