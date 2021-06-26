@@ -813,6 +813,8 @@ export class StationTime {
       }
       result += ','
     }
+    // remove the last comma
+    result = result.slice(0, -1)
     return result
   }
 }
