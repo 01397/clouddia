@@ -511,9 +511,7 @@ export default class TrainTimetableView extends View {
   private changeStopType(cell: { col: number; stationIndex: number }, type: number, direction: 0 | 1) {
     const timetable = this.app.data.railway.diagrams[this.diaIndex].trains[this.direction][cell.col].timetable
     const stationIndex =
-          direction === 0
-            ? cell.stationIndex
-            : this.app.data.railway.stations.length - cell.stationIndex - 1
+      direction === 0 ? cell.stationIndex : this.app.data.railway.stations.length - cell.stationIndex - 1
     if (!(stationIndex in timetable.data)) {
       timetable.data[stationIndex] = {
         arrival: null,
@@ -668,9 +666,7 @@ export default class TrainTimetableView extends View {
   private eraceTime(cell: { col: number; stationIndex: number }, direction: 0 | 1) {
     const timetable = this.app.data.railway.diagrams[this.diaIndex].trains[this.direction][cell.col].timetable
     const stationIndex =
-      direction === 0
-        ? cell.stationIndex
-        : this.app.data.railway.stations.length - cell.stationIndex - 1
+      direction === 0 ? cell.stationIndex : this.app.data.railway.stations.length - cell.stationIndex - 1
 
     if (!(stationIndex in timetable.data)) return
     timetable.data[stationIndex].arrival = null

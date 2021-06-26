@@ -141,9 +141,15 @@ export default class CanvasDiagramView extends View {
         this.context = this.canvas.getContext('2d', { alpha: false });
         this.canvasWrapper.appendChild(this.canvas);
         if ('ontouchstart' in document && 'orientation' in window) {
-            this.element.addEventListener('touchstart', (e) => this.touchstart(e), true);
-            this.element.addEventListener('touchmove', (e) => { this.touchMove(e); this.pinchScaling(e); }, false);
-            this.element.addEventListener('touchend', (e) => { this.touchEnd(e); this.pinchEnd(); }, false);
+            this.element.addEventListener('touchstart', e => this.touchstart(e), true);
+            this.element.addEventListener('touchmove', e => {
+                this.touchMove(e);
+                this.pinchScaling(e);
+            }, false);
+            this.element.addEventListener('touchend', e => {
+                this.touchEnd(e);
+                this.pinchEnd();
+            }, false);
             this.element.addEventListener('touchend', e => {
                 const rect = e.currentTarget.getBoundingClientRect();
                 this.pointerPosition = {
@@ -159,10 +165,12 @@ export default class CanvasDiagramView extends View {
                 const x = e.offsetX;
                 const y = e.offsetY;
                 this.draggedTrain = this.getTrainByCoordinate({
-                    x, y
+                    x,
+                    y,
                 });
                 this.dragStart = {
-                    x, y
+                    x,
+                    y,
                 };
             });
             this.element.addEventListener('mousemove', e => {
@@ -276,7 +284,7 @@ export default class CanvasDiagramView extends View {
         const rect = event.currentTarget.getBoundingClientRect();
         this.touchStartPosition = {
             x: event.touches[0].clientX - rect.left,
-            y: event.touches[0].clientY - rect.top
+            y: event.touches[0].clientY - rect.top,
         };
         this.touchStartTime = performance.now();
         this.touchDragWaiting = true;
@@ -323,7 +331,7 @@ export default class CanvasDiagramView extends View {
                         this.paddingLeft),
                     Math.max(0, ((this.pinchStart.py + this.pinchStart.y0 - this.paddingTop) * dy) / this.pinchStart.dy -
                         y0 +
-                        this.paddingTop), // top
+                        this.paddingTop),
                 ],
             ];
         }
@@ -373,7 +381,7 @@ export default class CanvasDiagramView extends View {
     dragTrain() {
         const { x, y } = this.pointerPosition;
         if (this.dragStart && this.draggedTrain) {
-            const dt = Math.round((x - this.dragStart.x) / this.xScale * this.devicePixelRatio) * 60;
+            const dt = Math.round(((x - this.dragStart.x) / this.xScale) * this.devicePixelRatio) * 60;
             if (dt === 0)
                 return;
             this.dragStart = { x, y };

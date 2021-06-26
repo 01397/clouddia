@@ -90,25 +90,25 @@ export default class CanvasDiagramView extends View {
   /**
    * 長押し判定待ち
    */
-  private touchDragWaiting: boolean;
+  private touchDragWaiting: boolean
   /**
    * タッチ開始時刻
    */
-  private touchStartTime: number;
+  private touchStartTime: number
   /**
    * タッチ開始位置
    */
-  private touchStartPosition: { x: number; y: number } | null = null;
+  private touchStartPosition: { x: number; y: number } | null = null
 
   private dragStart: {
-    x: number;
-    y: number;
-  } | null;
+    x: number
+    y: number
+  } | null
   private draggedTrain: {
     direction: number
     trainIndex: number
     diaIndex: number
-  } | null;
+  } | null
   private pinchStart: {
     x0: number
     y0: number
@@ -307,9 +307,23 @@ export default class CanvasDiagramView extends View {
     this.canvasWrapper.appendChild(this.canvas)
 
     if ('ontouchstart' in document && 'orientation' in window) {
-      this.element.addEventListener('touchstart', (e) => this.touchstart(e), true)
-      this.element.addEventListener('touchmove', (e) => { this.touchMove(e); this.pinchScaling(e);}, false)
-      this.element.addEventListener('touchend', (e) => { this.touchEnd(e); this.pinchEnd()}, false)
+      this.element.addEventListener('touchstart', e => this.touchstart(e), true)
+      this.element.addEventListener(
+        'touchmove',
+        e => {
+          this.touchMove(e)
+          this.pinchScaling(e)
+        },
+        false
+      )
+      this.element.addEventListener(
+        'touchend',
+        e => {
+          this.touchEnd(e)
+          this.pinchEnd()
+        },
+        false
+      )
       this.element.addEventListener('touchend', e => {
         const rect = (e.currentTarget as Element).getBoundingClientRect()
         this.pointerPosition = {
@@ -321,26 +335,28 @@ export default class CanvasDiagramView extends View {
       })
     } else {
       this.element.addEventListener('mousedown', e => {
-        const x = e.offsetX;
-        const y = e.offsetY;
+        const x = e.offsetX
+        const y = e.offsetY
         this.draggedTrain = this.getTrainByCoordinate({
-          x, y
-        });
+          x,
+          y,
+        })
         this.dragStart = {
-          x, y
-        };
+          x,
+          y,
+        }
       })
       this.element.addEventListener('mousemove', e => {
-        const x = e.offsetX;
-        const y = e.offsetY;
+        const x = e.offsetX
+        const y = e.offsetY
         this.pointerPosition = { x, y }
         this.dragTrain()
         this.pointerMoved = true
       })
       this.element.addEventListener('mouseup', e => {
-        this.dragStart = null;
-      });
-      this.element.addEventListener('click', e => this.selectTrain(e.offsetX, e.offsetY));
+        this.dragStart = null
+      })
+      this.element.addEventListener('click', e => this.selectTrain(e.offsetX, e.offsetY))
       this.element.addEventListener('contextmenu', (event: MouseEvent) => {
         this.selectedTrain = this.getTrainByCoordinate({
           x: event.offsetX,
@@ -401,7 +417,7 @@ export default class CanvasDiagramView extends View {
    */
   private selectTrain(x, y) {
     this.forceDraw = true
-    this.selectedTrain = this.getTrainByCoordinate({x, y})
+    this.selectedTrain = this.getTrainByCoordinate({ x, y })
     if (!(this.app.sub instanceof TrainSubview)) return
     if (this.selectedTrain === null) {
       this.app.sub.showStationTime(null)
@@ -442,10 +458,10 @@ export default class CanvasDiagramView extends View {
     const rect = (event.currentTarget as Element).getBoundingClientRect()
     this.touchStartPosition = {
       x: event.touches[0].clientX - rect.left,
-      y: event.touches[0].clientY - rect.top
+      y: event.touches[0].clientY - rect.top,
     }
-    this.touchStartTime = performance.now();
-    this.touchDragWaiting = true;
+    this.touchStartTime = performance.now()
+    this.touchDragWaiting = true
   }
   /**
    * ピンチによる拡大縮小(モバイル)
@@ -514,47 +530,49 @@ export default class CanvasDiagramView extends View {
     if (this.dragStart) {
       this.dragTrain()
     }
-    if (this.touchDragWaiting === false || !this.touchStartPosition) return;
-    const x1 = e.touches[0].clientX;
-    const y1 = e.touches[0].clientY;
+    if (this.touchDragWaiting === false || !this.touchStartPosition) return
+    const x1 = e.touches[0].clientX
+    const y1 = e.touches[0].clientY
     if (performance.now() - this.touchStartTime < 200) {
       const { x, y } = this.touchStartPosition
-      if ((x - x1) ** 2 + (y - y1) ** 2 < 5 ** 2) return;
-      this.touchDragWaiting = false;
+      if ((x - x1) ** 2 + (y - y1) ** 2 < 5 ** 2) return
+      this.touchDragWaiting = false
     } else {
-      this.touchDragWaiting = false;
+      this.touchDragWaiting = false
       this.dragStart = this.touchStartPosition
-      this.draggedTrain = this.getTrainByCoordinate(this.touchStartPosition);
+      this.draggedTrain = this.getTrainByCoordinate(this.touchStartPosition)
     }
   }
 
   private touchEnd(e: TouchEvent) {
     if (performance.now() - this.touchStartTime < 200 && this.touchDragWaiting == true && this.touchStartPosition) {
-      const {x, y} = this.touchStartPosition
-      this.selectTrain(x, y);
+      const { x, y } = this.touchStartPosition
+      this.selectTrain(x, y)
     }
-    this.touchStartPosition = null;
-    this.touchStartTime = 0;
-    this.touchDragWaiting = false;
-    this.dragStart = null;
-    this.draggedTrain = null;
+    this.touchStartPosition = null
+    this.touchStartTime = 0
+    this.touchDragWaiting = false
+    this.dragStart = null
+    this.draggedTrain = null
   }
 
   private dragTrain() {
-    const {x, y} = this.pointerPosition
+    const { x, y } = this.pointerPosition
     if (this.dragStart && this.draggedTrain) {
-      const dt = Math.round((x - this.dragStart.x) / this.xScale * this.devicePixelRatio) * 60;
-      if (dt === 0) return;
-      this.dragStart = {x, y}
-      const train = this.app.data.railway.diagrams[this.draggedTrain.diaIndex].trains[this.draggedTrain.direction][this.draggedTrain.trainIndex]
+      const dt = Math.round(((x - this.dragStart.x) / this.xScale) * this.devicePixelRatio) * 60
+      if (dt === 0) return
+      this.dragStart = { x, y }
+      const train = this.app.data.railway.diagrams[this.draggedTrain.diaIndex].trains[this.draggedTrain.direction][
+        this.draggedTrain.trainIndex
+      ]
       for (const td of train.timetable.data) {
-        if(!td) continue
+        if (!td) continue
         if (td.arrival != null) td.arrival += dt
         if (td.departure != null) td.departure += dt
       }
     }
-    this.update();
-    this.forceDraw = true;
+    this.update()
+    this.forceDraw = true
   }
 
   // 駅間距離(描画用)

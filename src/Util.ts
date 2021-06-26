@@ -148,7 +148,11 @@ export const createColorField = (
   className: string | null = null,
   onchange?: (e: Event) => void
 ): HTMLInputElement => {
-  const colorField = h('input', { type: 'color', value, class: 'form-color' + (className == null ? '' : ' ' + className) }) as HTMLInputElement
+  const colorField = h('input', {
+    type: 'color',
+    value,
+    class: 'form-color' + (className == null ? '' : ' ' + className),
+  }) as HTMLInputElement
   // const label = h(
   //   'label',
   //   { class: 'form-color' + (className == null ? '' : ' ' + className), tabindex: 0 },

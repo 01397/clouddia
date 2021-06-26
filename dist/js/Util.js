@@ -103,7 +103,11 @@ export const createButton = (value, className = null, onclick) => {
     return h('input', { class: 'form-button' + (className == null ? '' : ' ' + className), type: 'button', value }, null, onclick);
 };
 export const createColorField = (value, className = null, onchange) => {
-    const colorField = h('input', { type: 'color', value, class: 'form-color' + (className == null ? '' : ' ' + className) });
+    const colorField = h('input', {
+        type: 'color',
+        value,
+        class: 'form-color' + (className == null ? '' : ' ' + className),
+    });
     // const label = h(
     //   'label',
     //   { class: 'form-color' + (className == null ? '' : ' ' + className), tabindex: 0 },
