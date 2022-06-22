@@ -331,7 +331,7 @@ export default class CanvasDiagramView extends View {
                         this.paddingLeft),
                     Math.max(0, ((this.pinchStart.py + this.pinchStart.y0 - this.paddingTop) * dy) / this.pinchStart.dy -
                         y0 +
-                        this.paddingTop),
+                        this.paddingTop), // top
                 ],
             ];
         }

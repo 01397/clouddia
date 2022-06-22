@@ -20,6 +20,23 @@ export default class TrainTimetableView extends View {
     constructor(app, diaIndex, direction, trainId, stationId) {
         const trainMenu = [
             {
+                label: '列車を左に移動',
+                accelerator: 'CmdOrCtrl+Left',
+                click: () => {
+                    const col = this.getActiveCell().col;
+                    this.swapTrain(col, col - 1);
+                }
+            },
+            {
+                label: '列車を右に移動',
+                accelerator: 'CmdOrCtrl+Right',
+                click: () => {
+                    const col = this.getActiveCell().col;
+                    this.swapTrain(col, col + 1);
+                }
+            },
+            { type: 'separator' },
+            {
                 label: '列車を左に挿入',
                 accelerator: 'Alt+Left',
                 click: () => this.insertTrain(this.getActiveCell().col),
@@ -519,6 +536,19 @@ export default class TrainTimetableView extends View {
         this.render();
         this.update();
         requestAnimationFrame(() => this.selectCell(index, this.getActiveCell().row));
+    }
+    swapTrain(from, to) {
+        const trainList = this.app.data.railway.diagrams[this.diaIndex].trains[this.direction];
+        if (from < 0 || to < 0 || from >= trainList.length || to >= trainList.length)
+            return;
+        const fTrain = trainList[from];
+        const tTrain = trainList[to];
+        trainList[from] = tTrain;
+        trainList[to] = fTrain;
+        this.rendering = true;
+        this.render();
+        this.update();
+        requestAnimationFrame(() => this.selectCell(to, this.getActiveCell().row));
     }
     cloneTrain(index) {
         const trainList = this.app.data.railway.diagrams[this.diaIndex].trains[this.direction];

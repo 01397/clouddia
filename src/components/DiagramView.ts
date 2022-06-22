@@ -3,7 +3,6 @@ import { Station, Train } from '../DiagramParser.js'
 import { DASH_ARRAY_STYLE, getDistance2, h, numberToTimeString, Menu } from '../Util.js'
 import View from './View.js'
 import TrainSubview from './TrainSubview.js'
-import { textChangeRangeIsUnchanged } from '../../../../../node_modules/typescript/lib/typescript.js'
 type drawingDataItem = Array<{
   path: Array<number | boolean>
   color: string
