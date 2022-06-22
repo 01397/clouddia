@@ -13,7 +13,7 @@ import DiagramParser from './DiagramParser.js';
 import { h, Menu } from './Util.js';
 export default class App {
     constructor(root) {
-        this.version = '0.4.2';
+        this.version = '0.4.3';
         this.sidebarElm = h('aside', { id: 'sidebar' }, null);
         this.toolbarElm = h('div', { id: 'toolbar' }, null);
         this.tabbarElm = h('div', { id: 'tabbar' }, null);
