@@ -21,7 +21,7 @@
     "preview": "vite preview",
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",
-    "prettier": "prettier --write src/**/*.ts"
+    "prettier": "prettier --write './src/**/*.{ts,tsx}'"
   },
   "dependencies": {
     "@types/encoding-japanese": "^2.0.1"
