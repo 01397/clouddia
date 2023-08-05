@@ -16,7 +16,7 @@ export default class DiagramParser {
 }
 
 abstract class DiagramData {
-  constructor(params = {}) {
+  constructor(params: object = {}) {
     this.fromOudiaParams({})
     for (const key in params) {
       if (params.hasOwnProperty(key)) {
@@ -88,7 +88,7 @@ abstract class DiagramData {
    * fromOudia内で、oudia文字列からプロパティへ変換するためのメソッド。
    * @param key
    */
-  public fromOudiaParams(params: {}) {
+  public fromOudiaParams(params: object) {
     for (const key in params) {
       if (params.hasOwnProperty(key)) {
         this[key] = params[key]
