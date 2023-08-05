@@ -1,15 +1,27 @@
 {
   "compilerOptions": {
-    "target": "es2018",
-    "outDir": "dist/js/",
-    "module": "es6",
-    "sourceMap": true,
+    "target": "ES2022",
+    "useDefineForClassFields": true,
+    "module": "ES2022",
+    "lib": [
+      "ES2022",
+      "DOM",
+      "DOM.Iterable"
+    ],
+    "skipLibCheck": true,
+
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+
     "strict": true,
-    "noImplicitAny": false,
     "strictNullChecks": true,
     "strictFunctionTypes": false,
     "strictBindCallApply": false,
     "strictPropertyInitialization": false,
+    "noImplicitAny": false,
     "noImplicitThis": false
   },
   "include": [
