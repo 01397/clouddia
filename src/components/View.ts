@@ -1,5 +1,5 @@
-import App, { MenuItem } from '../App.js'
-import { h } from '../Util.js'
+import App, { MenuItem } from '../App.js';
+import { h } from '../Util.js';
 
 export type viewTypeString =
   | 'Start'
@@ -7,30 +7,30 @@ export type viewTypeString =
   | 'InboundTrainTimetable'
   | 'OutboundTrainTimetable'
   | 'Diagram'
-  | 'FileSetting'
+  | 'FileSetting';
 export default abstract class View {
-  protected app: App
-  protected element: HTMLDivElement
+  protected app: App;
+  protected element: HTMLDivElement;
   constructor(app: App, viewType: viewTypeString, menu: MenuItem[] = []) {
-    this.app = app
-    this.app.currentView = viewType
+    this.app = app;
+    this.app.currentView = viewType;
 
     // お疲れ様、前mainViewの終了
-    if (app.main) app.main.finish()
+    if (app.main) app.main.finish();
     // @ts-ignore
-    delete app.main
+    delete app.main;
 
     // EventListenerなどのしがらみのない、まっとうなDIVを取り戻す
-    const newDiv = h('div', { id: 'mainContainer' }) as HTMLDivElement
-    app.mainElm.replaceWith(newDiv)
-    app.mainElm = newDiv
-    this.element = newDiv
+    const newDiv = h('div', { id: 'mainContainer' }) as HTMLDivElement;
+    app.mainElm.replaceWith(newDiv);
+    app.mainElm = newDiv;
+    this.element = newDiv;
 
-    app.setViewMenu(menu)
+    app.setViewMenu(menu);
   }
 
-  public abstract finish(): void
+  public abstract finish(): void;
   public keydown(e: KeyboardEvent) {
-    return
+    return;
   }
 }

@@ -198,7 +198,6 @@ export default class App {
       unicodeArray.push(oudiaString.charCodeAt(i))
     }
     // Encodingはencoding.jsの力を借ります。
-    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
     // @ts-ignore
     const shiftJISArray = Encoding.convert(unicodeArray, 'sjis', 'unicode')
     const shiftJISuInt8 = new Uint8Array(shiftJISArray)

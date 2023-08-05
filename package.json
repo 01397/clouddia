@@ -7,20 +7,20 @@
   "author": "01397 <41501869+01397@users.noreply.github.com>",
   "license": "GPL-3.0-or-later",
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^2.0.0",
-    "@typescript-eslint/parser": "^2.0.0",
-    "eslint": "^6.2.2",
-    "eslint-config-prettier": "^6.1.0",
-    "eslint-plugin-prettier": "^3.1.0",
-    "eslint-plugin-react": "^7.14.3",
-    "prettier": "^1.18.2",
-    "ts-node": "8.4.1",
-    "tslint": "5.20.1",
-    "typescript": "3.7.2"
+    "@typescript-eslint/eslint-plugin": "^6.2.1",
+    "@typescript-eslint/parser": "^6.2.1",
+    "eslint": "^8.46.0",
+    "eslint-config-prettier": "^8.10.0",
+    "prettier": "^3.0.1",
+    "typescript": "^5.1.6"
   },
   "scripts": {
-    "lint": "eslint src/** --ext .ts,.tsx",
-    "lint:fix": "yarn lint --fix",
-    "compile": "tsc"
+    "build": "tsc",
+    "lint": "eslint src",
+    "lint:fix": "eslint src --fix",
+    "prettier": "prettier --write src/**/*.ts"
+  },
+  "dependencies": {
+    "@types/encoding-japanese": "^2.0.1"
   }
 }
