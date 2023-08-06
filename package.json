@@ -2,25 +2,37 @@
   "name": "clouddia",
   "version": "0.4.3",
   "description": "Online Diagram Editor",
+  "homepage": "http://onemu.starfree.jp/clouddia/",
   "main": "src/main.ts",
   "repository": "git@github.com:01397/clouddia.git",
   "author": "01397 <41501869+01397@users.noreply.github.com>",
   "license": "GPL-3.0-or-later",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "lint": "npm run eslint && npm run prettier",
+    "lint:fix": "npm run eslint:fix && npm run prettier:fix",
+    "eslint": "eslint src",
+    "eslint:fix": "eslint src --fix",
+    "prettier": "prettier --check './src/**/*.{ts,tsx}'",
+    "prettier:fix": "prettier --write './src/**/*.{ts,tsx}'"
+  },
+  "dependencies": {
+    "@types/encoding-japanese": "^2.0.1"
+  },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^6.2.1",
     "@typescript-eslint/parser": "^6.2.1",
     "eslint": "^8.46.0",
     "eslint-config-prettier": "^8.10.0",
     "prettier": "^3.0.1",
-    "typescript": "^5.1.6"
+    "typescript": "^5.1.6",
+    "vite": "^4.4.8"
   },
-  "scripts": {
-    "build": "tsc",
-    "lint": "eslint src",
-    "lint:fix": "eslint src --fix",
-    "prettier": "prettier --write src/**/*.ts"
-  },
-  "dependencies": {
-    "@types/encoding-japanese": "^2.0.1"
+  "private": true,
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=9.8.0"
   }
 }
