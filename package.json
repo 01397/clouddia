@@ -19,9 +19,12 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "lint": "eslint src",
-    "lint:fix": "eslint src --fix",
-    "prettier": "prettier --write './src/**/*.{ts,tsx}'"
+    "lint": "npm run eslint && npm run prettier",
+    "lint:fix": "npm run eslint:fix && npm run prettier:fix",
+    "eslint": "eslint src",
+    "eslint:fix": "eslint src --fix",
+    "prettier": "prettier --check './src/**/*.{ts,tsx}'",
+    "prettier:fix": "prettier --write './src/**/*.{ts,tsx}'"
   },
   "dependencies": {
     "@types/encoding-japanese": "^2.0.1"
