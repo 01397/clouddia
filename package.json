@@ -2,19 +2,11 @@
   "name": "clouddia",
   "version": "0.4.3",
   "description": "Online Diagram Editor",
+  "homepage": "http://onemu.starfree.jp/clouddia/",
   "main": "src/main.ts",
   "repository": "git@github.com:01397/clouddia.git",
   "author": "01397 <41501869+01397@users.noreply.github.com>",
   "license": "GPL-3.0-or-later",
-  "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^6.2.1",
-    "@typescript-eslint/parser": "^6.2.1",
-    "eslint": "^8.46.0",
-    "eslint-config-prettier": "^8.10.0",
-    "prettier": "^3.0.1",
-    "typescript": "^5.1.6",
-    "vite": "^4.4.8"
-  },
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
@@ -28,5 +20,19 @@
   },
   "dependencies": {
     "@types/encoding-japanese": "^2.0.1"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^6.2.1",
+    "@typescript-eslint/parser": "^6.2.1",
+    "eslint": "^8.46.0",
+    "eslint-config-prettier": "^8.10.0",
+    "prettier": "^3.0.1",
+    "typescript": "^5.1.6",
+    "vite": "^4.4.8"
+  },
+  "private": true,
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=9.8.0"
   }
 }
