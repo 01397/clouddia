@@ -111,9 +111,9 @@ export default class StationSettingView extends View {
               station.isMain = value;
               this.svgElement
                 .querySelectorAll('g')
-                [stationIndex].classList[value ? 'add' : 'remove'](
-                  'fs-railmap-main'
-                );
+                [
+                  stationIndex
+                ].classList[value ? 'add' : 'remove']('fs-railmap-main');
             }),
             h('div', { class: 'fs-text' }, '主要駅'),
           ]),
