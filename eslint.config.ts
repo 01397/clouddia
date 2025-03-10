@@ -1,4 +1,3 @@
-// @ts-check
 import js from '@eslint/js';
 import tseslint from "typescript-eslint";
 import tseslintParser from '@typescript-eslint/parser';
