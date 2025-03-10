@@ -12,6 +12,7 @@ import TrainTimetableView from './components/TrainTimetableView.js';
 import TrainTypeSettingView from './components/TrainTypeSettingView.js';
 import View, { viewTypeString } from './components/View.js';
 import DiagramParser, { DiagramFile, Train } from './DiagramParser.js';
+import Encoding from 'encoding-japanese';
 import { h, Menu } from './Util.js';
 
 export interface SelectionObject {
@@ -225,8 +226,7 @@ export default class App {
       unicodeArray.push(oudiaString.charCodeAt(i));
     }
     // Encodingはencoding.jsの力を借ります。
-    // @ts-ignore
-    const shiftJISArray = Encoding.convert(unicodeArray, 'sjis', 'unicode');
+    const shiftJISArray = Encoding.convert(unicodeArray, 'SJIS', 'UNICODE');
     const shiftJISuInt8 = new Uint8Array(shiftJISArray);
     const anchor = h('a', {
       href: URL.createObjectURL(

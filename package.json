@@ -19,10 +19,11 @@
     "prettier:fix": "prettier --write './src/**/*.{ts,tsx}'"
   },
   "dependencies": {
-    "@types/encoding-japanese": "^2.0.1"
+    "encoding-japanese": "^2.2.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.22.0",
+    "@types/encoding-japanese": "^2.2.1",
     "@typescript-eslint/parser": "^8.26.0",
     "eslint": "^9.22.0",
     "eslint-config-prettier": "^10.1.1",
