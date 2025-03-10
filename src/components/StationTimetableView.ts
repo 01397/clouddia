@@ -286,6 +286,7 @@ export default class StationTimetableView extends View {
       const id = Number(event.currentTarget.dataset.index);
       const direction = Number(event.currentTarget.dataset.direction);
       this.app.sub.showStationTime({
+        // @ts-ignore
         stationIndex: this.stationList[
           this.stationSelectorElement.value
         ].indexList

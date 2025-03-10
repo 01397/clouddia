@@ -459,7 +459,9 @@ export default class TrainTimetableView extends View {
       if (this.columns.has(i)) continue;
       if (reusableIndex.size !== 0) {
         const oldIndex = reusableIndex.values().next().value;
+        // @ts-ignore
         reusableIndex.delete(oldIndex);
+        // @ts-ignore
         this.reuseColumn(oldIndex, i, false);
       } else {
         this.createColumn(i);
