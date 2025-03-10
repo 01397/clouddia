@@ -26,4 +26,4 @@ parser
 ```
 
 ## 作者
-Twitter [大井さかな (@01_397)](https://twitter.com/01_397)
+X [大井さかな (@01397dev)](https://x.com/01397dev)
