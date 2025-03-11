@@ -137,7 +137,11 @@ export default class StartView extends View {
         ),
         h('p', { class: 'start-readme-paragraph' }, [
           document.createTextNode('Twitter: '),
-          h('a', { href: 'https://twitter.com/01_397' }, '大井さかな(@01_397)'),
+          h(
+            'a',
+            { href: 'https://twitter.com/01397dev' },
+            '大井さかな(@01397dev)'
+          ),
         ]),
         h('p', { class: 'start-readme-paragraph' }, [
           document.createTextNode('ソースコード: '),

@@ -1,4 +1,4 @@
-![CloudDia](dist/img/logo_horizontal.svg "CloudDia")
+![CloudDia](public/img/logo_horizontal.svg "CloudDia")
 
 ## 概要
 鉄道のダイヤグラムをWeb上で表示、編集するソフトウェアです。
@@ -26,4 +26,4 @@ parser
 ```
 
 ## 作者
-Twitter [大井さかな (@01_397)](https://twitter.com/01_397)
+X [大井さかな (@01397dev)](https://x.com/01397dev)
