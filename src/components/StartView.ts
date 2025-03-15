@@ -112,7 +112,7 @@ export default class StartView extends View {
         h(
           'p',
           { class: 'start-readme-paragraph' },
-          'ブラウザ上で時刻表ファイルを見れたらいいなぁ〜という気持ちを込めて開発中の作品。OuDia, OuDiaSecondのファイルを表示することが多分できます。web上のファイルは"http://onemu.starfree.jp/clouddia/?url=[時刻表ファイルのURL]"で開くこともできます。'
+          'ブラウザ上で時刻表ファイルを見れたらいいなぁ〜という気持ちを込めて開発中の作品。OuDia, OuDiaSecondのファイルを表示することが多分できます。web上のファイルは"https://clouddia.01397.dev/clouddia/?url=[時刻表ファイルのURL]"で開くこともできます。'
         ),
         h('h1', { class: 'start-readme-heading' }, '注意事項'),
         h(

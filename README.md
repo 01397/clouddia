@@ -9,7 +9,7 @@ OuDiaファイル(.oud), OuDiaSecondファイル(.oud2)を開くことができ�
 Chromeを推奨しています。おそらく、Edge, Firefox, Safariの最新版でも動作すると思います。Internet Explorerはサポートしていません。
 
 ## 試す
-[http://onemu.starfree.jp/clouddia/](http://onemu.starfree.jp/clouddia/)で公開しています。
+[https://clouddia.01397.dev/clouddia/](https://clouddia.01397.dev/clouddia/)で公開しています。
 
 ## DiagramParser.js
 [DiagramParser.js](dist/js/DiagramParser.js) を用いてOudia, OudiaSecondのファイルをロードするのに使うことができます。DiagramParser.jsは[Util.js](dist/js/Util.js)に依存しているのでDiagramParser.jsとUtil.jsは同じディレクトリに含める必要があります。もちろん[Typescript版](src)もあります。
