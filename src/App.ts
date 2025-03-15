@@ -13,7 +13,7 @@ import TrainTypeSettingView from './components/TrainTypeSettingView.js';
 import View, { viewTypeString } from './components/View.js';
 import DiagramParser, { DiagramFile, Train } from './DiagramParser.js';
 import Encoding from 'encoding-japanese';
-import { h, Menu } from './Util.js';
+import { Dialog, h, Menu } from './Util.js';
 
 export interface SelectionObject {
   train?: Train;
@@ -248,6 +248,12 @@ export default class App {
       .catch((e: Error) => {
         // tslint:disable-next-line: no-console
         console.error('parse error.', e);
+        const dialog = new Dialog({
+          title: 'ファイル読み込みエラー',
+          message: '時刻表ファイルとして認識できませんでした。',
+          buttons: ['OK'],
+        });
+        dialog.show();
       });
   }
   public initialize(diagram: DiagramFile) {
@@ -260,19 +266,40 @@ export default class App {
     this.showTrainTimetableView(0, 0);
   }
   public loadOnlineFile(fileURL: string) {
-    const url = 'http://soasa.starfree.jp/fileRequest.php?url=' + fileURL;
-    fetch(url, { mode: 'cors' })
-      .then((response) => response.blob())
-      .then(
-        (blob) =>
-          new Promise(() => {
-            const reader = new FileReader();
-            reader.onload = () =>
-              this.loadOudia(reader.result as string, 'Web上のファイル');
-            reader.readAsText(blob, 'shift-jis');
-          })
-      )
+    fetch(fileURL, { mode: 'cors' })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`HTTPステータスコード: ${response.status}`);
+        }
+        return response.blob();
+      })
+      .then((blob) => {
+        const reader = new FileReader();
+        reader.onload = () =>
+          this.loadOudia(reader.result as string, 'Web上のファイル');
+        reader.onerror = (e) => {
+          const dialog = new Dialog({
+            title: 'ファイル読み込みエラー',
+            message: 'ファイルの読み取りに失敗しました。',
+            buttons: ['OK'],
+          });
+          dialog.show();
+        };
+        reader.readAsText(blob, 'shift-jis');
+      })
       .catch((err) => {
+        const message =
+          err instanceof TypeError
+            ? 'CORSポリシーにより、読み込みがブロックされている可能性があります。'
+            : err instanceof Error
+              ? err.message
+              : '';
+        const dialog = new Dialog({
+          title: 'ファイル読み込みエラー',
+          message: '指定のURLからファイルを読み込めませんでした。' + message,
+          buttons: ['OK'],
+        });
+        dialog.show();
         throw err;
       });
   }
