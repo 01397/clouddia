@@ -1,7 +1,7 @@
 {
   "name": "clouddia",
   "description": "Online Diagram Editor",
-  "homepage": "https://clouddia.01397.dev/clouddia/",
+  "homepage": "https://clouddia.app/",
   "main": "src/main.ts",
   "repository": "git@github.com:01397/clouddia.git",
   "author": "01397 <41501869+01397@users.noreply.github.com>",
