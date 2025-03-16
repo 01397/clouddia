@@ -14,6 +14,7 @@ import View, { viewTypeString } from './components/View.js';
 import DiagramParser, { DiagramFile, Train } from './DiagramParser.js';
 import Encoding from 'encoding-japanese';
 import { Dialog, h, Menu } from './Util.js';
+import './styles/app.css'
 
 export interface SelectionObject {
   train?: Train;
