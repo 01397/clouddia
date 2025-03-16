@@ -16,6 +16,8 @@ jobs:
           cache: 'npm'
       - run: npm install
       - run: npm run build
+        env:
+          VITE_APP_VERSION: ${{ github.ref_name }}
       - name: Publish to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
         with:

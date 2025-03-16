@@ -1,8 +1,7 @@
 {
   "name": "clouddia",
-  "version": "0.4.4",
   "description": "Online Diagram Editor",
-  "homepage": "http://onemu.starfree.jp/clouddia/",
+  "homepage": "https://clouddia.01397.dev/clouddia/",
   "main": "src/main.ts",
   "repository": "git@github.com:01397/clouddia.git",
   "author": "01397 <41501869+01397@users.noreply.github.com>",
