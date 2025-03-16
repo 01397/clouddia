@@ -148,7 +148,7 @@ export default class StartView extends View {
           h('a', { href: 'https://github.com/01397/clouddia' }, 'GitHub'),
         ]),
         h('p', { class: 'start-readme-paragraph' }, [
-          document.createTextNode('バージョン: v' + this.app.version + ' '),
+          document.createTextNode('バージョン: ' + this.app.version + ' '),
           h(
             'a',
             {

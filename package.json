@@ -1,6 +1,5 @@
 {
   "name": "clouddia",
-  "version": "0.4.4",
   "description": "Online Diagram Editor",
   "homepage": "https://clouddia.01397.dev/clouddia/",
   "main": "src/main.ts",

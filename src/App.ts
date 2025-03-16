@@ -14,7 +14,7 @@ import View, { viewTypeString } from './components/View.js';
 import DiagramParser, { DiagramFile, Train } from './DiagramParser.js';
 import Encoding from 'encoding-japanese';
 import { Dialog, h, Menu } from './Util.js';
-import './styles/app.css'
+import './styles/app.css';
 
 export interface SelectionObject {
   train?: Train;
@@ -95,7 +95,9 @@ export default class App {
   private menu: MenuItem[];
 
   constructor(root: Element) {
-    this.version = '0.4.4';
+    this.version = import.meta.env.PROD
+      ? import.meta.env.VITE_APP_VERSION
+      : 'dev-build';
     this.sidebarElm = h('aside', { id: 'sidebar' }, null);
     this.toolbarElm = h('div', { id: 'toolbar' }, null);
     this.tabbarElm = h('div', { id: 'tabbar' }, null);
@@ -222,7 +224,7 @@ export default class App {
   public save() {
     //const bom = new Uint8Array([0xef, 0xbb, 0xbf]);
     const unicodeArray: number[] = [];
-    const oudiaString = this.data.saveAsOud('CloudDia v' + this.version);
+    const oudiaString = this.data.saveAsOud('CloudDia ' + this.version);
     for (let i = 0; i < oudiaString.length; i++) {
       unicodeArray.push(oudiaString.charCodeAt(i));
     }
