@@ -1,9 +1,19 @@
 /// <reference types="vite/client" />
 
 interface ImportMetaEnv {
-  // VITE_APP_VERSIONは、GitHub Actionsによるビルド時にGit tagから取得したバージョン番号を設定する
-  // 例: "v0.1.0"
+  // 'production' では GitHub Actionsのビルド時に渡される
+
+  /**
+   * Git tagから取得したバージョン文字列
+   * @example 'v1.0.0'
+   */
   VITE_APP_VERSION: string;
+
+  /**
+   * Google Analytics 4 の Measurement ID
+   * @example 'G-XXXXXXXXXX'
+   */
+  VITE_GA4_MEASUREMENT_ID: string;
 }
 
 interface ImportMeta {
