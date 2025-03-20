@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>サイト移転しました - CloudDia</title>
+  <meta name="description" content="CloudDiaのサイトは移転しました。新しいURLは https://clouddia.app/ です。">
+  <meta name="robots" content="noindex, follow">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@800&display=swap&text=0123456789:CDFNadilnotu。かがしせたつでへまりんジペー見"
+    rel="stylesheet">
+  <style>
+    :root {
+      --primary-color: hsl(270, 100%, 66%);
+      --secondary-color: hsl(210, 100%, 66%);
+      --header-bg: #444444;
+    }
+
+    html,
+    body {
+      font-family: Arial, sans-serif;
+      font-size: 16px;
+      margin: 0;
+      padding: 0;
+      font-family: "Noto Sans JP", sans-serif;
+      font-optical-sizing: auto;
+      font-weight: 800;
+      font-style: normal;
+    }
+
+    html {
+      min-height: 100dvh;
+      background-image: url('img/logo_icon_bg.svg');
+      background-size: 50%;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    .logo {
+      background-color: var(--header-bg);
+      padding: 8px;
+
+      img {
+        box-sizing: content-box;
+        background-color: white;
+        border-radius: 8px;
+        padding: 4px;
+      }
+    }
+
+
+    .article_header {
+      background-color: var(--header-bg);
+      color: white;
+      padding: 0 1rem;
+      text-align: center;
+      display: flex;
+      align-items: baseline;
+      font-size: 1.3rem;
+
+      .article_header_inner {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        align-items: baseline;
+        gap: 1rem;
+        font-weight: bold;
+        line-height: 1.3;
+
+        p {
+          font-size: 2rem;
+        }
+
+        h1 {
+          font-size: 4rem;
+          border-left: var(--primary-color) solid 26px;
+          padding-left: 1rem;
+        }
+      }
+    }
+
+    .article_header_time {
+      top: 3rem;
+      right: 0.5rem;
+    }
+
+    .content {
+      width: 100%;
+      max-width: 600px;
+      padding: 2rem 1rem;
+      margin: 0 auto;
+      line-height: 1.5;
+      word-break: keep-all;
+      overflow-wrap: anywhere;
+
+      p {
+        margin: 0.25rem 0;
+      }
+    }
+
+    @media (width < 700px) {
+      .article_header_time {
+        position: fixed;
+        top: 0.5rem;
+        right: 0.5rem;
+        font-size: 1rem;
+      }
+    }
+
+    @media (max-width: 500px) {
+      /* .logo img {
+        width: 150px;
+        height: 30px;
+      } */
+
+      .article_header {
+        .article_header_inner {
+          flex-direction: column;
+          border-left: var(--primary-color) solid 16px;
+          padding: 0.5rem 0.5rem;
+          gap: 4px;
+          line-height: 1;
+
+          p {
+            padding: 0;
+            font-size: 6vw;
+          }
+
+          h1 {
+            padding: 0;
+            border-left: none;
+            font-size: 12vw;
+
+            span {
+              transform: none;
+            }
+          }
+        }
+      }
+    }
+  </style>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const now = new Date();
+      const timeString = `${now.getHours()}:${now.getMinutes()}`;
+      document.querySelector('.article_header_time time').textContent = timeString;
+    });
+  </script>
+</head>
+
+<body>
+  <header class="logo">
+    <img src="./img/logo_horizontal.svg" alt="CloudDia" width="150" height="30">
+  </header>
+  <main>
+    <article>
+      <header class="article_header">
+        <div class="article_header_inner">
+          <p>404</p>
+          <h1><span>Not Found</span></h1>
+        </div>
+        <p class="article_header_time"><time datetime="2025-03-20">2025/3/20</time></p>
+      </header>
+      <section class="content">
+        <p>ページが<wbr />見つかり<wbr />ませんでした。</p>
+        <p><a href="https://clouddia.app/">CloudDiaへ</a></p>
+      </section>
+    </article>
+  </main>
+</body>
+
+</html>
